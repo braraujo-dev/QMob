@@ -119,7 +119,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               SecondaryButton(
-                text: 'Admin Access',
+                text: 'Cadastro Administrador',
                 icon: Icons.admin_panel_settings_outlined,
                 onPressed: () {},
               ),
