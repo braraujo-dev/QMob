@@ -8,7 +8,6 @@ class AppColors {
   static const Color slate400 = Color(0xFF94A3B8);
   static const Color slate500 = Color(0xFF64748B);
   
-  // Adicionando variações para facilitar o uso no tema
-  static const Color inputBackground = Color(0xFF161E2D); // Um pouco mais claro que o bg para contraste
+  static const Color inputBackground = Color(0xFF161E2D);
   static const Color border = Color(0xFF1E293B);
 }
