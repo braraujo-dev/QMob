@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                   label: 'Senha',
                   hintText: '••••••••',
                   prefixIcon: Icons.lock_outline,
-                  isPassword: true,
+                  isPassword: true
                 ),
                 const SizedBox(height: 16),
                 Row(
