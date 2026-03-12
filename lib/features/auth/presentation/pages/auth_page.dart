@@ -1,4 +1,6 @@
+import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -31,12 +33,9 @@ class _AuthPageState extends State<AuthPage> {
   void _onStateChanged() {
     final state = _controller.value;
     if (state is AuthErrorState) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.message),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.redAccent));
     } else if (state is AuthSuccessState) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -79,7 +78,7 @@ class _AuthPageState extends State<AuthPage> {
                         height: 200,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: AppColors.slate500.withOpacity(0.1),
+                          color: AppColors.slate500.withValues(alpha: .1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Column(
@@ -144,9 +143,7 @@ class _AuthPageState extends State<AuthPage> {
                               });
                             },
                             activeColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -167,10 +164,7 @@ class _AuthPageState extends State<AuthPage> {
                       onPressed: () {},
                       child: const Text(
                         'Esqueci a senha',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -180,16 +174,19 @@ class _AuthPageState extends State<AuthPage> {
                   valueListenable: _controller,
                   builder: (context, state, child) {
                     final isLoading = state is AuthLoadingState;
-                    
+
                     return PrimaryButton(
                       text: isLoading ? 'Entrando...' : 'Entrar',
                       icon: isLoading ? null : Icons.login,
-                      onPressed: isLoading 
-                        ? () {} 
-                        : () => _controller.signIn(
-                            _emailController.text,
-                            _passwordController.text,
-                          ),
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, AppRoutes.adminHome);
+                      },
+                      // onPressed: isLoading
+                      //   ? () {}
+                      //   : () => _controller.signIn(
+                      //       _emailController.text,
+                      //       _passwordController.text,
+                      //     ),
                     );
                   },
                 ),
@@ -203,18 +200,12 @@ class _AuthPageState extends State<AuthPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Precisa de ajuda? ',
-                      style: TextStyle(color: AppColors.slate500),
-                    ),
+                    const Text('Precisa de ajuda? ', style: TextStyle(color: AppColors.slate500)),
                     GestureDetector(
                       onTap: () {},
                       child: const Text(
                         'Contato',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
