@@ -1,18 +1,60 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/custom_text_field.dart';
-import '../../../core/widgets/primary_button.dart';
-import '../../../core/widgets/secondary_button.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/primary_button.dart';
+import '../../../../core/widgets/secondary_button.dart';
+import '../controllers/auth_controller.dart';
+import '../controllers/auth_state.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<AuthPage> createState() => _AuthPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _AuthPageState extends State<AuthPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _rememberMe = false;
+
+  late final AuthController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = sl<AuthController>();
+    _controller.addListener(_onStateChanged);
+  }
+
+  void _onStateChanged() {
+    final state = _controller.value;
+    if (state is AuthErrorState) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.message),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } else if (state is AuthSuccessState) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login realizado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _controller.removeListener(_onStateChanged);
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +66,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 20),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.asset(
@@ -70,17 +113,19 @@ class _LoginPageState extends State<LoginPage> {
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 28),
-                const CustomTextField(
+                CustomTextField(
                   label: 'Email',
                   hintText: 'Digite seu email',
                   prefixIcon: Icons.person_outline,
+                  controller: _emailController,
                 ),
                 const SizedBox(height: 20),
-                const CustomTextField(
+                CustomTextField(
                   label: 'Senha',
                   hintText: '••••••••',
                   prefixIcon: Icons.lock_outline,
-                  isPassword: true
+                  isPassword: true,
+                  controller: _passwordController,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -131,10 +176,22 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
                 const SizedBox(height: 28),
-                PrimaryButton(
-                  text: 'Entrar',
-                  icon: Icons.login,
-                  onPressed: () {},
+                ValueListenableBuilder<AuthState>(
+                  valueListenable: _controller,
+                  builder: (context, state, child) {
+                    final isLoading = state is AuthLoadingState;
+                    
+                    return PrimaryButton(
+                      text: isLoading ? 'Entrando...' : 'Entrar',
+                      icon: isLoading ? null : Icons.login,
+                      onPressed: isLoading 
+                        ? () {} 
+                        : () => _controller.signIn(
+                            _emailController.text,
+                            _passwordController.text,
+                          ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 SecondaryButton(
@@ -179,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 40),
               ],
             ),
           ),
