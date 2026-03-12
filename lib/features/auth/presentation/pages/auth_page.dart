@@ -1,5 +1,6 @@
-import 'package:alternative/features/home/presentation/pages/driver_register_page.dart';
+import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -77,7 +78,7 @@ class _AuthPageState extends State<AuthPage> {
                         height: 200,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: AppColors.slate500.withOpacity(0.1),
+                          color: AppColors.slate500.withValues(alpha: .1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Column(
@@ -178,10 +179,7 @@ class _AuthPageState extends State<AuthPage> {
                       text: isLoading ? 'Entrando...' : 'Entrar',
                       icon: isLoading ? null : Icons.login,
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const DriverRegisterPage()),
-                        );
+                        Navigator.pushReplacementNamed(context, AppRoutes.adminHome);
                       },
                       // onPressed: isLoading
                       //   ? () {}
