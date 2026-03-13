@@ -1,34 +1,30 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/services/location_service.dart';
 import '../../domain/entities/capital_entity.dart';
+import '../../domain/usecases/get_checkin_status_usecase.dart';
 import 'checkin_state.dart';
 
 class CheckinController extends ValueNotifier<CheckinState> {
+  final ILocationService locationService;
+  final GetCheckinStatusUseCase getCheckinStatusUseCase;
+  
   StreamSubscription<Position>? _positionStream;
-  String _cachedCity = "";
+  String? _cachedCity;
 
-  CheckinController(CapitalEntity destination) 
-      : super(CheckinState(destination: destination));
+  CheckinController({
+    required CapitalEntity destination,
+    required this.locationService,
+    required this.getCheckinStatusUseCase,
+  }) : super(CheckinState(destination: destination));
 
   void startTracking() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return;
+    final hasPermission = await locationService.checkPermission();
+    if (!hasPermission) return;
 
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return;
-    }
-
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high, 
-        distanceFilter: 10
-      ),
-    ).listen(_updatePosition);
+    _positionStream = locationService.getPositionStream().listen(_updatePosition);
   }
 
   void stopTracking() {
@@ -38,41 +34,30 @@ class CheckinController extends ValueNotifier<CheckinState> {
   Future<void> _updatePosition(Position position) async {
     final destination = value.destination;
     
-    final distance = Geolocator.distanceBetween(
+    final distance = locationService.calculateDistance(
       position.latitude, position.longitude,
       destination.coords.latitude, destination.coords.longitude,
     );
 
-    bool insideByDistance = distance <= destination.radius;
-    bool insideByCity = false;
-
-    if (distance < 25000 && _cachedCity.isEmpty) {
-      try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude, position.longitude
-        );
-        if (placemarks.isNotEmpty) {
-          _cachedCity = placemarks[0].locality ?? "";
-          insideByCity = _cachedCity.toLowerCase().contains(destination.cityName.toLowerCase());
-        }
-      } catch (_) {}
-    } else if (_cachedCity.isNotEmpty) {
-      insideByCity = _cachedCity.toLowerCase().contains(destination.cityName.toLowerCase());
+    if (distance < 25000 && _cachedCity == null) {
+      _cachedCity = await locationService.getCityFromCoordinates(
+        position.latitude, position.longitude
+      );
     }
 
-    final bool isNowInside = insideByDistance || insideByCity;
+    final isInside = getCheckinStatusUseCase.isInsideGeofence(
+      currentPosition: position,
+      destination: destination,
+      currentCity: _cachedCity,
+    );
 
-    String status;
-    if (isNowInside) {
-      status = "No Local";
-    } else if (position.speed > 0.5) {
-      status = "Em Rota";
-    } else {
-      status = "Aguardando";
-    }
+    final status = getCheckinStatusUseCase.calculateStatus(
+      isInside: isInside,
+      speed: position.speed,
+    );
 
     String eta;
-    if (isNowInside) {
+    if (isInside) {
       eta = "Já chegou";
     } else {
       final minutesToArrival = (distance / 1000).ceil();
@@ -83,7 +68,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
 
     value = value.copyWith(
       distanceToCenter: distance,
-      isInsideGeofence: isNowInside,
+      isInsideGeofence: isInside,
       status: status,
       arrivalTime: eta,
       speed: position.speed,

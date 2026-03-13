@@ -6,4 +6,10 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+
+  Future<void> saveRememberedEmail(String email);
+  Future<String?> getRememberedEmail();
+  Future<void> removeRememberedEmail();
+  
+  UserEntity? getCurrentUser();
 }

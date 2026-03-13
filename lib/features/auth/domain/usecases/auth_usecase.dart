@@ -13,4 +13,20 @@ class AuthUseCase {
   }) async {
     return await repository.signIn(email: email, password: password);
   }
+
+  UserEntity? getCurrentUser() {
+    return repository.getCurrentUser();
+  }
+
+  Future<void> saveEmail(String email) async {
+    await repository.saveRememberedEmail(email);
+  }
+
+  Future<String?> getSavedEmail() async {
+    return await repository.getRememberedEmail();
+  }
+
+  Future<void> removeSavedEmail() async {
+    await repository.removeRememberedEmail();
+  }
 }

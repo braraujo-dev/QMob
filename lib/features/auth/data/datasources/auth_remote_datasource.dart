@@ -6,6 +6,8 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String password,
   });
+  
+  UserModel? getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -35,5 +37,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       throw Exception(e.toString());
     }
+  }
+
+  @override
+  UserModel? getCurrentUser() {
+    final user = supabaseClient.auth.currentUser;
+    if (user != null) {
+      return UserModel(id: user.id, email: user.email ?? '');
+    }
+    return null;
   }
 }
