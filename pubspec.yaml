@@ -38,6 +38,10 @@ dependencies:
   supabase_flutter: ^2.6.0
   dartz: ^0.10.1
   get_it: ^8.0.2
+  google_maps_flutter: ^2.10.0
+  geolocator: ^13.0.2
+  intl: ^0.20.2
+  geocoding: ^4.0.0
 
 dev_dependencies:
   flutter_test:

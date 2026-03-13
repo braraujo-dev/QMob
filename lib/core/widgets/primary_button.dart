@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final IconData? icon;
 
   const PrimaryButton({
@@ -16,6 +16,10 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        disabledBackgroundColor: Colors.white.withValues(alpha: 0.05),
+        disabledForegroundColor: Colors.white.withValues(alpha: .3),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
