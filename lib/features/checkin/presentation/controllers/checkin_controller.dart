@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/services/location_service.dart';
+import '../../../queue/domain/usecases/is_user_in_queue_usecase.dart';
+import '../../../queue/domain/usecases/perform_checkin_usecase.dart';
 import '../../domain/entities/capital_entity.dart';
 import '../../domain/usecases/get_checkin_status_usecase.dart';
 import 'checkin_state.dart';
@@ -10,6 +12,8 @@ import 'checkin_state.dart';
 class CheckinController extends ValueNotifier<CheckinState> {
   final ILocationService locationService;
   final GetCheckinStatusUseCase getCheckinStatusUseCase;
+  final PerformCheckinUseCase performCheckinUseCase;
+  final IsUserInQueueUseCase isUserInQueueUseCase;
   
   StreamSubscription<Position>? _positionStream;
   String? _cachedCity;
@@ -18,17 +22,42 @@ class CheckinController extends ValueNotifier<CheckinState> {
     required CapitalEntity destination,
     required this.locationService,
     required this.getCheckinStatusUseCase,
+    required this.performCheckinUseCase,
+    required this.isUserInQueueUseCase,
   }) : super(CheckinState(destination: destination));
 
   void startTracking() async {
-    final hasPermission = await locationService.checkPermission();
-    if (!hasPermission) return;
+    try {
+      final inQueue = await isUserInQueueUseCase();
+      value = value.copyWith(isAlreadyInQueue: inQueue);
+    } catch (e) {
+    }
 
-    _positionStream = locationService.getPositionStream().listen(_updatePosition);
+    final hasPermission = await locationService.checkPermission();
+    if (!hasPermission) {
+      return;
+    }
+
+    _positionStream = locationService.getPositionStream().listen((pos) {
+      _updatePosition(pos);
+    });
   }
 
   void stopTracking() {
     _positionStream?.cancel();
+  }
+
+  Future<void> performCheckin() async {
+    if (value.isAlreadyInQueue || !value.isInsideGeofence) return;
+
+    value = value.copyWith(isLoading: true);
+    try {
+      await performCheckinUseCase(value.destination.cityName);
+      value = value.copyWith(isAlreadyInQueue: true, isLoading: false);
+    } catch (e) {
+      value = value.copyWith(isLoading: false);
+      rethrow;
+    }
   }
 
   Future<void> _updatePosition(Position position) async {

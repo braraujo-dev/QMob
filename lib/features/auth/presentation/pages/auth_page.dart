@@ -1,10 +1,10 @@
 import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
-import '../../../../core/widgets/secondary_button.dart';
 import '../controllers/auth_controller.dart';
 import '../controllers/auth_state.dart';
 
@@ -64,7 +64,11 @@ class _AuthPageState extends State<AuthPage> {
       );
       _controller.resetState();
     } else if (state is AuthSuccessState) {
-      Navigator.pushReplacementNamed(context, AppRoutes.checkin);
+      if (state.user.isAdmin) {
+        Navigator.pushReplacementNamed(context, AppRoutes.adminHome);
+      } else {
+        Navigator.pushReplacementNamed(context, AppRoutes.main);
+      }
     }
   }
 
@@ -192,13 +196,6 @@ class _AuthPageState extends State<AuthPage> {
                               : null,
                         );
                       },
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    SecondaryButton(
-                      text: 'Cadastro Administrador',
-                      icon: Icons.admin_panel_settings_outlined,
-                      onPressed: () {},
                     ),
                     const SizedBox(height: 40),
                   ],

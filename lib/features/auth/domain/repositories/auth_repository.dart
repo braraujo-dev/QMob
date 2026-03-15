@@ -11,5 +11,5 @@ abstract class AuthRepository {
   Future<String?> getRememberedEmail();
   Future<void> removeRememberedEmail();
   
-  UserEntity? getCurrentUser();
+  Future<UserEntity?> getCurrentUser();
 }

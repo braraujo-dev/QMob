@@ -15,18 +15,22 @@ void main() async {
   await di.init();
 
   final authUseCase = sl<AuthUseCase>();
-  final user = authUseCase.getCurrentUser();
+  final user = await authUseCase.getCurrentUser();
   final savedEmail = await authUseCase.getSavedEmail();
 
-  final bool shouldGoToCheckin = user != null && savedEmail != null;
+  String initialRoute = AppRoutes.auth;
 
-  runApp(MyApp(startInCheckin: shouldGoToCheckin));
+  if (user != null && savedEmail != null) {
+    initialRoute = user.isAdmin ? AppRoutes.adminHome : AppRoutes.main;
+  }
+
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
-  final bool startInCheckin;
+  final String initialRoute;
   
-  const MyApp({super.key, required this.startInCheckin});
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +38,7 @@ class MyApp extends StatelessWidget {
       title: 'Alternative App',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      initialRoute: startInCheckin ? AppRoutes.checkin : AppRoutes.auth,
+      initialRoute: initialRoute,
       routes: AppRoutes.routes,
     );
   }

@@ -7,7 +7,7 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
   
-  UserModel? getCurrentUser();
+  Future<UserModel?> getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -30,9 +30,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Usuário não encontrado');
       }
 
+      final profileResponse = await supabaseClient
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', response.user!.id)
+          .single();
+
       return UserModel(
         id: response.user!.id,
         email: response.user!.email ?? '',
+        isAdmin: profileResponse['is_admin'] ?? false,
       );
     } catch (e) {
       throw Exception(e.toString());
@@ -40,10 +47,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  UserModel? getCurrentUser() {
+  Future<UserModel?> getCurrentUser() async {
     final user = supabaseClient.auth.currentUser;
     if (user != null) {
-      return UserModel(id: user.id, email: user.email ?? '');
+      try {
+        final profileResponse = await supabaseClient
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', user.id)
+            .single();
+
+        return UserModel(
+          id: user.id, 
+          email: user.email ?? '',
+          isAdmin: profileResponse['is_admin'] ?? false,
+        );
+      } catch (_) {
+        return UserModel(id: user.id, email: user.email ?? '', isAdmin: false);
+      }
     }
     return null;
   }

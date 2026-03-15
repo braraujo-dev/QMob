@@ -7,6 +7,8 @@ class CheckinState {
   final String arrivalTime;
   final String status;
   final double speed;
+  final bool isAlreadyInQueue;
+  final bool isLoading;
 
   CheckinState({
     required this.destination,
@@ -15,6 +17,8 @@ class CheckinState {
     this.arrivalTime = '--:--',
     this.status = 'Aguardando',
     this.speed = 0,
+    this.isAlreadyInQueue = false,
+    this.isLoading = false,
   });
 
   CheckinState copyWith({
@@ -24,6 +28,8 @@ class CheckinState {
     String? arrivalTime,
     String? status,
     double? speed,
+    bool? isAlreadyInQueue,
+    bool? isLoading,
   }) {
     return CheckinState(
       destination: destination ?? this.destination,
@@ -32,6 +38,8 @@ class CheckinState {
       arrivalTime: arrivalTime ?? this.arrivalTime,
       status: status ?? this.status,
       speed: speed ?? this.speed,
+      isAlreadyInQueue: isAlreadyInQueue ?? this.isAlreadyInQueue,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 }

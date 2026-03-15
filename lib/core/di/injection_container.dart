@@ -10,6 +10,14 @@ import '../../features/checkin/domain/entities/capital_entity.dart';
 import '../../features/checkin/domain/repositories/checkin_repository.dart';
 import '../../features/checkin/data/repositories/checkin_repository_impl.dart';
 import '../../features/checkin/domain/usecases/get_checkin_status_usecase.dart';
+import '../../features/queue/domain/repositories/queue_repository.dart';
+import '../../features/queue/data/repositories/queue_repository_impl.dart';
+import '../../features/queue/domain/usecases/get_queue_usecase.dart';
+import '../../features/queue/domain/usecases/perform_checkin_usecase.dart';
+import '../../features/queue/domain/usecases/perform_checkout_usecase.dart';
+import '../../features/queue/domain/usecases/is_user_in_queue_usecase.dart';
+import '../../features/queue/presentation/controllers/queue_controller.dart';
+import '../../features/queue/data/datasources/queue_remote_datasource.dart';
 import '../services/location_service.dart';
 
 final sl = GetIt.instance;
@@ -36,6 +44,21 @@ Future<void> init() async {
       destination: destination,
       locationService: sl(),
       getCheckinStatusUseCase: sl(),
+      performCheckinUseCase: sl(),
+      isUserInQueueUseCase: sl(),
     ),
   );
+
+  // Queue
+  sl.registerLazySingleton<QueueRemoteDataSource>(() => QueueRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<QueueRepository>(() => QueueRepositoryImpl(sl(), sl()));
+  sl.registerLazySingleton(() => GetQueueUseCase(sl()));
+  sl.registerLazySingleton(() => PerformCheckinUseCase(sl()));
+  sl.registerLazySingleton(() => PerformCheckoutUseCase(sl()));
+  sl.registerLazySingleton(() => IsUserInQueueUseCase(sl()));
+  
+  sl.registerFactory(() => QueueController(
+    getQueueUseCase: sl(),
+    performCheckoutUseCase: sl(),
+  ));
 }
