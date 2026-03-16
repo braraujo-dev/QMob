@@ -1,6 +1,5 @@
 import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -42,14 +41,23 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
-  // 1. ADICIONE ESTA FUNÇÃO AUXILIAR AQUI (antes do _requestSindicatoAccess)
-  String? _encodeQueryParameters(Map<String, String> params) {
-    return params.entries
-        .map(
-          (e) =>
-              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value).replaceAll('+', '%20')}',
-        )
-        .join('&');
+  void _onStateChanged() {
+    final state = _controller.value;
+    if (state is AuthErrorState) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.message),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      _controller.resetState();
+    } else if (state is AuthSuccessState) {
+      Navigator.pushReplacementNamed(
+        context,
+        state.user.isAdmin ? AppRoutes.adminHome : AppRoutes.main,
+      );
+    }
   }
 
   Future<void> _requestSindicatoAccess() async {
@@ -84,49 +92,25 @@ class _AuthPageState extends State<AuthPage> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.redAccent)),
-          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             onPressed: () async {
-              // 1. Monta o corpo da mensagem
-              final String body =
-                  '''
-Olá, gostaria de solicitar o cadastro no sistema Alternative.
-
-DADOS DO SINDICATO:
-- Nome: ${nomeSindicatoController.text}
-- CNPJ: ${cnpjController.text}
-- Responsável: ${responsavelController.text}
-- Contato: ${telefoneController.text}
-
-Aguardo o retorno para finalização do acesso.
-''';
-
-              final Uri emailUri = Uri(
-                scheme: 'mailto',
-                path: 'felipemoreira512@outlook.com',
-                query: _encodeQueryParameters({
-                  'subject': 'Solicitação de Cadastro: Sindicato de Motoristas',
-                  'body': body,
-                }),
+              final success = await _controller.sendSindicatoRequest(
+                nome: nomeSindicatoController.text,
+                cnpj: cnpjController.text,
+                responsavel: responsavelController.text,
+                telefone: telefoneController.text,
               );
 
-              try {
-                // 3. ALTERADO AQUI: Usando externalNonBrowserApplication para garantir abertura no app de e-mail
-                await launchUrl(emailUri, mode: LaunchMode.externalNonBrowserApplication);
-                if (mounted) Navigator.pop(context);
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Não encontramos um app de e-mail configurado.'),
-                      backgroundColor: Colors.orange,
-                    ),
-                  );
-                }
+              if (!success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Não encontramos um app de e-mail configurado.'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              } else if (mounted) {
+                Navigator.pop(context);
               }
             },
             child: const Text('Enviar Solicitação'),
@@ -136,7 +120,6 @@ Aguardo o retorno para finalização do acesso.
     );
   }
 
-  // Helper para os campos do Dialog
   Widget _buildDialogField(
     String label,
     TextEditingController controller, {
@@ -162,25 +145,6 @@ Aguardo o retorno para finalização do acesso.
     );
   }
 
-  void _onStateChanged() {
-    final state = _controller.value;
-    if (state is AuthErrorState) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.message),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      _controller.resetState();
-    } else if (state is AuthSuccessState) {
-      Navigator.pushReplacementNamed(
-        context,
-        state.user.isAdmin ? AppRoutes.adminHome : AppRoutes.main,
-      );
-    }
-  }
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -192,7 +156,7 @@ Aguardo o retorno para finalização do acesso.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Slate 900 para um visual moderno
+      backgroundColor: const Color(0xFF0F172A),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -202,7 +166,6 @@ Aguardo o retorno para finalização do acesso.
               return Column(
                 children: [
                   const SizedBox(height: 40),
-                  // Ilustração/Logo
                   Container(
                     height: 160,
                     decoration: BoxDecoration(
@@ -228,7 +191,6 @@ Aguardo o retorno para finalização do acesso.
                     style: TextStyle(color: AppColors.slate400, fontSize: 14),
                   ),
                   const SizedBox(height: 20),
-                  // Campos de Input
                   CustomTextField(
                     label: 'E-mail',
                     hintText: 'exemplo@email.com',
@@ -249,8 +211,6 @@ Aguardo o retorno para finalização do acesso.
                         ? _controller.signIn(_emailController.text, _passwordController.text)
                         : null,
                   ),
-
-                  // Lembrar e Esqueci Senha
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
@@ -286,43 +246,38 @@ Aguardo o retorno para finalização do acesso.
                       ],
                     ),
                   ),
-                  Column(
+                  ValueListenableBuilder<AuthState>(
+                    valueListenable: _controller,
+                    builder: (context, state, child) {
+                      final isLoading = state is AuthLoadingState;
+                      return PrimaryButton(
+                        text: isLoading ? 'Autenticando...' : 'Entrar',
+                        onPressed: (_controller.isFormValid && !isLoading)
+                            ? () => _controller.signIn(
+                                _emailController.text,
+                                _passwordController.text,
+                              )
+                            : null,
+                      );
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ValueListenableBuilder<AuthState>(
-                        valueListenable: _controller,
-                        builder: (context, state, child) {
-                          final isLoading = state is AuthLoadingState;
-                          return PrimaryButton(
-                            text: isLoading ? 'Autenticando...' : 'Entrar',
-                            onPressed: (_controller.isFormValid && !isLoading)
-                                ? () => _controller.signIn(
-                                    _emailController.text,
-                                    _passwordController.text,
-                                  )
-                                : null,
-                          );
-                        },
+                      const Text(
+                        'É um sindicato? ',
+                        style: TextStyle(color: AppColors.slate400, fontSize: 14),
                       ),
-                      // Alinhamento central para o texto e o botão
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'É um sindicato? ',
-                            style: TextStyle(color: AppColors.slate400, fontSize: 14),
+                      TextButton(
+                        onPressed: _requestSindicatoAccess,
+                        child: const Text(
+                          'Solicite seu cadastro aqui',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
                           ),
-                          TextButton(
-                            onPressed: _requestSindicatoAccess,
-                            child: const Text(
-                              'Solicite seu cadastro aqui',
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
