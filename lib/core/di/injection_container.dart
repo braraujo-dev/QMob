@@ -1,3 +1,8 @@
+import 'package:alternative/features/profile/data/datasources/profile_remote_datasouurce.dart';
+import 'package:alternative/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
+import 'package:alternative/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:alternative/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -35,15 +40,12 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
   sl.registerLazySingleton(() => AuthUseCase(sl()));
   sl.registerLazySingleton(() => SendPasswordResetEmailUseCase(sl()));
-  sl.registerFactory(() => AuthController(
-    authUseCase: sl(),
-    sendPasswordResetEmailUseCase: sl(),
-  ));
+  sl.registerFactory(() => AuthController(authUseCase: sl(), sendPasswordResetEmailUseCase: sl()));
 
   // Checkin
   sl.registerLazySingleton<CheckinRepository>(() => CheckinRepositoryImpl());
   sl.registerLazySingleton(() => const GetCheckinStatusUseCase());
-  
+
   sl.registerFactoryParam<CheckinController, CapitalEntity, void>(
     (destination, _) => CheckinController(
       destination: destination,
@@ -61,9 +63,15 @@ Future<void> init() async {
   sl.registerLazySingleton(() => PerformCheckinUseCase(sl()));
   sl.registerLazySingleton(() => PerformCheckoutUseCase(sl()));
   sl.registerLazySingleton(() => IsUserInQueueUseCase(sl()));
-  
-  sl.registerFactory(() => QueueController(
-    getQueueUseCase: sl(),
-    performCheckoutUseCase: sl(),
-  ));
+
+  // Profile Feature
+  sl.registerLazySingleton<ProfileRemoteDataSource>(() => ProfileRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<ProfileRepository>(() => ProfileRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => GetProfileUseCase(sl()));
+
+  sl.registerFactory(
+    () => ProfileController(getProfileUseCase: sl(), repository: sl(), supabase: sl()),
+  );
+
+  sl.registerFactory(() => QueueController(getQueueUseCase: sl(), performCheckoutUseCase: sl()));
 }

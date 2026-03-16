@@ -42,11 +42,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
           return _buildListView(motoristas);
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/cadastro'),
-        backgroundColor: accentBlue,
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
-      ),
       bottomNavigationBar: _buildBottomNav(accentBlue),
     );
   }
@@ -55,7 +50,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
     return AppBar(
       backgroundColor: bg,
       elevation: 0,
-      leading: const Icon(Icons.menu, color: Colors.white),
       title: const Text(
         'Motoristas',
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -245,7 +239,25 @@ class _AdminHomePageState extends State<AdminHomePage> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: accentBlue,
         unselectedItemColor: Colors.white38,
-        currentIndex: 1,
+        currentIndex: 1, // Atualmente na aba Motoristas
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              // Se tiver uma Home Admin específica:
+              // Navigator.pushReplacementNamed(context, AppRoutes.adminHome);
+              break;
+            case 1:
+              // Já estamos aqui (Motoristas)
+              break;
+            case 2:
+              // Navigator.pushNamed(context, AppRoutes.reports);
+              break;
+            case 3:
+              // Navega para a tela de Perfil/Ajustes que criamos
+              Navigator.pushNamed(context, AppRoutes.adminProfile);
+              break;
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "INÍCIO"),
           BottomNavigationBarItem(icon: Icon(Icons.drive_eta), label: "MOTORISTAS"),

@@ -15,10 +15,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final userModel = await remoteDataSource.signIn(
-        email: email,
-        password: password,
-      );
+      final userModel = await remoteDataSource.signIn(email: email, password: password);
       return Right(userModel);
     } catch (e) {
       return Left(e.toString());

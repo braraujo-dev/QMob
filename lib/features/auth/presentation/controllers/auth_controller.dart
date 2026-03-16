@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../domain/usecases/auth_usecase.dart';
 import '../../domain/usecases/send_password_reset_email_usecase.dart';
 import 'auth_state.dart';
@@ -14,7 +15,7 @@ class AuthController extends ValueNotifier<AuthState> {
 
   bool isFormValid = false;
   bool rememberMe = false;
-  
+
   String? emailError;
   String? passwordError;
 
@@ -22,7 +23,9 @@ class AuthController extends ValueNotifier<AuthState> {
     if (email.isEmpty) {
       emailError = null;
     } else {
-      final emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
+      final emailValid = RegExp(
+        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+      ).hasMatch(email);
       emailError = emailValid ? null : 'E-mail inválido';
     }
 
@@ -32,7 +35,8 @@ class AuthController extends ValueNotifier<AuthState> {
       passwordError = password.length >= 8 ? null : 'Mínimo 8 caracteres';
     }
 
-    isFormValid = emailError == null && passwordError == null && email.isNotEmpty && password.isNotEmpty;
+    isFormValid =
+        emailError == null && passwordError == null && email.isNotEmpty && password.isNotEmpty;
     notifyListeners();
   }
 
@@ -86,5 +90,49 @@ class AuthController extends ValueNotifier<AuthState> {
       rememberMe = true;
     }
     return email;
+  }
+
+  Future<bool> sendSindicatoRequest({
+    required String nome,
+    required String cnpj,
+    required String responsavel,
+    required String telefone,
+  }) async {
+    final String body =
+        '''
+Olá, gostaria de solicitar o cadastro no sistema Alternative.
+
+DADOS DO SINDICATO:
+- Nome: $nome
+- CNPJ: $cnpj
+- Responsável: $responsavel
+- Contato: $telefone
+
+Aguardo o retorno para finalização do acesso!
+''';
+
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'felipemoreira512@outlook.com',
+      query: _encodeQueryParameters({
+        'subject': 'Solicitação de Cadastro: Sindicato de Motoristas',
+        'body': body,
+      }),
+    );
+
+    try {
+      return await launchUrl(emailUri, mode: LaunchMode.externalNonBrowserApplication);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  String? _encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map(
+          (e) =>
+              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value).replaceAll('+', '%20')}',
+        )
+        .join('&');
   }
 }

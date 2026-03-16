@@ -20,10 +20,10 @@ class _CheckinPageState extends State<CheckinPage> {
   @override
   void initState() {
     super.initState();
-    
+
     final destination = CapitalEntity(
-      cityName: 'João Pessoa',
-      coords: const LatLng(-7.1153, -34.8610),
+      cityName: 'Limoeiro do Norte',
+      coords: const LatLng(-5.141232776415835, -38.09332926435016),
       radius: 7000,
     );
 
@@ -80,7 +80,7 @@ class _CheckinPageState extends State<CheckinPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-            
+
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -91,17 +91,24 @@ class _CheckinPageState extends State<CheckinPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(destination.cityName, style: const TextStyle(color: AppColors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text(
+                            destination.cityName,
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 20),
                           _buildInfoRow('Status Atual', state.status),
                           const SizedBox(height: 12),
                           _buildInfoRow(
-                            'Distância', 
-                            state.isInsideGeofence 
-                              ? '0 metros' 
-                              : (state.distanceToCenter >= 1000 
-                                  ? '${(state.distanceToCenter / 1000).toStringAsFixed(1)} km' 
-                                  : '${state.distanceToCenter.toInt()} metros')
+                            'Distância',
+                            state.isInsideGeofence
+                                ? '0 metros'
+                                : (state.distanceToCenter >= 1000
+                                      ? '${(state.distanceToCenter / 1000).toStringAsFixed(1)} km'
+                                      : '${state.distanceToCenter.toInt()} metros'),
                           ),
                           const SizedBox(height: 12),
                           _buildInfoRow('Previsão de Chegada', state.arrivalTime),
@@ -109,17 +116,22 @@ class _CheckinPageState extends State<CheckinPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-            
+
                     PrimaryButton(
-                      text: state.isAlreadyInQueue ? 'Você já está na fila' : (state.isLoading ? 'Enviando...' : 'Realizar Check-in'),
+                      text: state.isAlreadyInQueue
+                          ? 'Você já está na fila'
+                          : (state.isLoading ? 'Enviando...' : 'Realizar Check-in'),
                       icon: state.isAlreadyInQueue ? Icons.check_circle : Icons.location_on,
-                      onPressed: (state.isInsideGeofence && !state.isAlreadyInQueue && !state.isLoading)
-                        ? () => _controller.performCheckin() 
-                        : null,
+                      onPressed:
+                          (state.isInsideGeofence && !state.isAlreadyInQueue && !state.isLoading)
+                          ? () => _controller.performCheckin()
+                          : null,
                     ),
                     const SizedBox(height: 8),
-                    
-                    if (!state.isInsideGeofence && !state.isAlreadyInQueue && distanceToGeofence < 1000)
+
+                    if (!state.isInsideGeofence &&
+                        !state.isAlreadyInQueue &&
+                        distanceToGeofence < 1000)
                       Text(
                         'Aproxime-se mais ${distanceToGeofence.toInt()} metros para habilitar o check-in.',
                         textAlign: TextAlign.center,
@@ -129,13 +141,21 @@ class _CheckinPageState extends State<CheckinPage> {
                       const Text(
                         'Você já chegou ao destino! Faça seu check-in.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     if (state.isAlreadyInQueue)
                       const Text(
                         'Check-in realizado. Acompanhe sua posição na aba Fila.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                   ],
                 ),
@@ -152,7 +172,10 @@ class _CheckinPageState extends State<CheckinPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: const TextStyle(color: AppColors.slate400, fontSize: 14)),
-        Text(value, style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }

@@ -3,24 +3,32 @@ import '../theme/app_colors.dart';
 
 class CustomTextField extends StatefulWidget {
   final String label;
-  final String hintText;
-  final IconData prefixIcon;
+  final String hintText; // Removido o 'required'
+  final IconData? prefixIcon; // Agora opcional (para Placa/Cor)
+  final IconData? suffixIcon; // Novo
   final bool isPassword;
+  final bool readOnly; // Novo
   final TextEditingController? controller;
   final String? errorText;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
   final Function(String)? onChanged;
+  final Function(String)? onFieldSubmitted;
 
   const CustomTextField({
     super.key,
     required this.label,
-    required this.hintText,
-    required this.prefixIcon,
+    this.hintText = '', // Valor padrão vazio
+    this.prefixIcon,
+    this.suffixIcon,
     this.isPassword = false,
+    this.readOnly = false,
     this.controller,
     this.errorText,
     this.keyboardType,
+    this.textInputAction,
     this.onChanged,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -43,23 +51,26 @@ class _CustomTextFieldState extends State<CustomTextField> {
       children: [
         Text(
           widget.label,
-          style: const TextStyle(
-            color: AppColors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: widget.controller,
           obscureText: _obscureText,
+          readOnly: widget.readOnly, // Aplicando o readOnly
           keyboardType: widget.keyboardType,
+          textInputAction: widget.textInputAction,
           onChanged: widget.onChanged,
-          style: const TextStyle(color: AppColors.white),
+          onFieldSubmitted: widget.onFieldSubmitted,
+          style: TextStyle(color: widget.readOnly ? AppColors.slate400 : AppColors.white),
           decoration: InputDecoration(
+            hintStyle: const TextStyle(color: AppColors.slate400),
             hintText: widget.hintText,
             errorText: widget.errorText,
-            prefixIcon: Icon(widget.prefixIcon, size: 20),
+            // Só mostra o ícone se ele for passado
+            prefixIcon: widget.prefixIcon != null
+                ? Icon(widget.prefixIcon, size: 20, color: AppColors.primary)
+                : null,
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: Icon(
@@ -67,13 +78,25 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       color: AppColors.slate400,
                       size: 20,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureText = !_obscureText;
-                      });
-                    },
+                    onPressed: () => setState(() => _obscureText = !_obscureText),
                   )
-                : null,
+                : (widget.suffixIcon != null
+                      ? Icon(widget.suffixIcon, size: 20, color: AppColors.slate400)
+                      : null),
+            filled: true,
+            fillColor: AppColors.slate500.withValues(alpha: 0.1),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
           ),
         ),
       ],
