@@ -218,18 +218,11 @@ class _AuthPageState extends State<AuthPage> {
                       children: [
                         Row(
                           children: [
-                            SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: Checkbox(
-                                value: _controller.rememberMe,
-                                onChanged: (v) => _controller.toggleRememberMe(v),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
+                            Checkbox(
+                              value: _controller.rememberMe,
+                              onChanged: (v) => _controller.toggleRememberMe(v),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                             ),
-                            const SizedBox(width: 8),
                             const Text(
                               'Lembrar-me',
                               style: TextStyle(color: AppColors.slate400, fontSize: 13),
@@ -239,8 +232,8 @@ class _AuthPageState extends State<AuthPage> {
                         TextButton(
                           onPressed: () {},
                           child: const Text(
-                            'Esqueceu a senha?',
-                            style: TextStyle(color: AppColors.primary, fontSize: 13),
+                            'Esqueci a senha',
+                            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],

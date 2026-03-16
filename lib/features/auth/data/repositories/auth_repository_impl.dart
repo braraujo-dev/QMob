@@ -1,4 +1,3 @@
-import 'package:alternative/features/auth/data/models/user_model.dart';
 import 'package:dartz/dartz.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/user_entity.dart';
@@ -24,8 +23,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<UserModel?> getCurrentUser() {
-    return remoteDataSource.getCurrentUser();
+  Future<UserEntity?> getCurrentUser() async {
+    return await remoteDataSource.getCurrentUser();
   }
 
   @override
@@ -44,5 +43,15 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> saveRememberedEmail(String email) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('saved_email', email);
+  }
+
+  @override
+  Future<Either<String, void>> sendPasswordResetEmail(String email) async {
+    try {
+      await remoteDataSource.sendPasswordResetEmail(email);
+      return const Right(null);
+    } catch (e) {
+      return Left(e.toString());
+    }
   }
 }

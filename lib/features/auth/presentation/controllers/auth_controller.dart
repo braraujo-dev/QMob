@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../domain/usecases/auth_usecase.dart';
+import '../../domain/usecases/send_password_reset_email_usecase.dart';
 import 'auth_state.dart';
 
 class AuthController extends ValueNotifier<AuthState> {
   final AuthUseCase authUseCase;
+  final SendPasswordResetEmailUseCase sendPasswordResetEmailUseCase;
 
-  AuthController(this.authUseCase) : super(AuthInitialState());
+  AuthController({
+    required this.authUseCase,
+    required this.sendPasswordResetEmailUseCase,
+  }) : super(AuthInitialState());
 
   bool isFormValid = false;
   bool rememberMe = false;
@@ -67,6 +72,15 @@ class AuthController extends ValueNotifier<AuthState> {
         }
         value = AuthSuccessState(user);
       },
+    );
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    value = AuthLoadingState();
+    final result = await sendPasswordResetEmailUseCase(email);
+    result.fold(
+      (error) => value = AuthErrorState(error),
+      (_) => value = AuthInitialState(), // Or a Success state if you prefer
     );
   }
 

@@ -5,6 +5,7 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/auth_usecase.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
+import '../../features/auth/domain/usecases/send_password_reset_email_usecase.dart';
 import '../../features/checkin/presentation/controllers/checkin_controller.dart';
 import '../../features/checkin/domain/entities/capital_entity.dart';
 import '../../features/checkin/domain/repositories/checkin_repository.dart';
@@ -33,7 +34,11 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
   sl.registerLazySingleton(() => AuthUseCase(sl()));
-  sl.registerFactory(() => AuthController(sl()));
+  sl.registerLazySingleton(() => SendPasswordResetEmailUseCase(sl()));
+  sl.registerFactory(() => AuthController(
+    authUseCase: sl(),
+    sendPasswordResetEmailUseCase: sl(),
+  ));
 
   // Checkin
   sl.registerLazySingleton<CheckinRepository>(() => CheckinRepositoryImpl());
