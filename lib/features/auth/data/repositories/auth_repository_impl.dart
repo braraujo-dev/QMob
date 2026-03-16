@@ -1,3 +1,4 @@
+import 'package:alternative/features/auth/data/models/user_model.dart';
 import 'package:dartz/dartz.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/user_entity.dart';
@@ -15,10 +16,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final userModel = await remoteDataSource.signIn(
-        email: email,
-        password: password,
-      );
+      final userModel = await remoteDataSource.signIn(email: email, password: password);
       return Right(userModel);
     } catch (e) {
       return Left(e.toString());
@@ -26,7 +24,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  UserEntity? getCurrentUser() {
+  Future<UserModel?> getCurrentUser() {
     return remoteDataSource.getCurrentUser();
   }
 

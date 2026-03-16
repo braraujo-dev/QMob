@@ -9,7 +9,7 @@ class AuthController extends ValueNotifier<AuthState> {
 
   bool isFormValid = false;
   bool rememberMe = false;
-  
+
   String? emailError;
   String? passwordError;
 
@@ -17,7 +17,9 @@ class AuthController extends ValueNotifier<AuthState> {
     if (email.isEmpty) {
       emailError = null;
     } else {
-      final emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
+      final emailValid = RegExp(
+        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+      ).hasMatch(email);
       emailError = emailValid ? null : 'E-mail inválido';
     }
 
@@ -27,7 +29,8 @@ class AuthController extends ValueNotifier<AuthState> {
       passwordError = password.length >= 8 ? null : 'Mínimo 8 caracteres';
     }
 
-    isFormValid = emailError == null && passwordError == null && email.isNotEmpty && password.isNotEmpty;
+    isFormValid =
+        emailError == null && passwordError == null && email.isNotEmpty && password.isNotEmpty;
     notifyListeners();
   }
 

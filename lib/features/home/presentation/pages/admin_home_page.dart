@@ -42,11 +42,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
           return _buildListView(motoristas);
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/cadastro'),
-        backgroundColor: accentBlue,
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
-      ),
       bottomNavigationBar: _buildBottomNav(accentBlue),
     );
   }

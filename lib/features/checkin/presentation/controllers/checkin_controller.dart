@@ -14,7 +14,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
   final GetCheckinStatusUseCase getCheckinStatusUseCase;
   final PerformCheckinUseCase performCheckinUseCase;
   final IsUserInQueueUseCase isUserInQueueUseCase;
-  
+
   StreamSubscription<Position>? _positionStream;
   String? _cachedCity;
 
@@ -30,8 +30,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
     try {
       final inQueue = await isUserInQueueUseCase();
       value = value.copyWith(isAlreadyInQueue: inQueue);
-    } catch (e) {
-    }
+    } catch (e) {}
 
     final hasPermission = await locationService.checkPermission();
     if (!hasPermission) {
@@ -62,15 +61,18 @@ class CheckinController extends ValueNotifier<CheckinState> {
 
   Future<void> _updatePosition(Position position) async {
     final destination = value.destination;
-    
+
     final distance = locationService.calculateDistance(
-      position.latitude, position.longitude,
-      destination.coords.latitude, destination.coords.longitude,
+      position.latitude,
+      position.longitude,
+      destination.coords.latitude,
+      destination.coords.longitude,
     );
 
     if (distance < 25000 && _cachedCity == null) {
       _cachedCity = await locationService.getCityFromCoordinates(
-        position.latitude, position.longitude
+        position.latitude,
+        position.longitude,
       );
     }
 
