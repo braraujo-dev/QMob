@@ -32,9 +32,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Usuário não encontrado');
       }
 
+      // Busca o perfil completo incluindo base_city
       final profileResponse = await supabaseClient
           .from('profiles')
-          .select('is_admin')
+          .select('is_admin, base_city')
           .eq('id', response.user!.id)
           .single();
 
@@ -42,6 +43,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         id: response.user!.id,
         email: response.user!.email ?? '',
         isAdmin: profileResponse['is_admin'] ?? false,
+        baseCity: profileResponse['base_city'],
       );
     } catch (e) {
       throw Exception(e.toString());
@@ -55,7 +57,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       try {
         final profileResponse = await supabaseClient
             .from('profiles')
-            .select('is_admin')
+            .select('is_admin, base_city')
             .eq('id', user.id)
             .single();
 
@@ -63,6 +65,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           id: user.id, 
           email: user.email ?? '',
           isAdmin: profileResponse['is_admin'] ?? false,
+          baseCity: profileResponse['base_city'],
         );
       } catch (_) {
         return UserModel(id: user.id, email: user.email ?? '', isAdmin: false);

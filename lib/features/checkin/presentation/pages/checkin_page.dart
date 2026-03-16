@@ -5,7 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../controllers/checkin_controller.dart';
 import '../controllers/checkin_state.dart';
-import '../../domain/entities/capital_entity.dart';
 
 class CheckinPage extends StatefulWidget {
   const CheckinPage({super.key});
@@ -16,71 +15,84 @@ class CheckinPage extends StatefulWidget {
 
 class _CheckinPageState extends State<CheckinPage> {
   late final CheckinController _controller;
+  GoogleMapController? _mapController;
+  Widget? _mapWidget;
 
   @override
   void initState() {
     super.initState();
-    
-    final destination = CapitalEntity(
-      cityName: 'João Pessoa',
-      coords: const LatLng(-7.1153, -34.8610),
-      radius: 7000,
-    );
-
-    _controller = sl<CheckinController>(param1: destination);
-    _controller.startTracking();
+    _controller = sl<CheckinController>();
+    _controller.init();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<CheckinState>(
-      valueListenable: _controller,
-      builder: (context, state, child) {
-        final destination = state.destination;
-        final distanceToGeofence = state.distanceToCenter - destination.radius;
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: ValueListenableBuilder<CheckinState>(
+          valueListenable: _controller,
+          builder: (context, state, child) {
+            if (state.isLoading && state.destination.cityName.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          body: SafeArea(
-            child: SingleChildScrollView(
+            if (state.destination.cityName.isEmpty) {
+              return const Center(
+                child: Text(
+                  'Erro ao carregar destino.\nVerifique seu perfil.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white),
+                ),
+              );
+            }
+
+            final destination = state.destination;
+            final distanceToGeofence = state.distanceToCenter - destination.radius;
+
+            _mapWidget ??= Container(
+              height: 250,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: GoogleMap(
+                onMapCreated: (controller) => _mapController = controller,
+                initialCameraPosition: CameraPosition(target: destination.coords, zoom: 11),
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+                circles: {
+                  Circle(
+                    circleId: const CircleId('geofence'),
+                    center: destination.coords,
+                    radius: destination.radius,
+                    fillColor: AppColors.primary.withValues(alpha: 0.15),
+                    strokeColor: AppColors.primary.withValues(alpha: 0.4),
+                    strokeWidth: 1,
+                  ),
+                },
+                markers: {
+                  Marker(markerId: const MarkerId('dest'), position: destination.coords),
+                },
+              ),
+            );
+
+            return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    Container(
-                      height: 250,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: GoogleMap(
-                        initialCameraPosition: CameraPosition(target: destination.coords, zoom: 11),
-                        myLocationEnabled: true,
-                        myLocationButtonEnabled: true,
-                        circles: {
-                          Circle(
-                            circleId: const CircleId('geofence'),
-                            center: destination.coords,
-                            radius: destination.radius,
-                            fillColor: AppColors.primary.withValues(alpha: 0.15),
-                            strokeColor: AppColors.primary.withValues(alpha: 0.4),
-                            strokeWidth: 1,
-                          ),
-                        },
-                        markers: {
-                          Marker(markerId: const MarkerId('dest'), position: destination.coords),
-                        },
-                      ),
-                    ),
+                    _mapWidget!,
                     const SizedBox(height: 16),
-            
+
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -109,7 +121,7 @@ class _CheckinPageState extends State<CheckinPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-            
+
                     PrimaryButton(
                       text: state.isAlreadyInQueue ? 'Você já está na fila' : (state.isLoading ? 'Enviando...' : 'Realizar Check-in'),
                       icon: state.isAlreadyInQueue ? Icons.check_circle : Icons.location_on,
@@ -119,7 +131,7 @@ class _CheckinPageState extends State<CheckinPage> {
                     ),
                     const SizedBox(height: 8),
                     
-                    if (!state.isInsideGeofence && !state.isAlreadyInQueue && distanceToGeofence < 1000)
+                    if (!state.isInsideGeofence && !state.isAlreadyInQueue && destination.radius > 0 && distanceToGeofence < 1000)
                       Text(
                         'Aproxime-se mais ${distanceToGeofence.toInt()} metros para habilitar o check-in.',
                         textAlign: TextAlign.center,
@@ -140,10 +152,10 @@ class _CheckinPageState extends State<CheckinPage> {
                   ],
                 ),
               ),
-            ),
-          ),
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 

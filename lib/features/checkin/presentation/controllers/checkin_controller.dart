@@ -2,10 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/services/location_service.dart';
+import '../../../auth/domain/usecases/auth_usecase.dart';
 import '../../../queue/domain/usecases/is_user_in_queue_usecase.dart';
 import '../../../queue/domain/usecases/perform_checkin_usecase.dart';
 import '../../domain/entities/capital_entity.dart';
+import '../../domain/repositories/checkin_repository.dart';
 import '../../domain/usecases/get_checkin_status_usecase.dart';
 import 'checkin_state.dart';
 
@@ -14,37 +17,58 @@ class CheckinController extends ValueNotifier<CheckinState> {
   final GetCheckinStatusUseCase getCheckinStatusUseCase;
   final PerformCheckinUseCase performCheckinUseCase;
   final IsUserInQueueUseCase isUserInQueueUseCase;
+  final AuthUseCase authUseCase;
+  final CheckinRepository checkinRepository;
   
   StreamSubscription<Position>? _positionStream;
   String? _cachedCity;
 
   CheckinController({
-    required CapitalEntity destination,
     required this.locationService,
     required this.getCheckinStatusUseCase,
     required this.performCheckinUseCase,
     required this.isUserInQueueUseCase,
-  }) : super(CheckinState(destination: destination));
+    required this.authUseCase,
+    required this.checkinRepository,
+  }) : super(CheckinState(
+    destination: CapitalEntity(cityName: '', coords: const LatLng(0,0), radius: 0),
+    isLoading: true,
+  ));
 
-  void startTracking() async {
+  Future<void> init() async {
     try {
-      final inQueue = await isUserInQueueUseCase();
-      value = value.copyWith(isAlreadyInQueue: inQueue);
+      value = value.copyWith(isLoading: true);
+
+      // 1. Busca o perfil para saber a baseCity
+      final user = await authUseCase.getCurrentUser();
+      if (user?.baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
+
+      // 2. Busca dados geográficos no Supabase
+      final destination = await checkinRepository.getDestinationByCityName(user!.baseCity!);
+      
+      // 3. Verifica se já está na fila
+      bool inQueue = false;
+      try {
+        inQueue = await isUserInQueueUseCase();
+      } catch (_) {}
+
+      value = value.copyWith(
+        destination: destination,
+        isAlreadyInQueue: inQueue,
+        isLoading: false,
+      );
+
+      startTracking();
     } catch (e) {
+      value = value.copyWith(isLoading: false);
     }
-
-    final hasPermission = await locationService.checkPermission();
-    if (!hasPermission) {
-      return;
-    }
-
-    _positionStream = locationService.getPositionStream().listen((pos) {
-      _updatePosition(pos);
-    });
   }
 
-  void stopTracking() {
-    _positionStream?.cancel();
+  void startTracking() async {
+    final hasPermission = await locationService.checkPermission();
+    if (!hasPermission) return;
+
+    _positionStream = locationService.getPositionStream().listen(_updatePosition);
   }
 
   Future<void> performCheckin() async {
@@ -62,6 +86,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
 
   Future<void> _updatePosition(Position position) async {
     final destination = value.destination;
+    if (destination.radius == 0) return;
     
     final distance = locationService.calculateDistance(
       position.latitude, position.longitude,
@@ -106,7 +131,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
 
   @override
   void dispose() {
-    stopTracking();
+    _positionStream?.cancel();
     super.dispose();
   }
 }
