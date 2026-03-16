@@ -9,7 +9,9 @@ class CustomTextField extends StatefulWidget {
   final TextEditingController? controller;
   final String? errorText;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
   final Function(String)? onChanged;
+  final Function(String)? onFieldSubmitted;
 
   const CustomTextField({
     super.key,
@@ -20,7 +22,9 @@ class CustomTextField extends StatefulWidget {
     this.controller,
     this.errorText,
     this.keyboardType,
+    this.textInputAction,
     this.onChanged,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -43,23 +47,22 @@ class _CustomTextFieldState extends State<CustomTextField> {
       children: [
         Text(
           widget.label,
-          style: const TextStyle(
-            color: AppColors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: widget.controller,
           obscureText: _obscureText,
           keyboardType: widget.keyboardType,
+          textInputAction: widget.textInputAction,
           onChanged: widget.onChanged,
+          onFieldSubmitted: widget.onFieldSubmitted,
           style: const TextStyle(color: AppColors.white),
           decoration: InputDecoration(
+            hintStyle: const TextStyle(color: AppColors.slate400),
             hintText: widget.hintText,
             errorText: widget.errorText,
-            prefixIcon: Icon(widget.prefixIcon, size: 20),
+            prefixIcon: Icon(widget.prefixIcon, size: 20, color: AppColors.primary),
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: Icon(
@@ -67,13 +70,23 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       color: AppColors.slate400,
                       size: 20,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureText = !_obscureText;
-                      });
-                    },
+                    onPressed: () => setState(() => _obscureText = !_obscureText),
                   )
                 : null,
+            filled: true,
+            fillColor: AppColors.slate500.withValues(alpha: 0.1),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
           ),
         ),
       ],
