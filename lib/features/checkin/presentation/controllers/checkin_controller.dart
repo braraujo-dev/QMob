@@ -5,8 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../auth/domain/usecases/auth_usecase.dart';
-import '../../../queue/domain/usecases/is_user_in_queue_usecase.dart';
+import '../../../queue/domain/entities/driver_queue_entity.dart';
+import '../../../queue/domain/repositories/queue_repository.dart';
 import '../../../queue/domain/usecases/perform_checkin_usecase.dart';
+import '../../../queue/domain/usecases/is_user_in_queue_usecase.dart';
 import '../../domain/entities/capital_entity.dart';
 import '../../domain/repositories/checkin_repository.dart';
 import '../../domain/usecases/get_checkin_status_usecase.dart';
@@ -19,8 +21,10 @@ class CheckinController extends ValueNotifier<CheckinState> {
   final IsUserInQueueUseCase isUserInQueueUseCase;
   final AuthUseCase authUseCase;
   final CheckinRepository checkinRepository;
+  final QueueRepository queueRepository;
   
   StreamSubscription<Position>? _positionStream;
+  StreamSubscription<List<DriverQueueEntity>>? _queueStream;
   String? _cachedCity;
 
   CheckinController({
@@ -30,6 +34,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
     required this.isUserInQueueUseCase,
     required this.authUseCase,
     required this.checkinRepository,
+    required this.queueRepository,
   }) : super(CheckinState(
     destination: CapitalEntity(cityName: '', coords: const LatLng(0,0), radius: 0),
     isLoading: true,
@@ -39,27 +44,25 @@ class CheckinController extends ValueNotifier<CheckinState> {
     try {
       value = value.copyWith(isLoading: true);
 
-      // 1. Busca o perfil para saber a baseCity
       final user = await authUseCase.getCurrentUser();
       if (user?.baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
 
-      // 2. Busca dados geográficos no Supabase
       final destination = await checkinRepository.getDestinationByCityName(user!.baseCity!);
       
-      // 3. Verifica se já está na fila
-      bool inQueue = false;
-      try {
-        inQueue = await isUserInQueueUseCase();
-      } catch (_) {}
+      _queueStream?.cancel();
+      _queueStream = queueRepository.getQueueStream().listen((queue) {
+        final bool inQueue = queue.any((driver) => driver.isCurrentUser);
+        value = value.copyWith(isAlreadyInQueue: inQueue);
+      });
 
       value = value.copyWith(
         destination: destination,
-        isAlreadyInQueue: inQueue,
         isLoading: false,
       );
 
       startTracking();
     } catch (e) {
+      debugPrint('Erro no init do Checkin: $e');
       value = value.copyWith(isLoading: false);
     }
   }
@@ -71,13 +74,18 @@ class CheckinController extends ValueNotifier<CheckinState> {
     _positionStream = locationService.getPositionStream().listen(_updatePosition);
   }
 
+  void stopTracking() {
+    _positionStream?.cancel();
+    _queueStream?.cancel();
+  }
+
   Future<void> performCheckin() async {
     if (value.isAlreadyInQueue || !value.isInsideGeofence) return;
 
     value = value.copyWith(isLoading: true);
     try {
       await performCheckinUseCase(value.destination.cityName);
-      value = value.copyWith(isAlreadyInQueue: true, isLoading: false);
+      value = value.copyWith(isLoading: false);
     } catch (e) {
       value = value.copyWith(isLoading: false);
       rethrow;
@@ -131,7 +139,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
 
   @override
   void dispose() {
-    _positionStream?.cancel();
+    stopTracking();
     super.dispose();
   }
 }

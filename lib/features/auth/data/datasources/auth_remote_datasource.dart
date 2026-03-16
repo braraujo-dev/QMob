@@ -32,7 +32,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Usuário não encontrado');
       }
 
-      // Busca o perfil completo incluindo base_city
       final profileResponse = await supabaseClient
           .from('profiles')
           .select('is_admin, base_city')

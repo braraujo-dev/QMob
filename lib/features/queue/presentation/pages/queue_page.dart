@@ -200,11 +200,10 @@ class _QueuePageState extends State<QueuePage> {
                       minHeight: 8,
                     ),
                     const SizedBox(height: 20),
-                    // BOTÃO DE CHECKOUT (SAIR DA FILA)
                     ElevatedButton.icon(
                       onPressed: () => _showCheckoutDialog(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
+                        backgroundColor: Colors.redAccent,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         minimumSize: const Size(double.infinity, 45),

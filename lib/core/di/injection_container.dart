@@ -40,6 +40,14 @@ Future<void> init() async {
     sendPasswordResetEmailUseCase: sl(),
   ));
 
+  // Queue
+  sl.registerLazySingleton<QueueRemoteDataSource>(() => QueueRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<QueueRepository>(() => QueueRepositoryImpl(sl(), sl()));
+  sl.registerLazySingleton(() => GetQueueUseCase(sl()));
+  sl.registerLazySingleton(() => PerformCheckinUseCase(sl()));
+  sl.registerLazySingleton(() => PerformCheckoutUseCase(sl()));
+  sl.registerLazySingleton(() => IsUserInQueueUseCase(sl()));
+
   // Checkin
   sl.registerLazySingleton<CheckinRemoteDataSource>(() => CheckinRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<CheckinRepository>(() => CheckinRepositoryImpl(sl()));
@@ -52,18 +60,13 @@ Future<void> init() async {
     isUserInQueueUseCase: sl(),
     authUseCase: sl(),
     checkinRepository: sl(),
+    queueRepository: sl(),
   ));
 
-  // Queue
-  sl.registerLazySingleton<QueueRemoteDataSource>(() => QueueRemoteDataSourceImpl(sl()));
-  sl.registerLazySingleton<QueueRepository>(() => QueueRepositoryImpl(sl(), sl()));
-  sl.registerLazySingleton(() => GetQueueUseCase(sl()));
-  sl.registerLazySingleton(() => PerformCheckinUseCase(sl()));
-  sl.registerLazySingleton(() => PerformCheckoutUseCase(sl()));
-  sl.registerLazySingleton(() => IsUserInQueueUseCase(sl()));
-  
+  // Controllers da Queue
   sl.registerFactory(() => QueueController(
     getQueueUseCase: sl(),
     performCheckoutUseCase: sl(),
+    queueRepository: sl(),
   ));
 }

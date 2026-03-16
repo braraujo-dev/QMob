@@ -16,7 +16,6 @@ class CheckinPage extends StatefulWidget {
 class _CheckinPageState extends State<CheckinPage> {
   late final CheckinController _controller;
   GoogleMapController? _mapController;
-  Widget? _mapWidget;
 
   @override
   void initState() {
@@ -57,42 +56,39 @@ class _CheckinPageState extends State<CheckinPage> {
             final destination = state.destination;
             final distanceToGeofence = state.distanceToCenter - destination.radius;
 
-            _mapWidget ??= Container(
-              height: 250,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.border),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: GoogleMap(
-                onMapCreated: (controller) => _mapController = controller,
-                initialCameraPosition: CameraPosition(target: destination.coords, zoom: 11),
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-                circles: {
-                  Circle(
-                    circleId: const CircleId('geofence'),
-                    center: destination.coords,
-                    radius: destination.radius,
-                    fillColor: AppColors.primary.withValues(alpha: 0.15),
-                    strokeColor: AppColors.primary.withValues(alpha: 0.4),
-                    strokeWidth: 1,
-                  ),
-                },
-                markers: {
-                  Marker(markerId: const MarkerId('dest'), position: destination.coords),
-                },
-              ),
-            );
-
             return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    _mapWidget!,
+                    Container(
+                      height: 250,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: GoogleMap(
+                        onMapCreated: (controller) => _mapController = controller,
+                        initialCameraPosition: CameraPosition(target: destination.coords, zoom: 11),
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        circles: {
+                          Circle(
+                            circleId: const CircleId('geofence'),
+                            center: destination.coords,
+                            radius: destination.radius,
+                            fillColor: AppColors.primary.withValues(alpha: 0.15),
+                            strokeColor: AppColors.primary.withValues(alpha: 0.4),
+                            strokeWidth: 1,
+                          ),
+                        },
+                        markers: {
+                          Marker(markerId: const MarkerId('dest'), position: destination.coords),
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 16),
-
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
@@ -121,7 +117,6 @@ class _CheckinPageState extends State<CheckinPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-
                     PrimaryButton(
                       text: state.isAlreadyInQueue ? 'Você já está na fila' : (state.isLoading ? 'Enviando...' : 'Realizar Check-in'),
                       icon: state.isAlreadyInQueue ? Icons.check_circle : Icons.location_on,

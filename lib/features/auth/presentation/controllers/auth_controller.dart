@@ -76,7 +76,7 @@ class AuthController extends ValueNotifier<AuthState> {
     final result = await sendPasswordResetEmailUseCase(email);
     result.fold(
       (error) => value = AuthErrorState(error),
-      (_) => value = AuthInitialState(), // Or a Success state if you prefer
+      (_) => value = AuthInitialState(),
     );
   }
 
