@@ -9,12 +9,12 @@ import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/auth_usecase.dart';
-import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/domain/usecases/send_password_reset_email_usecase.dart';
+import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/checkin/presentation/controllers/checkin_controller.dart';
-import '../../features/checkin/domain/entities/capital_entity.dart';
 import '../../features/checkin/domain/repositories/checkin_repository.dart';
 import '../../features/checkin/data/repositories/checkin_repository_impl.dart';
+import '../../features/checkin/data/datasources/checkin_remote_datasource.dart';
 import '../../features/checkin/domain/usecases/get_checkin_status_usecase.dart';
 import '../../features/queue/domain/repositories/queue_repository.dart';
 import '../../features/queue/data/repositories/queue_repository_impl.dart';
@@ -42,20 +42,6 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SendPasswordResetEmailUseCase(sl()));
   sl.registerFactory(() => AuthController(authUseCase: sl(), sendPasswordResetEmailUseCase: sl()));
 
-  // Checkin
-  sl.registerLazySingleton<CheckinRepository>(() => CheckinRepositoryImpl());
-  sl.registerLazySingleton(() => const GetCheckinStatusUseCase());
-
-  sl.registerFactoryParam<CheckinController, CapitalEntity, void>(
-    (destination, _) => CheckinController(
-      destination: destination,
-      locationService: sl(),
-      getCheckinStatusUseCase: sl(),
-      performCheckinUseCase: sl(),
-      isUserInQueueUseCase: sl(),
-    ),
-  );
-
   // Queue
   sl.registerLazySingleton<QueueRemoteDataSource>(() => QueueRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<QueueRepository>(() => QueueRepositoryImpl(sl(), sl()));
@@ -63,6 +49,28 @@ Future<void> init() async {
   sl.registerLazySingleton(() => PerformCheckinUseCase(sl()));
   sl.registerLazySingleton(() => PerformCheckoutUseCase(sl()));
   sl.registerLazySingleton(() => IsUserInQueueUseCase(sl()));
+
+  // Checkin
+  sl.registerLazySingleton<CheckinRemoteDataSource>(() => CheckinRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<CheckinRepository>(() => CheckinRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => const GetCheckinStatusUseCase());
+
+  sl.registerFactory(() => CheckinController(
+    locationService: sl(),
+    getCheckinStatusUseCase: sl(),
+    performCheckinUseCase: sl(),
+    isUserInQueueUseCase: sl(),
+    authUseCase: sl(),
+    checkinRepository: sl(),
+    queueRepository: sl(),
+  ));
+
+  // Controllers da Queue
+  sl.registerFactory(() => QueueController(
+    getQueueUseCase: sl(),
+    performCheckoutUseCase: sl(),
+    queueRepository: sl(),
+  ));
 
   // Profile Feature
   sl.registerLazySingleton<ProfileRemoteDataSource>(() => ProfileRemoteDataSourceImpl(sl()));
@@ -73,5 +81,4 @@ Future<void> init() async {
     () => ProfileController(getProfileUseCase: sl(), repository: sl(), supabase: sl()),
   );
 
-  sl.registerFactory(() => QueueController(getQueueUseCase: sl(), performCheckoutUseCase: sl()));
 }

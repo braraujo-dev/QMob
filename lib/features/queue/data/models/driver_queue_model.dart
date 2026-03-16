@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import '../../domain/entities/driver_queue_entity.dart';
 
 class DriverQueueModel extends DriverQueueEntity {
@@ -11,14 +12,20 @@ class DriverQueueModel extends DriverQueueEntity {
     super.isCurrentUser,
   });
 
-  factory DriverQueueModel.fromJson(Map<String, dynamic> json, String currentUserId) {
+  factory DriverQueueModel.fromJson(Map<String, dynamic> json, String currentUserId, int index) {
+    String formattedTime = '--:--';
+    if (json['checkin_time'] != null) {
+      DateTime dt = DateTime.parse(json['checkin_time']).toLocal();
+      formattedTime = DateFormat('HH:mm').format(dt);
+    }
+
     return DriverQueueModel(
       id: json['id']?.toString() ?? '',
       name: json['profiles']?['full_name'] ?? 'Motorista',
       vehicle: json['profiles']?['vehicle_model'] ?? 'Veículo',
       color: json['profiles']?['vehicle_color'] ?? '',
-      arrivalTime: json['checkin_time'] ?? '',
-      position: json['queue_position'] ?? 0,
+      arrivalTime: formattedTime,
+      position: index + 1,
       isCurrentUser: json['driver_id'] == currentUserId,
     );
   }

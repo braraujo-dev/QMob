@@ -15,6 +15,18 @@ class QueueRepositoryImpl implements QueueRepository {
   }
 
   @override
+  Stream<List<DriverQueueEntity>> getQueueStream() {
+    return remoteDataSource.getQueueStream().map((models) => models.cast<DriverQueueEntity>());
+  }
+
+  @override
+  Stream<bool> isUserInQueueStream() {
+    final driverId = supabaseClient.auth.currentUser?.id;
+    if (driverId == null) return Stream.value(false);
+    return remoteDataSource.isUserInQueueStream(driverId);
+  }
+
+  @override
   Future<void> performCheckin(String cityName) async {
     final driverId = supabaseClient.auth.currentUser?.id;
     if (driverId == null) throw Exception('Usuário não autenticado');

@@ -2,10 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/services/location_service.dart';
-import '../../../queue/domain/usecases/is_user_in_queue_usecase.dart';
+import '../../../auth/domain/usecases/auth_usecase.dart';
+import '../../../queue/domain/entities/driver_queue_entity.dart';
+import '../../../queue/domain/repositories/queue_repository.dart';
 import '../../../queue/domain/usecases/perform_checkin_usecase.dart';
+import '../../../queue/domain/usecases/is_user_in_queue_usecase.dart';
 import '../../domain/entities/capital_entity.dart';
+import '../../domain/repositories/checkin_repository.dart';
 import '../../domain/usecases/get_checkin_status_usecase.dart';
 import 'checkin_state.dart';
 
@@ -14,36 +19,64 @@ class CheckinController extends ValueNotifier<CheckinState> {
   final GetCheckinStatusUseCase getCheckinStatusUseCase;
   final PerformCheckinUseCase performCheckinUseCase;
   final IsUserInQueueUseCase isUserInQueueUseCase;
+  final AuthUseCase authUseCase;
+  final CheckinRepository checkinRepository;
+  final QueueRepository queueRepository;
 
   StreamSubscription<Position>? _positionStream;
+  StreamSubscription<List<DriverQueueEntity>>? _queueStream;
   String? _cachedCity;
 
   CheckinController({
-    required CapitalEntity destination,
     required this.locationService,
     required this.getCheckinStatusUseCase,
     required this.performCheckinUseCase,
     required this.isUserInQueueUseCase,
-  }) : super(CheckinState(destination: destination));
+    required this.authUseCase,
+    required this.checkinRepository,
+    required this.queueRepository,
+  }) : super(CheckinState(
+    destination: CapitalEntity(cityName: '', coords: const LatLng(0,0), radius: 0),
+    isLoading: true,
+  ));
+
+  Future<void> init() async {
+    try {
+      value = value.copyWith(isLoading: true);
+
+      final user = await authUseCase.getCurrentUser();
+      if (user?.baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
+
+      final destination = await checkinRepository.getDestinationByCityName(user!.baseCity!);
+
+      _queueStream?.cancel();
+      _queueStream = queueRepository.getQueueStream().listen((queue) {
+        final bool inQueue = queue.any((driver) => driver.isCurrentUser);
+        value = value.copyWith(isAlreadyInQueue: inQueue);
+      });
+
+      value = value.copyWith(
+        destination: destination,
+        isLoading: false,
+      );
+
+      startTracking();
+    } catch (e) {
+      debugPrint('Erro no init do Checkin: $e');
+      value = value.copyWith(isLoading: false);
+    }
+  }
 
   void startTracking() async {
-    try {
-      final inQueue = await isUserInQueueUseCase();
-      value = value.copyWith(isAlreadyInQueue: inQueue);
-    } catch (e) {}
-
     final hasPermission = await locationService.checkPermission();
-    if (!hasPermission) {
-      return;
-    }
+    if (!hasPermission) return;
 
-    _positionStream = locationService.getPositionStream().listen((pos) {
-      _updatePosition(pos);
-    });
+    _positionStream = locationService.getPositionStream().listen(_updatePosition);
   }
 
   void stopTracking() {
     _positionStream?.cancel();
+    _queueStream?.cancel();
   }
 
   Future<void> performCheckin() async {
@@ -52,7 +85,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
     value = value.copyWith(isLoading: true);
     try {
       await performCheckinUseCase(value.destination.cityName);
-      value = value.copyWith(isAlreadyInQueue: true, isLoading: false);
+      value = value.copyWith(isLoading: false);
     } catch (e) {
       value = value.copyWith(isLoading: false);
       rethrow;
@@ -61,6 +94,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
 
   Future<void> _updatePosition(Position position) async {
     final destination = value.destination;
+    if (destination.radius == 0) return;
 
     final distance = locationService.calculateDistance(
       position.latitude,
