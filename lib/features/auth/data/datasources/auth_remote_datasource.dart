@@ -8,6 +8,8 @@ abstract class AuthRemoteDataSource {
   });
   
   Future<UserModel?> getCurrentUser();
+
+  Future<void> sendPasswordResetEmail(String email);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -67,5 +69,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
     }
     return null;
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) async {
+    await supabaseClient.auth.resetPasswordForEmail(email);
   }
 }
