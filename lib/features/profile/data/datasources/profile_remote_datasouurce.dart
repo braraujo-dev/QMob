@@ -1,5 +1,4 @@
 ﻿import 'package:alternative/features/profile/data/models/profile_model.dart';
-import 'package:alternative/features/profile/domain/entities/profile_entity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class ProfileRemoteDataSource {
