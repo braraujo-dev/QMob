@@ -1,4 +1,4 @@
-﻿import 'package:alternative/features/settings/data/models/profile_model.dart';
+﻿import 'package:alternative/features/profile/data/models/profile_model.dart';
 import 'package:dartz/dartz.dart';
 
 abstract class ProfileRepository {

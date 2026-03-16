@@ -6,9 +6,10 @@ import 'package:alternative/features/checkin/presentation/pages/checkin_page.dar
 import 'package:alternative/features/home/presentation/pages/admin_home_page.dart';
 import 'package:alternative/features/home/presentation/pages/driver_register_page.dart';
 import 'package:alternative/features/main/presentation/pages/main_page.dart';
-import 'package:alternative/features/settings/presentation/pages/edit_profile_page.dart';
+import 'package:alternative/features/profile/presentation/pages/admin_profile_page.dart';
+import 'package:alternative/features/profile/presentation/pages/edit_driver_profile_page.dart';
 import 'package:alternative/features/queue/presentation/pages/queue_page.dart';
-import 'package:alternative/features/settings/presentation/pages/profile_page.dart';
+import 'package:alternative/features/profile/presentation/pages/driver_profile_page.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
@@ -19,6 +20,7 @@ class AppRoutes {
   static const String queue = '/queue';
   static const String adminHome = '/adminHome';
   static const String driverRegister = '/driverRegister';
+  static const String adminProfile = '/adminProfile';
   static const String profile = '/profile';
   static const String editProfile = '/editProfile';
 
@@ -30,6 +32,7 @@ class AppRoutes {
     queue: (context) => const QueuePage(),
     adminHome: (context) => const AdminHomePage(),
     driverRegister: (context) => const DriverRegisterPage(),
+    adminProfile: (context) => const AdminProfilePage(),
     profile: (context) => const ProfilePage(),
     editProfile: (context) => const EditProfilePage(),
   };

@@ -1,8 +1,8 @@
-import 'package:alternative/features/settings/data/datasources/profile_remote_datasouurce.dart';
-import 'package:alternative/features/settings/data/repositories/profile_repository_impl.dart';
-import 'package:alternative/features/settings/domain/repositories/profile_repository.dart';
-import 'package:alternative/features/settings/domain/usecases/get_profile_usecase.dart';
-import 'package:alternative/features/settings/presentation/controllers/profile_controller.dart';
+import 'package:alternative/features/profile/data/datasources/profile_remote_datasouurce.dart';
+import 'package:alternative/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
+import 'package:alternative/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:alternative/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';

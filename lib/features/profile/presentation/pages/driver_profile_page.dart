@@ -1,9 +1,10 @@
-﻿import 'package:alternative/features/settings/domain/entities/profile_entity.dart';
-import 'package:alternative/features/settings/presentation/controllers/profile_state.dart';
+﻿// lib/features/profile/presentation/pages/profile_page.dart
 import 'package:flutter/material.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../routes/app_routes_manager.dart';
+import '../../domain/entities/profile_entity.dart';
 import '../controllers/profile_controller.dart';
+import '../controllers/profile_state.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -19,7 +20,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _controller = sl<ProfileController>();
-    _controller.fetchProfile(); // Busca os dados do script que você inseriu
+    _controller.fetchProfile();
   }
 
   @override
@@ -32,14 +33,11 @@ class _ProfilePageState extends State<ProfilePage> {
           if (state is ProfileLoadingState) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (state is ProfileSuccessState) {
-            final profile = state.profile;
-            return _buildContent(profile);
+            return _buildContent(state.profile);
           }
-
           return const Center(
-            child: Text("Erro ao carregar perfil", style: TextStyle(color: Colors.white)),
+            child: Text("Erro ao carregar", style: TextStyle(color: Colors.white)),
           );
         },
       ),
@@ -51,7 +49,6 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Column(
         children: [
           const SizedBox(height: 60),
-          // Avatar dinâmico
           CircleAvatar(
             radius: 60,
             backgroundImage: profile.photoUrl != null
@@ -60,28 +57,27 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 16),
           Text(
-            profile.name,
+            profile.name ?? 'Motorista',
             style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
           ),
           Text(profile.email, style: const TextStyle(color: Colors.grey, fontSize: 14)),
-
           const SizedBox(height: 32),
-
-          // Botão Logout usando o controller
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: ElevatedButton(
-              onPressed: () async {
-                await _controller.signOut();
-                if (mounted) {
-                  Navigator.pushNamedAndRemoveUntil(context, AppRoutes.auth, (route) => false);
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent.withOpacity(0.1)),
-              child: const Text("Encerrar Sessão", style: TextStyle(color: Colors.redAccent)),
-            ),
-          ),
+          _buildLogoutButton(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: ElevatedButton(
+        onPressed: () async {
+          await _controller.signOut();
+          if (mounted) Navigator.pushNamedAndRemoveUntil(context, AppRoutes.auth, (route) => false);
+        },
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent.withOpacity(0.1)),
+        child: const Text("Encerrar Sessão", style: TextStyle(color: Colors.redAccent)),
       ),
     );
   }

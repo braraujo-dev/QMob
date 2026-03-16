@@ -254,7 +254,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
               break;
             case 3:
               // Navega para a tela de Perfil/Ajustes que criamos
-              Navigator.pushNamed(context, AppRoutes.profile);
+              Navigator.pushNamed(context, AppRoutes.adminProfile);
               break;
           }
         },

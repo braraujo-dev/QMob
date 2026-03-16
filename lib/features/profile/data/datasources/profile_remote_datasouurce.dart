@@ -1,4 +1,5 @@
-﻿import 'package:alternative/features/settings/data/models/profile_model.dart';
+﻿import 'package:alternative/features/profile/data/models/profile_model.dart';
+import 'package:alternative/features/profile/domain/entities/profile_entity.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class ProfileRemoteDataSource {
@@ -14,11 +15,17 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<ProfileModel> getProfile(String userId) async {
     try {
       final user = supabaseClient.auth.currentUser;
+
+      // 1. Busca os dados na tabela profiles
       final response = await supabaseClient.from('profiles').select().eq('id', userId).single();
 
-      return ProfileModel.fromJson(response, user?.email ?? '');
+      // 2. Verifica se é admin
+      final bool isAdmin = response['is_admin'] ?? false;
+
+      // 3. Retorna o Model (que é um subtipo de ProfileEntity)
+      return ProfileModel.fromJson(response, user?.email ?? '', isAdmin);
     } catch (e) {
-      throw Exception('Erro ao buscar perfil: $e');
+      throw ('Erro ao buscar perfil: $e');
     }
   }
 

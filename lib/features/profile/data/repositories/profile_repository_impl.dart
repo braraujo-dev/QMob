@@ -1,6 +1,6 @@
-﻿import 'package:alternative/features/settings/data/datasources/profile_remote_datasouurce.dart';
-import 'package:alternative/features/settings/data/models/profile_model.dart';
-import 'package:alternative/features/settings/domain/repositories/profile_repository.dart';
+﻿import 'package:alternative/features/profile/data/datasources/profile_remote_datasouurce.dart';
+import 'package:alternative/features/profile/data/models/profile_model.dart';
+import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
 import 'package:dartz/dartz.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {

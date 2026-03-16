@@ -1,5 +1,5 @@
 ﻿// Estados (profile_state.dart)
-import 'package:alternative/features/settings/data/models/profile_model.dart';
+import 'package:alternative/features/profile/data/models/profile_model.dart';
 
 abstract class ProfileState {}
 

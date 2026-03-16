@@ -1,7 +1,7 @@
 ﻿// features/profile/presentation/controllers/profile_controller.dart
-import 'package:alternative/features/settings/domain/repositories/profile_repository.dart';
-import 'package:alternative/features/settings/domain/usecases/get_profile_usecase.dart';
-import 'package:alternative/features/settings/presentation/controllers/profile_state.dart';
+import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
+import 'package:alternative/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:alternative/features/profile/presentation/controllers/profile_state.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
