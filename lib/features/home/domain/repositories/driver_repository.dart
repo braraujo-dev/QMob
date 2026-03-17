@@ -6,4 +6,5 @@ abstract class DriverRepository {
     required DriverEntity driver,
     required String password,
   });
+  Future<Either<String, List<DriverEntity>>> getDrivers();
 }

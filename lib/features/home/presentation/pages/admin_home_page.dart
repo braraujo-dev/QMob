@@ -1,24 +1,29 @@
-﻿import 'package:alternative/routes/app_routes_manager.dart';
+﻿import 'package:alternative/core/di/injection_container.dart';
+import 'package:alternative/features/home/domain/entities/driver_entity.dart';
+import 'package:alternative/features/home/presentation/controllers/driver_controller.dart';
+import 'package:alternative/features/home/presentation/controllers/driver_state.dart';
+import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminHomePage extends StatefulWidget {
-  const AdminHomePage({super.key});
+  const AdminHomePage({super.key}); // Construtor limpo
 
   @override
   State<AdminHomePage> createState() => _AdminHomePageState();
 }
 
 class _AdminHomePageState extends State<AdminHomePage> {
-  final supabase = Supabase.instance.client;
-  late final Stream<List<Map<String, dynamic>>> _motoristasStream;
-
+  // Buscamos a instância aqui
+  final controller = sl<DriverController>();
   bool _temMotoristas = false;
 
   @override
   void initState() {
     super.initState();
-    _motoristasStream = supabase.from('motoristas').stream(primaryKey: ['id']).order('nome');
+    // Inicia a busca dos dados
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchDrivers();
+    });
   }
 
   @override
@@ -29,21 +34,25 @@ class _AdminHomePageState extends State<AdminHomePage> {
     return Scaffold(
       backgroundColor: bgDark,
       appBar: _buildAppBar(bgDark, accentBlue, _temMotoristas),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _motoristasStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: ValueListenableBuilder<DriverState>(
+        valueListenable: controller,
+        builder: (context, state, child) {
+          if (state is DriverLoadingState && controller.drivers.isEmpty) {
             return const Center(child: CircularProgressIndicator(color: accentBlue));
           }
 
-          final motoristas = snapshot.data ?? [];
+          if (state is DriverErrorState) {
+            return Center(
+              child: Text(state.message, style: const TextStyle(color: Colors.red)),
+            );
+          }
 
+          final motoristas = controller.drivers;
+
+          // Atualiza o estado da AppBar para mostrar/esconder o ícone de busca
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              final atual = motoristas.isNotEmpty;
-              if (_temMotoristas != atual) {
-                setState(() => _temMotoristas = atual);
-              }
+            if (mounted && _temMotoristas != motoristas.isNotEmpty) {
+              setState(() => _temMotoristas = motoristas.isNotEmpty);
             }
           });
 
@@ -80,59 +89,61 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  Widget _buildListView(List<Map<String, dynamic>> motoristas) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "MOTORISTAS REGISTRADOS",
-            style: TextStyle(
-              color: Colors.white70,
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-              letterSpacing: 1.1,
+  Widget _buildListView(List<DriverEntity> motoristas) {
+    return RefreshIndicator(
+      onRefresh: () => controller.fetchDrivers(),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "MOTORISTAS REGISTRADOS",
+              style: TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                letterSpacing: 1.1,
+              ),
             ),
-          ),
-          Text(
-            "Gestão de ${motoristas.length} condutores ativos",
-            style: const TextStyle(color: Colors.white38, fontSize: 12),
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: ListView.builder(
-              itemCount: motoristas.length,
-              itemBuilder: (context, index) {
-                final m = motoristas[index];
-                return _buildDriverCard(m);
-              },
+            Text(
+              "Gestão de ${motoristas.length} condutores ativos",
+              style: const TextStyle(color: Colors.white38, fontSize: 12),
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: motoristas.length,
+                itemBuilder: (context, index) {
+                  return _buildDriverCard(motoristas[index]);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildDriverCard(Map<String, dynamic> m) {
+  Widget _buildDriverCard(DriverEntity m) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: .1)),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: Row(
         children: [
-          _buildAvatar(m['foto_url'], m['status']),
+          _buildAvatar(null, 'ativo'),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  m['nome'] ?? 'Sem nome',
+                  m.name,
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -141,16 +152,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "${m['idade'] ?? '--'} anos • ${m['modelo_veiculo'] ?? 'N/A'}",
+                  "${m.vehicleModel} • ${m.vehiclePlate}",
                   style: const TextStyle(color: Colors.white38, fontSize: 13),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.location_on_outlined, size: 14, color: Colors.blueAccent),
+                    const Icon(Icons.phone_outlined, size: 14, color: Colors.blueAccent),
                     const SizedBox(width: 4),
                     Text(
-                      "${m['km_rodados'] ?? '0'} KM rodados",
+                      m.phone,
                       style: const TextStyle(
                         color: Colors.blueAccent,
                         fontSize: 12,
@@ -169,9 +180,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   Widget _buildAvatar(String? url, String? status) {
-    Color statusColor = status == 'ativo'
-        ? Colors.green
-        : (status == 'ocupado' ? Colors.orange : Colors.grey);
+    Color statusColor = status == 'ativo' ? Colors.green : Colors.grey;
 
     return Stack(
       children: [
@@ -220,7 +229,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
             ),
             const SizedBox(height: 12),
             const Text(
-              "Cadastre seu primeiro aqui para começar a gerenciar sua frota e rotas de forma eficiente.",
+              "Cadastre seu primeiro aqui para começar a gerenciar sua frota.",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white54, fontSize: 15),
             ),
@@ -243,36 +252,21 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   Widget _buildBottomNav(Color accentBlue) {
-    return Theme(
-      data: Theme.of(
-        context,
-      ).copyWith(splashFactory: NoSplash.splashFactory, highlightColor: Colors.grey),
-      child: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.white10, width: 0.5)),
-        ),
-        child: BottomNavigationBar(
-          backgroundColor: const Color(0xFF0F172A),
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: accentBlue,
-          unselectedItemColor: Colors.white38,
-          currentIndex: 1,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                // Navigator.pushNamed(context, AppRoutes.home);
-                break;
-              case 2:
-                // Navigator.pushNamed(context, AppRoutes.historic);
-                break;
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Início"),
-            BottomNavigationBarItem(icon: Icon(Icons.drive_eta), label: "Motoristas"),
-            BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Relatórios"),
-          ],
-        ),
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(top: BorderSide(color: Colors.white10, width: 0.5)),
+      ),
+      child: BottomNavigationBar(
+        backgroundColor: const Color(0xFF0F172A),
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: accentBlue,
+        unselectedItemColor: Colors.white38,
+        currentIndex: 1,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Início"),
+          BottomNavigationBarItem(icon: Icon(Icons.drive_eta), label: "Motoristas"),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Relatórios"),
+        ],
       ),
     );
   }

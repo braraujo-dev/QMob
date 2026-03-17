@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class DriverRemoteDataSource {
   Future<void> registerDriver(DriverModel driver, String password);
+  Future<List<DriverModel>> getAllDrivers();
 }
 
 class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
@@ -22,5 +23,11 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
 
       await supabase.from('drivers').insert(driverData);
     }
+  }
+
+  @override
+  Future<List<DriverModel>> getAllDrivers() async {
+    final response = await supabase.from('drivers').select().order('full_name');
+    return (response as List).map((m) => DriverModel.fromMap(m)).toList();
   }
 }

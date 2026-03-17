@@ -1,4 +1,5 @@
 ﻿// lib/features/driver_register/presentation/controllers/driver_controller.dart
+import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/driver_entity.dart';
 import '../../domain/usecases/register_driver_usecase.dart';
@@ -6,8 +7,22 @@ import 'driver_state.dart';
 
 class DriverController extends ValueNotifier<DriverState> {
   final RegisterDriverUseCase registerDriverUseCase;
+  final GetDriversUseCase getDriversUseCase;
 
-  DriverController({required this.registerDriverUseCase}) : super(DriverInitialState());
+  List<DriverEntity> drivers = [];
+
+  DriverController({required this.registerDriverUseCase, required this.getDriversUseCase})
+    : super(DriverInitialState());
+
+  Future<void> fetchDrivers() async {
+    value = DriverLoadingState();
+    final result = await getDriversUseCase();
+
+    result.fold((error) => value = DriverErrorState(error), (list) {
+      drivers = list;
+      value = DriverSuccessState(); // Ou crie um DriverLoadedState
+    });
+  }
 
   Future<void> register({
     required String name,

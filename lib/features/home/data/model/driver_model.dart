@@ -12,6 +12,19 @@ class DriverModel extends DriverEntity {
     required super.assignedCapital,
   });
 
+  factory DriverModel.fromMap(Map<String, dynamic> map) {
+    return DriverModel(
+      id: map['id'],
+      name: map['full_name'] ?? '',
+      email: map['email'] ?? '',
+      phone: map['phone'] ?? '',
+      vehicleModel: map['vehicle_model'] ?? '',
+      vehicleColor: map['vehicle_color'] ?? '',
+      vehiclePlate: map['vehicle_plate'] ?? '',
+      assignedCapital: (map['assigned_capital'] ?? 0).toDouble(),
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'full_name': name,

@@ -34,4 +34,14 @@ class DriverRepositoryImpl implements DriverRepository {
       return Left("Erro ao salvar dados: ${e.toString()}");
     }
   }
+
+  @override
+  Future<Either<String, List<DriverEntity>>> getDrivers() async {
+    try {
+      final list = await remoteDataSource.getAllDrivers();
+      return Right(list);
+    } catch (e) {
+      return Left("Erro ao carregar motoristas: ${e.toString()}");
+    }
+  }
 }
