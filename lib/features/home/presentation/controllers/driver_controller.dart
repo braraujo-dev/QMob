@@ -12,15 +12,26 @@ class DriverController extends ValueNotifier<DriverState> {
   Future<void> register({
     required String name,
     required String email,
-    required String city,
-    required String cpf,
+    required String phone,
+    required String vehicleModel,
+    required String vehicleColor,
+    required String vehiclePlate,
+    required double assignedCapital,
     required String password,
   }) async {
     value = DriverLoadingState();
 
-    final driver = DriverEntity(name: name, email: email, city: city, cpf: cpf);
-    final result = await registerDriverUseCase(driver, password);
+    final driver = DriverEntity(
+      name: name,
+      email: email,
+      phone: phone,
+      vehicleModel: vehicleModel,
+      vehicleColor: vehicleColor,
+      vehiclePlate: vehiclePlate,
+      assignedCapital: assignedCapital,
+    );
 
+    final result = await registerDriverUseCase(driver, password);
     result.fold((error) => value = DriverErrorState(error), (_) => value = DriverSuccessState());
   }
 }

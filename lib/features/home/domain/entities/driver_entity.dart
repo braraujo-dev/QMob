@@ -2,14 +2,20 @@
   final String? id;
   final String name;
   final String email;
-  final String city;
-  final String cpf;
+  final String phone;
+  final String vehicleModel;
+  final String vehicleColor;
+  final String vehiclePlate;
+  final double assignedCapital;
 
   DriverEntity({
     this.id,
     required this.name,
     required this.email,
-    required this.city,
-    required this.cpf,
+    required this.phone,
+    required this.vehicleModel,
+    required this.vehicleColor,
+    required this.vehiclePlate,
+    required this.assignedCapital,
   });
 }
