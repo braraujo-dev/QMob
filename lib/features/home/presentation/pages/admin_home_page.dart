@@ -13,6 +13,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
   final supabase = Supabase.instance.client;
   late final Stream<List<Map<String, dynamic>>> _motoristasStream;
 
+  bool _temMotoristas = false;
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +28,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
     return Scaffold(
       backgroundColor: bgDark,
-      appBar: _buildAppBar(bgDark, accentBlue),
+      appBar: _buildAppBar(bgDark, accentBlue, _temMotoristas),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: _motoristasStream,
         builder: (context, snapshot) {
@@ -34,11 +36,21 @@ class _AdminHomePageState extends State<AdminHomePage> {
             return const Center(child: CircularProgressIndicator(color: accentBlue));
           }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          final motoristas = snapshot.data ?? [];
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              final atual = motoristas.isNotEmpty;
+              if (_temMotoristas != atual) {
+                setState(() => _temMotoristas = atual);
+              }
+            }
+          });
+
+          if (motoristas.isEmpty) {
             return _buildEmptyState(accentBlue);
           }
 
-          final motoristas = snapshot.data!;
           return _buildListView(motoristas);
         },
       ),
@@ -46,7 +58,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(Color bg, Color accent) {
+  PreferredSizeWidget _buildAppBar(Color bg, Color accent, bool mostrarBusca) {
     return AppBar(
       backgroundColor: bg,
       elevation: 0,
@@ -55,13 +67,14 @@ class _AdminHomePageState extends State<AdminHomePage> {
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
       actions: [
+        if (mostrarBusca)
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search, color: Colors.white),
+          ),
         IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.search, color: Colors.white),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.notifications_none, color: Colors.white),
+          onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
+          icon: const Icon(Icons.settings, color: Colors.white),
         ),
       ],
     );
@@ -230,40 +243,36 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   Widget _buildBottomNav(Color accentBlue) {
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.white10, width: 0.5)),
-      ),
-      child: BottomNavigationBar(
-        backgroundColor: const Color(0xFF0F172A),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: accentBlue,
-        unselectedItemColor: Colors.white38,
-        currentIndex: 1, // Atualmente na aba Motoristas
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              // Se tiver uma Home Admin específica:
-              // Navigator.pushReplacementNamed(context, AppRoutes.adminHome);
-              break;
-            case 1:
-              // Já estamos aqui (Motoristas)
-              break;
-            case 2:
-              // Navigator.pushNamed(context, AppRoutes.reports);
-              break;
-            case 3:
-              // Navega para a tela de Perfil/Ajustes que criamos
-              // Navigator.pushNamed(context, AppRoutes.adminProfile);
-              break;
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "INÍCIO"),
-          BottomNavigationBarItem(icon: Icon(Icons.drive_eta), label: "MOTORISTAS"),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "RELATÓRIOS"),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "AJUSTES"),
-        ],
+    return Theme(
+      data: Theme.of(
+        context,
+      ).copyWith(splashFactory: NoSplash.splashFactory, highlightColor: Colors.grey),
+      child: Container(
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.white10, width: 0.5)),
+        ),
+        child: BottomNavigationBar(
+          backgroundColor: const Color(0xFF0F172A),
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: accentBlue,
+          unselectedItemColor: Colors.white38,
+          currentIndex: 1,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                // Navigator.pushNamed(context, AppRoutes.home);
+                break;
+              case 2:
+                // Navigator.pushNamed(context, AppRoutes.historic);
+                break;
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Início"),
+            BottomNavigationBarItem(icon: Icon(Icons.drive_eta), label: "Motoristas"),
+            BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Relatórios"),
+          ],
+        ),
       ),
     );
   }
