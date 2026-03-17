@@ -2,6 +2,7 @@ import 'package:alternative/features/profile/data/datasources/profile_remote_dat
 import 'package:alternative/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
 import 'package:alternative/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:alternative/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:alternative/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -40,7 +41,10 @@ Future<void> init() async {
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
   sl.registerLazySingleton(() => AuthUseCase(sl()));
   sl.registerLazySingleton(() => SendPasswordResetEmailUseCase(sl()));
-  sl.registerFactory(() => AuthController(authUseCase: sl(), sendPasswordResetEmailUseCase: sl()));
+  sl.registerFactory(() => AuthController(
+    authUseCase: sl(),
+    sendPasswordResetEmailUseCase: sl(),
+  ));
 
   // Queue
   sl.registerLazySingleton<QueueRemoteDataSource>(() => QueueRemoteDataSourceImpl(sl()));
@@ -76,9 +80,13 @@ Future<void> init() async {
   sl.registerLazySingleton<ProfileRemoteDataSource>(() => ProfileRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<ProfileRepository>(() => ProfileRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
 
   sl.registerFactory(
-    () => ProfileController(getProfileUseCase: sl(), repository: sl(), supabase: sl()),
+    () => ProfileController(
+      getProfileUseCase: sl(),
+      updateProfileUseCase: sl(),
+      supabaseClient: sl(),
+    ),
   );
-
 }
