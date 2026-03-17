@@ -235,7 +235,7 @@ class _QueuePageState extends State<QueuePage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.logout, size: 24),
-              label: const Text('SAIR DA FILA (CHECKOUT)', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+              label: const Text('Sair da fila (Checkout)', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.1)),
             ),
           ),
       ],
