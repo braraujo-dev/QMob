@@ -19,6 +19,7 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   Future<List<DriverQueueModel>> getQueue() async {
     try {
       final currentUserId = supabaseClient.auth.currentUser?.id ?? '';
+      
       final response = await supabaseClient
           .from('queue')
           .select('*, profiles(full_name, vehicle_model, vehicle_color)')
@@ -54,10 +55,11 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
 
   @override
   Future<void> performCheckin(String driverId, String cityName) async {
+    // ENVIAR SEMPRE EM UTC PARA O BANCO
     await supabaseClient.from('queue').insert({
       'driver_id': driverId,
       'city_name': cityName,
-      'checkin_time': DateTime.now().toIso8601String(),
+      'checkin_time': DateTime.now().toUtc().toIso8601String(),
     });
   }
 

@@ -1,4 +1,7 @@
 ﻿import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/primary_button.dart';
 
 class DriverRegisterPage extends StatefulWidget {
   const DriverRegisterPage({super.key});
@@ -8,27 +11,37 @@ class DriverRegisterPage extends StatefulWidget {
 }
 
 class _DriverRegisterPageState extends State<DriverRegisterPage> {
-  bool _obscureText = true;
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _cpfController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _agreedToTerms = false;
 
   @override
-  Widget build(BuildContext context) {
-    const Color scaffoldBg = Color(0xFF0F172A);
-    const Color accentBlue = Color(0xFF1D4ED8);
-    const Color textColor = Colors.white70;
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _cityController.dispose();
+    _cpfController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: scaffoldBg,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.blueAccent),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Cadastro de Motorista',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -38,70 +51,53 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Preencha os dados abaixo para registrar seu veículo e começar a operar.',
-              style: TextStyle(color: textColor, fontSize: 16),
+              'Insira os detalhes abaixo para gerenciar a frota de transporte e operações.',
+              style: TextStyle(color: AppColors.slate400, fontSize: 16),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
-            // --- CAMPOS DO FORMULÁRIO ---
-            _buildLabel("Nome Completo"),
-            _buildTextField(hint: "Seu nome completo", icon: Icons.person_outline),
+            CustomTextField(
+              label: "Nome Completo",
+              hintText: "Digite o nome completo",
+              prefixIcon: Icons.person_outline,
+              controller: _nameController,
+            ),
+            const SizedBox(height: 20),
 
-            _buildLabel("Email"),
-            _buildTextField(
-              hint: "exemplo@email.com",
-              icon: Icons.email_outlined,
+            CustomTextField(
+              label: "Email",
+              hintText: "motorista@exemplo.com",
+              prefixIcon: Icons.email_outlined,
+              controller: _emailController,
               keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 20),
 
-            _buildLabel("Telefone"),
-            _buildTextField(
-              hint: "(00) 00000-0000",
-              icon: Icons.phone_android_outlined,
-              keyboardType: TextInputType.phone,
+            CustomTextField(
+              label: "Cidade Base",
+              hintText: "Ex: João Pessoa",
+              prefixIcon: Icons.location_on_outlined,
+              controller: _cityController,
             ),
+            const SizedBox(height: 20),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Divider(color: Colors.white10, thickness: 1),
-            ),
-
-            const Text(
-              "Informações do Veículo",
-              style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
-            ),
-
-            _buildLabel("Modelo do Veículo"),
-            _buildTextField(hint: "Ex: Toyota Corolla", icon: Icons.directions_car_filled_outlined),
-
-            _buildLabel("Cor do Veículo"),
-            _buildTextField(hint: "Ex: Prata", icon: Icons.palette_outlined),
-
-            _buildLabel("Placa"),
-            _buildTextField(hint: "ABC-1234", icon: Icons.featured_play_list_outlined),
-
-            _buildLabel("Capital Atribuída"),
-            _buildTextField(
-              hint: "Valor investido (R\$)",
-              icon: Icons.attach_money,
+            CustomTextField(
+              label: "CPF",
+              hintText: "000.000.000-00",
+              prefixIcon: Icons.badge_outlined,
+              controller: _cpfController,
               keyboardType: TextInputType.number,
             ),
+            const SizedBox(height: 20),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Divider(color: Colors.white10, thickness: 1),
-            ),
-
-            _buildLabel("Senha"),
-            _buildTextField(
-              hint: "Crie uma senha forte",
-              icon: Icons.lock_outline,
+            CustomTextField(
+              label: "Senha Inicial",
+              hintText: "........",
+              prefixIcon: Icons.lock_outline,
               isPassword: true,
-              obscureText: _obscureText,
-              onSuffixTap: () => setState(() => _obscureText = !_obscureText),
+              controller: _passwordController,
             ),
-
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // Checkbox de Termos
             Row(
@@ -109,22 +105,23 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                 Checkbox(
                   value: _agreedToTerms,
                   onChanged: (val) => setState(() => _agreedToTerms = val!),
-                  side: const BorderSide(color: Colors.blueAccent),
+                  activeColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.border),
                 ),
                 const Expanded(
                   child: Text.rich(
                     TextSpan(
-                      text: 'Ao registrar-se, você aceita nossos ',
-                      style: TextStyle(color: textColor, fontSize: 12),
+                      text: 'Ao registrar, você concorda com nossos ',
+                      style: TextStyle(color: AppColors.slate400, fontSize: 12),
                       children: [
                         TextSpan(
-                          text: 'Termos de Uso',
-                          style: TextStyle(color: Colors.blueAccent),
+                          text: 'Termos de Serviço',
+                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                         ),
                         TextSpan(text: ' e '),
                         TextSpan(
-                          text: 'Políticas de Privacidade',
-                          style: TextStyle(color: Colors.blueAccent),
+                          text: 'Política de Privacidade',
+                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -135,91 +132,32 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
 
             const SizedBox(height: 32),
 
-            // Botão Criar Conta
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _agreedToTerms
-                    ? () {
-                        // Lógica de cadastro aqui
-                      }
-                    : null, // Desabilitado se não aceitar termos
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accentBlue,
-                  disabledBackgroundColor: Colors.grey.withOpacity(0.1),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Finalizar Cadastro',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.check_circle_outline, color: Colors.white),
-                  ],
-                ),
-              ),
+            PrimaryButton(
+              text: 'Cadastrar Motorista',
+              icon: Icons.arrow_forward,
+              onPressed: _agreedToTerms ? () {} : null,
             ),
 
             const SizedBox(height: 24),
-          ],
-        ),
-      ),
-    );
-  }
 
-  // --- WIDGETS AUXILIARES ---
-
-  Widget _buildLabel(String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, top: 16),
-      child: Text(
-        label,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String hint,
-    required IconData icon,
-    bool isPassword = false,
-    bool obscureText = false,
-    TextInputType keyboardType = TextInputType.text,
-    VoidCallback? onSuffixTap,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: TextField(
-        keyboardType: keyboardType,
-        obscureText: obscureText,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.white38),
-          prefixIcon: Icon(icon, color: Colors.white38),
-          suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.white38,
+            Center(
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Text.rich(
+                  TextSpan(
+                    text: 'Já tem uma conta? ',
+                    style: TextStyle(color: AppColors.slate400),
+                    children: [
+                      TextSpan(
+                        text: 'Voltar ao Login',
+                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
-                  onPressed: onSuffixTap,
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 12),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

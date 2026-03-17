@@ -14,9 +14,19 @@ class DriverQueueModel extends DriverQueueEntity {
 
   factory DriverQueueModel.fromJson(Map<String, dynamic> json, String currentUserId, int index) {
     String formattedTime = '--:--';
+    
     if (json['checkin_time'] != null) {
-      DateTime dt = DateTime.parse(json['checkin_time']).toLocal();
-      formattedTime = DateFormat('HH:mm').format(dt);
+      try {
+        DateTime dt = DateTime.parse(json['checkin_time']);
+        
+        if (!dt.isUtc) {
+          dt = DateTime.parse(json['checkin_time'] + 'Z');
+        }
+        
+        formattedTime = DateFormat('HH:mm').format(dt.toLocal());
+      } catch (e) {
+        print('Erro ao formatar data: $e');
+      }
     }
 
     return DriverQueueModel(
