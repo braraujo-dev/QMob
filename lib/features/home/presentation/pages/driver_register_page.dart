@@ -1,4 +1,7 @@
 ﻿import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/custom_text_field.dart';
+import '../../../../core/widgets/primary_button.dart';
 
 class DriverRegisterPage extends StatefulWidget {
   const DriverRegisterPage({super.key});
@@ -8,25 +11,37 @@ class DriverRegisterPage extends StatefulWidget {
 }
 
 class _DriverRegisterPageState extends State<DriverRegisterPage> {
-  bool _obscureText = true;
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _cpfController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _agreedToTerms = false;
 
   @override
-  Widget build(BuildContext context) {
-    // Cores baseadas na imagem
-    const Color scaffoldBg = Color(0xFF0F172A);
-    const Color accentBlue = Color(0xFF1D4ED8);
-    const Color textColor = Colors.white70;
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _cityController.dispose();
+    _cpfController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: scaffoldBg,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const Icon(Icons.arrow_back, color: Colors.blueAccent),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text(
-          'Cadastro Admin',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          'Cadastro de Motorista',
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -36,36 +51,53 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Enter your details to manage the transport fleet and operations.',
-              style: TextStyle(color: textColor, fontSize: 16),
+              'Insira os detalhes abaixo para gerenciar a frota de transporte e operações.',
+              style: TextStyle(color: AppColors.slate400, fontSize: 16),
+            ),
+            const SizedBox(height: 32),
+
+            CustomTextField(
+              label: "Nome Completo",
+              hintText: "Digite o nome completo",
+              prefixIcon: Icons.person_outline,
+              controller: _nameController,
+            ),
+            const SizedBox(height: 20),
+
+            CustomTextField(
+              label: "Email",
+              hintText: "motorista@exemplo.com",
+              prefixIcon: Icons.email_outlined,
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 20),
+
+            CustomTextField(
+              label: "Cidade Base",
+              hintText: "Ex: João Pessoa",
+              prefixIcon: Icons.location_on_outlined,
+              controller: _cityController,
+            ),
+            const SizedBox(height: 20),
+
+            CustomTextField(
+              label: "CPF",
+              hintText: "000.000.000-00",
+              prefixIcon: Icons.badge_outlined,
+              controller: _cpfController,
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 20),
+
+            CustomTextField(
+              label: "Senha Inicial",
+              hintText: "........",
+              prefixIcon: Icons.lock_outline,
+              isPassword: true,
+              controller: _passwordController,
             ),
             const SizedBox(height: 24),
-
-            // Campos de Formulário
-            _buildLabel("Nome Completo"),
-            _buildTextField(hint: "Digite seu nome completo", icon: Icons.person_outline),
-
-            _buildLabel("Email"),
-            _buildTextField(hint: "admin@example.com", icon: Icons.email_outlined),
-
-            _buildLabel("Cidade"),
-            _buildTextField(
-              hint: "Cidade",
-              icon: Icons.location_on_outlined,
-              suffixIcon: Icons.keyboard_arrow_down,
-            ),
-
-            _buildLabel("CPF"),
-            _buildTextField(hint: "000.000.000-00", icon: Icons.badge_outlined),
-
-            _buildLabel("Senha"),
-            _buildTextField(
-              hint: "........",
-              icon: Icons.lock_outline,
-              isPassword: true,
-              obscureText: _obscureText,
-              onSuffixTap: () => setState(() => _obscureText = !_obscureText),
-            ),
 
             // Checkbox de Termos
             Row(
@@ -73,22 +105,23 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                 Checkbox(
                   value: _agreedToTerms,
                   onChanged: (val) => setState(() => _agreedToTerms = val!),
-                  side: const BorderSide(color: Colors.blueAccent),
+                  activeColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.border),
                 ),
                 const Expanded(
                   child: Text.rich(
                     TextSpan(
-                      text: 'By registering, you agree to our ',
-                      style: TextStyle(color: textColor, fontSize: 12),
+                      text: 'Ao registrar, você concorda com nossos ',
+                      style: TextStyle(color: AppColors.slate400, fontSize: 12),
                       children: [
                         TextSpan(
-                          text: 'Terms of Service',
-                          style: TextStyle(color: Colors.blueAccent),
+                          text: 'Termos de Serviço',
+                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: ' and '),
+                        TextSpan(text: ' e '),
                         TextSpan(
-                          text: 'Privacy Policy',
-                          style: TextStyle(color: Colors.blueAccent),
+                          text: 'Política de Privacidade',
+                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -99,101 +132,32 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
 
             const SizedBox(height: 32),
 
-            // Botão Criar Conta
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accentBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Create Admin Account',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward, color: Colors.white),
-                  ],
-                ),
-              ),
+            PrimaryButton(
+              text: 'Cadastrar Motorista',
+              icon: Icons.arrow_forward,
+              onPressed: _agreedToTerms ? () {} : null,
             ),
 
             const SizedBox(height: 24),
 
-            // Footer
             Center(
-              child: Text.rich(
-                TextSpan(
-                  text: 'Already have an account? ',
-                  style: const TextStyle(color: textColor),
-                  children: [
-                    TextSpan(
-                      text: 'Back to Login',
-                      style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: const Text.rich(
+                  TextSpan(
+                    text: 'Já tem uma conta? ',
+                    style: TextStyle(color: AppColors.slate400),
+                    children: [
+                      TextSpan(
+                        text: 'Voltar ao Login',
+                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Widget auxiliar para Labels
-  Widget _buildLabel(String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, top: 16),
-      child: Text(
-        label,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  // Widget auxiliar para Campos de Texto
-  Widget _buildTextField({
-    required String hint,
-    required IconData icon,
-    bool isPassword = false,
-    bool obscureText = false,
-    IconData? suffixIcon,
-    VoidCallback? onSuffixTap,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: TextField(
-        obscureText: obscureText,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.white38),
-          prefixIcon: Icon(icon, color: Colors.white38),
-          suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(
-                    obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.white38,
-                  ),
-                  onPressed: onSuffixTap,
-                )
-              : (suffixIcon != null ? Icon(suffixIcon, color: Colors.white38) : null),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 15),
         ),
       ),
     );
