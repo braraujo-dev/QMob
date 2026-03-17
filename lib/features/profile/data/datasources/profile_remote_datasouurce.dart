@@ -1,9 +1,11 @@
-﻿import 'package:alternative/features/profile/data/models/profile_model.dart';
+﻿import 'dart:io';
+import 'package:alternative/features/profile/data/models/profile_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<ProfileModel> getProfile(String userId);
   Future<void> signOut();
+  Future<void> updateProfile(ProfileModel profile, {File? imageFile});
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -14,17 +16,42 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<ProfileModel> getProfile(String userId) async {
     try {
       final user = supabaseClient.auth.currentUser;
-
-      // 1. Busca os dados na tabela profiles
       final response = await supabaseClient.from('profiles').select().eq('id', userId).single();
-
-      // 2. Verifica se é admin
-      final bool isAdmin = response['is_admin'] ?? false;
-
-      // 3. Retorna o Model (que é um subtipo de ProfileEntity)
-      return ProfileModel.fromJson(response, user?.email ?? '', isAdmin);
+      return ProfileModel.fromJson(response, user?.email ?? '');
     } catch (e) {
       throw ('Erro ao buscar perfil: $e');
+    }
+  }
+
+  @override
+  Future<void> updateProfile(ProfileModel profile, {File? imageFile}) async {
+    try {
+      String? photoUrl = profile.photoUrl;
+
+      // Se houver uma nova imagem, fazemos o upload para o Storage do Supabase
+      if (imageFile != null) {
+        final fileName = '${profile.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        
+        await supabaseClient.storage.from('avatars').upload(
+          fileName,
+          imageFile,
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+        );
+
+        photoUrl = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
+      }
+
+      final dataToUpdate = profile.toJson();
+      if (photoUrl != null) {
+        dataToUpdate['photo_url'] = photoUrl;
+      }
+
+      await supabaseClient
+          .from('profiles')
+          .update(dataToUpdate)
+          .eq('id', profile.id);
+    } catch (e) {
+      throw ('Erro ao atualizar perfil: $e');
     }
   }
 
