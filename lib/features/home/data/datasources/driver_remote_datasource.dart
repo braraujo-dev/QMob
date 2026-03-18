@@ -12,14 +12,11 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
 
   @override
   Future<void> registerDriver(DriverModel driver, String password) async {
-    // 1. Cria o usuário no Auth
     final AuthResponse res = await supabase.auth.signUp(email: driver.email, password: password);
 
     if (res.user != null) {
-      // 2. Insere na tabela CORRETA (drivers)
-      // e garante que o ID seja o do Auth
       final driverData = driver.toJson();
-      driverData['id'] = res.user!.id; // Sobrescreve/insere o ID do auth
+      driverData['id'] = res.user!.id;
 
       await supabase.from('drivers').insert(driverData);
     }

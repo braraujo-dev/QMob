@@ -18,10 +18,15 @@ class DriverController extends ValueNotifier<DriverState> {
     value = DriverLoadingState();
     final result = await getDriversUseCase();
 
-    result.fold((error) => value = DriverErrorState(error), (list) {
-      drivers = list;
-      value = DriverSuccessState(); // Ou crie um DriverLoadedState
-    });
+    result.fold(
+      (error) {
+        return value = DriverErrorState(error);
+      },
+      (list) {
+        drivers = list;
+        value = DriverSuccessState(); // Ou crie um DriverLoadedState
+      },
+    );
   }
 
   Future<void> register({
