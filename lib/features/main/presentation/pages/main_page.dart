@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../checkin/presentation/pages/checkin_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../queue/presentation/pages/queue_page.dart';
 
 class MainPage extends StatefulWidget {
@@ -22,7 +23,7 @@ class _MainPageState extends State<MainPage> {
       const CheckinPage(),
       const QueuePage(),
       const Center(child: Text('Viagens', style: TextStyle(color: Colors.white))),
-      const Center(child: Text('Perfil', style: TextStyle(color: Colors.white))),
+      const ProfilePage(),
     ];
   }
 
@@ -71,9 +72,9 @@ class _MainPageState extends State<MainPage> {
               label: 'Viagens',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Perfil',
+              icon: Icon(Icons.settings_outlined),
+              activeIcon: Icon(Icons.settings),
+              label: 'Ajustes',
             ),
           ],
         ),

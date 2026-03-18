@@ -1,7 +1,10 @@
 ﻿import 'package:flutter/material.dart';
+import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../controllers/driver_controller.dart';
+import '../controllers/driver_state.dart';
 
 class DriverRegisterPage extends StatefulWidget {
   const DriverRegisterPage({super.key});
@@ -11,21 +14,69 @@ class DriverRegisterPage extends StatefulWidget {
 }
 
 class _DriverRegisterPageState extends State<DriverRegisterPage> {
+  late final DriverController _controller;
+
+  // Controllers dos campos
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _cpfController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _modelController = TextEditingController();
+  final _colorController = TextEditingController();
+  final _plateController = TextEditingController();
+  final _capitalController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _agreedToTerms = false;
 
   @override
+  void initState() {
+    super.initState();
+    _controller = sl<DriverController>();
+    _controller.addListener(_onStateChanged);
+  }
+
+  void _onStateChanged() {
+    if (_controller.value is DriverSuccessState) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Motorista cadastrado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context);
+    } else if (_controller.value is DriverErrorState) {
+      final state = _controller.value as DriverErrorState;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red));
+    }
+  }
+
+  @override
   void dispose() {
+    _controller.removeListener(_onStateChanged);
     _nameController.dispose();
     _emailController.dispose();
-    _cityController.dispose();
-    _cpfController.dispose();
+    _phoneController.dispose();
+    _modelController.dispose();
+    _colorController.dispose();
+    _plateController.dispose();
+    _capitalController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _handleRegister() {
+    _controller.register(
+      name: _nameController.text,
+      email: _emailController.text,
+      phone: _phoneController.text,
+      vehicleModel: _modelController.text,
+      vehicleColor: _colorController.text,
+      vehiclePlate: _plateController.text,
+      assignedCapital: double.tryParse(_capitalController.text) ?? 0.0,
+      password: _passwordController.text,
+    );
   }
 
   @override
@@ -34,131 +85,97 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Cadastro de Motorista',
-          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Cadastro de Motorista', style: TextStyle(color: AppColors.white)),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Insira os detalhes abaixo para gerenciar a frota de transporte e operações.',
-              style: TextStyle(color: AppColors.slate400, fontSize: 16),
-            ),
-            const SizedBox(height: 32),
-
-            CustomTextField(
-              label: "Nome Completo",
-              hintText: "Digite o nome completo",
-              prefixIcon: Icons.person_outline,
-              controller: _nameController,
-            ),
-            const SizedBox(height: 20),
-
-            CustomTextField(
-              label: "Email",
-              hintText: "motorista@exemplo.com",
-              prefixIcon: Icons.email_outlined,
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 20),
-
-            CustomTextField(
-              label: "Cidade Base",
-              hintText: "Ex: João Pessoa",
-              prefixIcon: Icons.location_on_outlined,
-              controller: _cityController,
-            ),
-            const SizedBox(height: 20),
-
-            CustomTextField(
-              label: "CPF",
-              hintText: "000.000.000-00",
-              prefixIcon: Icons.badge_outlined,
-              controller: _cpfController,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 20),
-
-            CustomTextField(
-              label: "Senha Inicial",
-              hintText: "........",
-              prefixIcon: Icons.lock_outline,
-              isPassword: true,
-              controller: _passwordController,
-            ),
-            const SizedBox(height: 24),
-
-            // Checkbox de Termos
-            Row(
+      body: ValueListenableBuilder<DriverState>(
+        valueListenable: _controller,
+        builder: (context, state, child) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
               children: [
-                Checkbox(
+                CustomTextField(
+                  label: "Nome Completo",
+                  controller: _nameController,
+                  prefixIcon: Icons.person,
+                ),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  label: "Email",
+                  controller: _emailController,
+                  prefixIcon: Icons.email,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  label: "Telefone",
+                  controller: _phoneController,
+                  prefixIcon: Icons.phone,
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(
+                        label: "Veículo",
+                        hintText: "Modelo",
+                        controller: _modelController,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: CustomTextField(label: "Cor", controller: _colorController),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CustomTextField(label: "Placa", controller: _plateController),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: CustomTextField(
+                        label: "Capital (R\$)",
+                        controller: _capitalController,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                CustomTextField(
+                  label: "Senha",
+                  controller: _passwordController,
+                  prefixIcon: Icons.lock,
+                  isPassword: true,
+                ),
+                const SizedBox(height: 24),
+
+                CheckboxListTile(
+                  title: const Text(
+                    "Aceito os termos",
+                    style: TextStyle(color: AppColors.slate400, fontSize: 12),
+                  ),
                   value: _agreedToTerms,
                   onChanged: (val) => setState(() => _agreedToTerms = val!),
-                  activeColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.border),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
                 ),
-                const Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      text: 'Ao registrar, você concorda com nossos ',
-                      style: TextStyle(color: AppColors.slate400, fontSize: 12),
-                      children: [
-                        TextSpan(
-                          text: 'Termos de Serviço',
-                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                        ),
-                        TextSpan(text: ' e '),
-                        TextSpan(
-                          text: 'Política de Privacidade',
-                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
+
+                PrimaryButton(
+                  text: state is DriverLoadingState ? 'Processando...' : 'Cadastrar',
+                  onPressed: (_agreedToTerms && state is! DriverLoadingState)
+                      ? _handleRegister
+                      : null,
                 ),
               ],
             ),
-
-            const SizedBox(height: 32),
-
-            PrimaryButton(
-              text: 'Cadastrar Motorista',
-              icon: Icons.arrow_forward,
-              onPressed: _agreedToTerms ? () {} : null,
-            ),
-
-            const SizedBox(height: 24),
-
-            Center(
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: const Text.rich(
-                  TextSpan(
-                    text: 'Já tem uma conta? ',
-                    style: TextStyle(color: AppColors.slate400),
-                    children: [
-                      TextSpan(
-                        text: 'Voltar ao Login',
-                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

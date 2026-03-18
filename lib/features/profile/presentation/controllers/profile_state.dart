@@ -1,5 +1,4 @@
-﻿// Estados (profile_state.dart)
-import 'package:alternative/features/profile/data/models/profile_model.dart';
+﻿import '../../domain/entities/profile_entity.dart';
 
 abstract class ProfileState {}
 
@@ -8,7 +7,7 @@ class ProfileInitialState extends ProfileState {}
 class ProfileLoadingState extends ProfileState {}
 
 class ProfileSuccessState extends ProfileState {
-  final ProfileModel profile;
+  final ProfileEntity profile;
   ProfileSuccessState(this.profile);
 }
 

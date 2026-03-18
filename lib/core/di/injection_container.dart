@@ -1,7 +1,14 @@
+import 'package:alternative/features/home/data/datasources/driver_remote_datasource.dart';
+import 'package:alternative/features/home/data/repositories/driver_repository_impl.dart';
+import 'package:alternative/features/home/domain/repositories/driver_repository.dart';
+import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
+import 'package:alternative/features/home/domain/usecases/register_driver_usecase.dart';
+import 'package:alternative/features/home/presentation/controllers/driver_controller.dart';
 import 'package:alternative/features/profile/data/datasources/profile_remote_datasouurce.dart';
 import 'package:alternative/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
 import 'package:alternative/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:alternative/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:alternative/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -55,30 +62,41 @@ Future<void> init() async {
   sl.registerLazySingleton<CheckinRepository>(() => CheckinRepositoryImpl(sl()));
   sl.registerLazySingleton(() => const GetCheckinStatusUseCase());
 
-  sl.registerFactory(() => CheckinController(
-    locationService: sl(),
-    getCheckinStatusUseCase: sl(),
-    performCheckinUseCase: sl(),
-    isUserInQueueUseCase: sl(),
-    authUseCase: sl(),
-    checkinRepository: sl(),
-    queueRepository: sl(),
-  ));
+  sl.registerFactory(
+    () => CheckinController(
+      locationService: sl(),
+      getCheckinStatusUseCase: sl(),
+      performCheckinUseCase: sl(),
+      isUserInQueueUseCase: sl(),
+      authUseCase: sl(),
+      checkinRepository: sl(),
+      queueRepository: sl(),
+    ),
+  );
 
   // Controllers da Queue
-  sl.registerFactory(() => QueueController(
-    getQueueUseCase: sl(),
-    performCheckoutUseCase: sl(),
-    queueRepository: sl(),
-  ));
+  sl.registerFactory(
+    () =>
+        QueueController(getQueueUseCase: sl(), performCheckoutUseCase: sl(), queueRepository: sl()),
+  );
 
   // Profile Feature
   sl.registerLazySingleton<ProfileRemoteDataSource>(() => ProfileRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<ProfileRepository>(() => ProfileRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
-
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerFactory(
-    () => ProfileController(getProfileUseCase: sl(), repository: sl(), supabase: sl()),
+    () => ProfileController(
+      getProfileUseCase: sl(),
+      updateProfileUseCase: sl(),
+      supabaseClient: sl(),
+    ),
   );
 
+  // Driver Feature
+  sl.registerLazySingleton<DriverRemoteDataSource>(() => DriverRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<DriverRepository>(() => DriverRepositoryImpl(sl()));
+  sl.registerLazySingleton(() => RegisterDriverUseCase(sl()));
+  sl.registerLazySingleton(() => GetDriversUseCase(sl()));
+  sl.registerFactory(() => DriverController(registerDriverUseCase: sl(), getDriversUseCase: sl()));
 }
