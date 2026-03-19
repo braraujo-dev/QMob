@@ -1,6 +1,7 @@
 ﻿import 'package:alternative/features/auth/presentation/pages/auth_page.dart';
 import 'package:alternative/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:alternative/features/checkin/presentation/pages/checkin_page.dart';
+import 'package:alternative/features/historic/presentation/pages/historic_page.dart';
 import 'package:alternative/features/home/presentation/pages/admin_home_page.dart';
 import 'package:alternative/features/home/presentation/pages/driver_register_page.dart';
 import 'package:alternative/features/main/presentation/pages/main_page.dart';
@@ -19,6 +20,7 @@ class AppRoutes {
   static const String driverRegister = '/driverRegister';
   static const String profile = '/profile';
   static const String editProfile = '/editProfile';
+  static const String historic = '/historic';
 
   static Map<String, WidgetBuilder> get routes => {
     auth: (context) => const AuthPage(),
@@ -30,5 +32,6 @@ class AppRoutes {
     driverRegister: (context) => const DriverRegisterPage(),
     profile: (context) => const ProfilePage(),
     editProfile: (context) => const EditProfilePage(),
+    historic: (context) => const HistoricPage(),
   };
 }

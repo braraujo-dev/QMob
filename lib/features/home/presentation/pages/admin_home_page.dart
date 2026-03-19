@@ -1,4 +1,5 @@
 ﻿import 'package:alternative/core/di/injection_container.dart';
+import 'package:alternative/features/historic/presentation/pages/historic_page.dart';
 import 'package:alternative/features/home/domain/entities/driver_entity.dart';
 import 'package:alternative/features/home/presentation/controllers/driver_controller.dart';
 import 'package:alternative/features/home/presentation/controllers/driver_state.dart';
@@ -6,21 +7,29 @@ import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 
 class AdminHomePage extends StatefulWidget {
-  const AdminHomePage({super.key}); // Construtor limpo
+  const AdminHomePage({super.key});
 
   @override
   State<AdminHomePage> createState() => _AdminHomePageState();
 }
 
 class _AdminHomePageState extends State<AdminHomePage> {
-  // Buscamos a instância aqui
   final controller = sl<DriverController>();
-  bool _temMotoristas = false;
+  int _currentIndex = 1;
+
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
-    // Inicia a busca dos dados
+    _pages = [
+      const Center(
+        child: Text('Início', style: TextStyle(color: Colors.white)),
+      ),
+      buildDriverListBody(),
+      const HistoricPage(),
+    ];
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchDrivers();
     });
@@ -33,50 +42,40 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
     return Scaffold(
       backgroundColor: bgDark,
-      appBar: _buildAppBar(bgDark, accentBlue, _temMotoristas),
-      body: ValueListenableBuilder<DriverState>(
-        valueListenable: controller,
-        builder: (context, state, child) {
-          if (state is DriverLoadingState && controller.drivers.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: accentBlue));
-          }
-
-          if (state is DriverErrorState) {
-            return Center(
-              child: Text(state.message, style: const TextStyle(color: Colors.red)),
-            );
-          }
-
-          final motoristas = controller.drivers;
-
-          // Atualiza o estado da AppBar para mostrar/esconder o ícone de busca
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && _temMotoristas != motoristas.isNotEmpty) {
-              setState(() => _temMotoristas = motoristas.isNotEmpty);
-            }
-          });
-
-          if (motoristas.isEmpty) {
-            return _buildEmptyState(accentBlue);
-          }
-
-          return _buildListView(motoristas);
-        },
-      ),
-      bottomNavigationBar: _buildBottomNav(accentBlue),
+      appBar: buildAppBar(bgDark, accentBlue),
+      body: IndexedStack(index: _currentIndex, children: _pages),
+      bottomNavigationBar: buildBottomNav(accentBlue),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(Color bg, Color accent, bool mostrarBusca) {
+  PreferredSizeWidget buildAppBar(Color bg, Color accent) {
+    String title;
+    bool mostrarBusca = false;
+
+    switch (_currentIndex) {
+      case 0:
+        title = 'Início';
+        break;
+      case 1:
+        title = 'Motoristas';
+        mostrarBusca = controller.drivers.isNotEmpty;
+        break;
+      case 2:
+        title = 'Histórico';
+        break;
+      default:
+        title = 'Alternative';
+    }
+
     return AppBar(
       backgroundColor: bg,
       elevation: 0,
-      title: const Text(
-        'Motoristas',
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
       actions: [
-        if (mostrarBusca)
+        if (mostrarBusca && _currentIndex == 1)
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.search, color: Colors.white),
@@ -89,7 +88,29 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  Widget _buildListView(List<DriverEntity> motoristas) {
+  Widget buildDriverListBody() {
+    return ValueListenableBuilder<DriverState>(
+      valueListenable: controller,
+      builder: (context, state, child) {
+        if (state is DriverLoadingState && controller.drivers.isEmpty) {
+          return const Center(child: CircularProgressIndicator(color: Color(0xFF1D4ED8)));
+        }
+
+        if (state is DriverErrorState) {
+          return Center(
+            child: Text(state.message, style: const TextStyle(color: Colors.red)),
+          );
+        }
+
+        final motoristas = controller.drivers;
+        if (motoristas.isEmpty) return buildEmptyState(const Color(0xFF1D4ED8));
+
+        return buildListView(motoristas);
+      },
+    );
+  }
+
+  Widget buildListView(List<DriverEntity> motoristas) {
     return RefreshIndicator(
       onRefresh: () => controller.fetchDrivers(),
       child: Padding(
@@ -114,9 +135,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
             Expanded(
               child: ListView.builder(
                 itemCount: motoristas.length,
-                itemBuilder: (context, index) {
-                  return _buildDriverCard(motoristas[index]);
-                },
+                itemBuilder: (context, index) => buildDriverCard(motoristas[index]),
               ),
             ),
           ],
@@ -125,7 +144,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  Widget _buildDriverCard(DriverEntity m) {
+  Widget buildDriverCard(DriverEntity m) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -136,7 +155,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       ),
       child: Row(
         children: [
-          _buildAvatar(null, 'ativo'),
+          buildAvatar(null, 'ativo'),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -179,9 +198,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  Widget _buildAvatar(String? url, String? status) {
-    Color statusColor = status == 'ativo' ? Colors.green : Colors.grey;
-
+  Widget buildAvatar(String? url, String? status) {
     return Stack(
       children: [
         CircleAvatar(
@@ -197,7 +214,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
             width: 14,
             height: 14,
             decoration: BoxDecoration(
-              color: statusColor,
+              color: status == 'ativo' ? Colors.green : Colors.grey,
               shape: BoxShape.circle,
               border: Border.all(color: const Color(0xFF1E293B), width: 2.5),
             ),
@@ -207,7 +224,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  Widget _buildEmptyState(Color accentBlue) {
+  Widget buildEmptyState(Color accentBlue) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -251,7 +268,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  Widget _buildBottomNav(Color accentBlue) {
+  Widget buildBottomNav(Color accentBlue) {
     return Container(
       decoration: const BoxDecoration(
         border: Border(top: BorderSide(color: Colors.white10, width: 0.5)),
@@ -261,11 +278,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: accentBlue,
         unselectedItemColor: Colors.white38,
-        currentIndex: 1,
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Início"),
           BottomNavigationBarItem(icon: Icon(Icons.drive_eta), label: "Motoristas"),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Relatórios"),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Histórico"),
         ],
       ),
     );
