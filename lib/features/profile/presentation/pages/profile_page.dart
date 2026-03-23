@@ -1,8 +1,9 @@
+import 'package:alternative/features/home/domain/entities/admin_entity.dart';
+import 'package:alternative/features/home/domain/entities/driver_entity.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../routes/app_routes_manager.dart';
-import '../../domain/entities/profile_entity.dart';
 import '../controllers/profile_controller.dart';
 import '../controllers/profile_state.dart';
 
@@ -28,7 +29,10 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Ajustes', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Ajustes',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,
@@ -40,83 +44,110 @@ class _ProfilePageState extends State<ProfilePage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is ProfileSuccessState) {
+            // state.profile aqui é um Object (Admin ou Driver)
             return _buildContent(state.profile);
           }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Erro ao carregar ajustes", style: TextStyle(color: Colors.white)),
-                const SizedBox(height: 16),
-                TextButton(onPressed: () => _controller.fetchProfile(), child: const Text("Tentar novamente")),
-              ],
-            ),
-          );
+          if (state is ProfileErrorState) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(state.message, style: const TextStyle(color: Colors.white)),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => _controller.fetchProfile(),
+                    child: const Text("Tentar novamente"),
+                  ),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
         },
       ),
     );
   }
 
-  Widget _buildContent(ProfileEntity profile) {
+  Widget _buildContent(Object profile) {
+    // Extração de dados comuns usando a nova sintaxe do Dart
+    final (name, email, photoUrl) = switch (profile) {
+      DriverEntity d => (d.name, d.email, d.photoUrl),
+      AdminEntity a => (a.name, a.email, null), // Admin pode não ter foto
+      _ => ('Usuário', '', null),
+    };
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          // Header Perfil - SEM O ÍCONE DE CÂMERA
           Center(
             child: CircleAvatar(
               radius: 50,
               backgroundColor: AppColors.border,
-              backgroundImage: profile.photoUrl != null
-                  ? NetworkImage(profile.photoUrl!)
-                  : null,
-              child: profile.photoUrl == null
+              backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+              child: photoUrl == null
                   ? const Icon(Icons.person, size: 50, color: AppColors.slate400)
                   : null,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            profile.name ?? 'Usuário',
+            name,
             style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          Text(
-            profile.email,
-            style: const TextStyle(color: AppColors.slate400, fontSize: 14),
-          ),
+          Text(email, style: const TextStyle(color: AppColors.slate400, fontSize: 14)),
+
+          // Badge opcional para identificar o tipo (útil para você debugar)
+          if (profile is DriverEntity)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                "MOTORISTA",
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
           const SizedBox(height: 24),
-          
+
           ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.editProfile, arguments: profile),
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.editProfile, arguments: profile),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               minimumSize: const Size(double.infinity, 48),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Editar perfil', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Editar perfil',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           _buildSectionTitle('SEGURANÇA'),
           _buildOptionTile(Icons.lock_outline, 'Alterar senha'),
           _buildOptionTile(Icons.fingerprint, 'Autenticação biométrica'),
-          
+
           const SizedBox(height: 24),
           _buildSectionTitle('AJUDA E SUPORTE'),
           _buildOptionTile(Icons.help_outline, 'Dúvidas'),
           _buildOptionTile(Icons.headset_mic_outlined, 'Suporte'),
           _buildOptionTile(Icons.description_outlined, 'Termos de Privacidade'),
-          
+
           const SizedBox(height: 32),
-          
+
           ElevatedButton.icon(
             onPressed: () async {
               await _controller.signOut();
               if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.auth);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white.withValues(alpha: 0.05),
+              backgroundColor: Colors.white.withAlpha(13), // .withValues para versões novas
               foregroundColor: Colors.redAccent,
               minimumSize: const Size(double.infinity, 56),
               elevation: 0,
@@ -125,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: const Icon(Icons.logout),
             label: const Text('Encerrar sessão', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          
+
           const SizedBox(height: 16),
           const Text(
             'Versão 1.0.0 (Build 1)',
@@ -143,7 +174,11 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.only(bottom: 12),
         child: Text(
           title,
-          style: const TextStyle(color: AppColors.slate400, fontSize: 12, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: AppColors.slate400,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
@@ -153,7 +188,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: AppColors.inputBackground.withValues(alpha: 0.5),
+        color: AppColors.inputBackground.withAlpha(128),
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(

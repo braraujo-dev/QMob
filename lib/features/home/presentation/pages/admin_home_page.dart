@@ -180,7 +180,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     const Icon(Icons.phone_outlined, size: 14, color: Colors.blueAccent),
                     const SizedBox(width: 4),
                     Text(
-                      m.phone,
+                      m.phone ?? '',
                       style: const TextStyle(
                         color: Colors.blueAccent,
                         fontSize: 12,

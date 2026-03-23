@@ -1,13 +1,12 @@
-﻿import '../../domain/entities/profile_entity.dart';
-
-abstract class ProfileState {}
+﻿abstract class ProfileState {}
 
 class ProfileInitialState extends ProfileState {}
 
 class ProfileLoadingState extends ProfileState {}
 
 class ProfileSuccessState extends ProfileState {
-  final ProfileEntity profile;
+  final Object profile;
+
   ProfileSuccessState(this.profile);
 }
 

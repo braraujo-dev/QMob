@@ -15,7 +15,7 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
     final AuthResponse res = await supabase.auth.signUp(email: driver.email, password: password);
 
     if (res.user != null) {
-      final driverData = driver.toJson();
+      final driverData = driver.toMap();
       driverData['id'] = res.user!.id;
 
       await supabase.from('drivers').insert(driverData);

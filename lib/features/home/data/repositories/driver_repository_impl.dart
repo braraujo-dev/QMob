@@ -15,11 +15,14 @@ class DriverRepositoryImpl implements DriverRepository {
     required String password,
   }) async {
     try {
-      // Converte a Entity para o Model com os NOVOS campos
+      // Agora passamos o ID.
+      // No registro, o ID costuma vir vazio ou ser gerado pelo Auth depois.
       final model = DriverModel(
+        id: driver.id, // O ID que vem da entity (pode ser vazio no cadastro)
         name: driver.name,
         email: driver.email,
         phone: driver.phone,
+        photoUrl: driver.photoUrl,
         vehicleModel: driver.vehicleModel,
         vehicleColor: driver.vehicleColor,
         vehiclePlate: driver.vehiclePlate,
@@ -29,7 +32,7 @@ class DriverRepositoryImpl implements DriverRepository {
       await remoteDataSource.registerDriver(model, password);
       return const Right(null);
     } on AuthException catch (e) {
-      return Left(e.message); // Captura erro de rate limit ou email já existe
+      return Left(e.message);
     } catch (e) {
       return Left("Erro ao salvar dados: ${e.toString()}");
     }

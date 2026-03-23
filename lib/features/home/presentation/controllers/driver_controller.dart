@@ -1,4 +1,5 @@
 ﻿// lib/features/driver_register/presentation/controllers/driver_controller.dart
+import 'package:alternative/core/utils/enum_class.dart';
 import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/driver_entity.dart';
@@ -29,6 +30,8 @@ class DriverController extends ValueNotifier<DriverState> {
     );
   }
 
+ // driver_controller.dart
+
   Future<void> register({
     required String name,
     required String email,
@@ -42,9 +45,11 @@ class DriverController extends ValueNotifier<DriverState> {
     value = DriverLoadingState();
 
     final driver = DriverEntity(
+      id: '', // Será gerado pelo banco
       name: name,
       email: email,
       phone: phone,
+      userType: UserType.driver,
       vehicleModel: vehicleModel,
       vehicleColor: vehicleColor,
       vehiclePlate: vehiclePlate,
@@ -52,6 +57,9 @@ class DriverController extends ValueNotifier<DriverState> {
     );
 
     final result = await registerDriverUseCase(driver, password);
-    result.fold((error) => value = DriverErrorState(error), (_) => value = DriverSuccessState());
+    result.fold(
+      (error) => value = DriverErrorState(error), 
+      (_) => value = DriverSuccessState(),
+    );
   }
 }
