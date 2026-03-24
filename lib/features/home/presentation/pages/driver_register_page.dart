@@ -22,6 +22,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
   final _phoneController = TextEditingController();
   final _modelController = TextEditingController();
   final _colorController = TextEditingController();
+  final _baseCityController = TextEditingController();
   final _plateController = TextEditingController();
   final _capitalController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -74,6 +75,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       vehicleModel: _modelController.text,
       vehicleColor: _colorController.text,
       vehiclePlate: _plateController.text,
+      baseCity: _baseCityController.text,
       assignedCapital: double.tryParse(_capitalController.text) ?? 0.0,
       password: _passwordController.text,
     );

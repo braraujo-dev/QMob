@@ -1,3 +1,4 @@
+import 'package:alternative/core/utils/enum_class.dart';
 import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 
@@ -55,7 +56,7 @@ class _AuthPageState extends State<AuthPage> {
     } else if (state is AuthSuccessState) {
       Navigator.pushReplacementNamed(
         context,
-        state.user.isAdmin ? AppRoutes.adminHome : AppRoutes.main,
+        state.user.role == UserType.admin.name ? AppRoutes.adminHome : AppRoutes.main,
       );
     }
   }

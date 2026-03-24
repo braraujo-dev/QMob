@@ -1,7 +1,6 @@
-﻿// lib/features/driver_register/presentation/controllers/driver_controller.dart
-import 'package:alternative/core/utils/enum_class.dart';
-import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
+﻿import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/driver_entity.dart';
 import '../../domain/usecases/register_driver_usecase.dart';
 import 'driver_state.dart';
@@ -25,12 +24,10 @@ class DriverController extends ValueNotifier<DriverState> {
       },
       (list) {
         drivers = list;
-        value = DriverSuccessState(); // Ou crie um DriverLoadedState
+        value = DriverSuccessState();
       },
     );
   }
-
- // driver_controller.dart
 
   Future<void> register({
     required String name,
@@ -38,6 +35,7 @@ class DriverController extends ValueNotifier<DriverState> {
     required String phone,
     required String vehicleModel,
     required String vehicleColor,
+    required String baseCity,
     required String vehiclePlate,
     required double assignedCapital,
     required String password,
@@ -45,11 +43,11 @@ class DriverController extends ValueNotifier<DriverState> {
     value = DriverLoadingState();
 
     final driver = DriverEntity(
-      id: '', // Será gerado pelo banco
+      id: '',
       name: name,
       email: email,
       phone: phone,
-      userType: UserType.driver,
+      baseCity: baseCity,
       vehicleModel: vehicleModel,
       vehicleColor: vehicleColor,
       vehiclePlate: vehiclePlate,
@@ -57,9 +55,6 @@ class DriverController extends ValueNotifier<DriverState> {
     );
 
     final result = await registerDriverUseCase(driver, password);
-    result.fold(
-      (error) => value = DriverErrorState(error), 
-      (_) => value = DriverSuccessState(),
-    );
+    result.fold((error) => value = DriverErrorState(error), (_) => value = DriverSuccessState());
   }
 }

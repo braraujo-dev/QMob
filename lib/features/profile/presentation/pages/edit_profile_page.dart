@@ -1,11 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
-import '../../domain/entities/profile_entity.dart';
 import '../controllers/profile_controller.dart';
 import '../controllers/profile_state.dart';
 
@@ -23,23 +24,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final TextEditingController _vehicleModelController;
   late final TextEditingController _vehiclePlateController;
   late final TextEditingController _vehicleColorController;
-  
   late final ProfileController _controller;
-  ProfileEntity? _profile;
   File? _imageFile;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_profile == null) {
-      _profile = ModalRoute.of(context)!.settings.arguments as ProfileEntity;
-      _nameController = TextEditingController(text: _profile!.name);
-      _emailController = TextEditingController(text: _profile!.email);
-      _phoneController = TextEditingController(text: _profile!.phone);
-      _vehicleModelController = TextEditingController(text: _profile!.vehicleModel);
-      _vehiclePlateController = TextEditingController(text: _profile!.vehiclePlate);
-      _vehicleColorController = TextEditingController(text: _profile!.vehicleColor);
-    }
+    // if (_profile == null) {
+    //   _profile = ModalRoute.of(context)!.settings.arguments as ProfileEntity;
+    //   _nameController = TextEditingController(text: _profile!.name);
+    //   _emailController = TextEditingController(text: _profile!.email);
+    //   _phoneController = TextEditingController(text: _profile!.phone);
+    // _vehicleModelController = TextEditingController(text: _profile!.vehicleModel);
+    // _vehiclePlateController = TextEditingController(text: _profile!.vehiclePlate);
+    // _vehicleColorController = TextEditingController(text: _profile!.vehicleColor);
+    // }
   }
 
   @override
@@ -51,7 +50,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
-    
+
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -72,7 +71,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_profile == null) return const Scaffold();
+    // if (_profile == null) return const Scaffold();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -102,22 +101,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         onTap: _pickImage,
                         child: Stack(
                           children: [
-                            CircleAvatar(
-                              radius: 55,
-                              backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                              backgroundImage: _imageFile != null 
-                                  ? FileImage(_imageFile!) 
-                                  : (_profile!.photoUrl != null ? NetworkImage(_profile!.photoUrl!) : null) as ImageProvider?,
-                              child: (_imageFile == null && _profile!.photoUrl == null) 
-                                  ? const Icon(Icons.person, size: 60, color: AppColors.slate400) 
-                                  : null,
-                            ),
+                            // CircleAvatar(
+                            //   radius: 55,
+                            //   backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+                            //   backgroundImage: _imageFile != null
+                            //       ? FileImage(_imageFile!)
+                            //       : (_profile!.photoUrl != null
+                            //                 ? NetworkImage(_profile!.photoUrl!)
+                            //                 : null)
+                            //             as ImageProvider?,
+                            //   child: (_imageFile == null && _profile!.photoUrl == null)
+                            //       ? const Icon(Icons.person, size: 60, color: AppColors.slate400)
+                            //       : null,
+                            // ),
                             Positioned(
                               bottom: 0,
                               right: 0,
                               child: Container(
                                 padding: const EdgeInsets.all(6),
-                                decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                ),
                                 child: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
                               ),
                             ),
@@ -125,7 +130,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text('Alterar foto do perfil', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500)),
+                      const Text(
+                        'Alterar foto do perfil',
+                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500),
+                      ),
                     ],
                   ),
                 ),
@@ -155,7 +163,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
 
                 const SizedBox(height: 32),
-                const Text('DADOS DO VEÍCULO', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+                const Text(
+                  'DADOS DO VEÍCULO',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.1,
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 CustomTextField(
@@ -189,28 +205,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 PrimaryButton(
                   text: isLoading ? 'Salvando...' : 'Salvar Alterações',
                   icon: isLoading ? null : Icons.save_outlined,
-                  onPressed: isLoading ? null : () async {
-                    final updatedProfile = ProfileEntity(
-                      id: _profile!.id,
-                      email: _profile!.email,
-                      name: _nameController.text,
-                      phone: _phoneController.text,
-                      vehicleModel: _vehicleModelController.text,
-                      vehiclePlate: _vehiclePlateController.text,
-                      vehicleColor: _vehicleColorController.text,
-                      photoUrl: _profile!.photoUrl,
-                      nomeSindicato: _profile!.nomeSindicato,
-                    );
-                    
-                    await _controller.updateProfile(updatedProfile, imageFile: _imageFile);
-                    
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Perfil atualizado com sucesso!'), backgroundColor: Colors.green),
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          // final updatedProfile = ProfileEntity(
+                          //   id: _profile!.id,
+                          //   email: _profile!.email,
+                          //   name: _nameController.text,
+                          //   phone: _phoneController.text,
+                          //   vehicleModel: _vehicleModelController.text,
+                          //   vehiclePlate: _vehiclePlateController.text,
+                          //   vehicleColor: _vehicleColorController.text,
+                          //   photoUrl: _profile!.photoUrl,
+                          //   nomeSindicato: _profile!.nomeSindicato,
+                          // );
+
+                          // await _controller.updateProfile(updatedProfile, imageFile: _imageFile);
+
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Perfil atualizado com sucesso!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            Navigator.pop(context);
+                          }
+                        },
                 ),
                 const SizedBox(height: 24),
               ],
