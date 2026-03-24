@@ -56,7 +56,7 @@ class _AuthPageState extends State<AuthPage> {
     } else if (state is AuthSuccessState) {
       Navigator.pushReplacementNamed(
         context,
-        state.user.role == UserType.admin.name ? AppRoutes.adminHome : AppRoutes.main,
+        state.user.role == UserType.admin.name ? AppRoutes.adminHome : AppRoutes.driverHome,
       );
     }
   }

@@ -1,12 +1,10 @@
 import 'package:alternative/core/theme/app_theme.dart';
-import 'package:alternative/features/auth/domain/usecases/auth_usecase.dart';
 import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
 import 'core/di/injection_container.dart' as di;
-import 'core/di/injection_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,14 +13,22 @@ void main() async {
 
   await di.init();
 
-  final authUseCase = sl<AuthUseCase>();
-  final savedEmail = await authUseCase.getSavedEmail();
+  final supabase = Supabase.instance.client;
+  final session = supabase.auth.currentSession;
 
   String initialRoute = AppRoutes.auth;
 
-  // if (user != null && savedEmail != null) {
-  //   initialRoute = user.role ? AppRoutes.adminHome : AppRoutes.main;
-  // }
+  if (session != null && !session.isExpired) {
+    final user = session.user;
+
+    final String userRole = user.appMetadata['role'] ?? 'driver';
+
+    initialRoute = switch (userRole) {
+      'admin' => AppRoutes.adminHome,
+      'driver' => AppRoutes.driverHome,
+      _ => AppRoutes.auth,
+    };
+  }
 
   runApp(MyApp(initialRoute: initialRoute));
 }

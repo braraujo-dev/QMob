@@ -18,4 +18,17 @@
     required this.responsavel,
     required this.contato,
   });
+
+  AdminEntity copyWith({String? name, String? phone, String? responsavel, String? contato}) {
+    return AdminEntity(
+      id: id,
+      email: email,
+      name: name ?? this.name,
+      phone: phone ?? this.phone,
+      nomeSindicato: nomeSindicato,
+      cnpj: cnpj,
+      responsavel: responsavel ?? this.responsavel,
+      contato: contato ?? this.contato,
+    );
+  }
 }

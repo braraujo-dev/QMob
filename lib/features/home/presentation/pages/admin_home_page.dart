@@ -15,20 +15,14 @@ class AdminHomePage extends StatefulWidget {
 
 class _AdminHomePageState extends State<AdminHomePage> {
   final controller = sl<DriverController>();
-  int _currentIndex = 1;
+  int _currentIndex = 0;
 
   late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
-    _pages = [
-      const Center(
-        child: Text('Início', style: TextStyle(color: Colors.white)),
-      ),
-      buildDriverListBody(),
-      const HistoricPage(),
-    ];
+    _pages = [buildDriverListBody(), const HistoricPage()];
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchDrivers();
@@ -54,13 +48,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
     switch (_currentIndex) {
       case 0:
-        title = 'Início';
-        break;
-      case 1:
         title = 'Motoristas';
         mostrarBusca = controller.drivers.isNotEmpty;
         break;
-      case 2:
+      case 1:
         title = 'Histórico';
         break;
       default:
@@ -75,7 +66,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
       actions: [
-        if (mostrarBusca && _currentIndex == 1)
+        if (mostrarBusca && _currentIndex == 0)
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.search, color: Colors.white),
@@ -180,7 +171,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     const Icon(Icons.phone_outlined, size: 14, color: Colors.blueAccent),
                     const SizedBox(width: 4),
                     Text(
-                      m.phone ?? '',
+                      m.phone,
                       style: const TextStyle(
                         color: Colors.blueAccent,
                         fontSize: 12,
@@ -281,7 +272,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Início"),
           BottomNavigationBarItem(icon: Icon(Icons.drive_eta), label: "Motoristas"),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: "Histórico"),
         ],

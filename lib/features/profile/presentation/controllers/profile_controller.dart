@@ -1,4 +1,6 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/usecases/get_profile_usecase.dart';
@@ -25,7 +27,9 @@ class ProfileController extends ValueNotifier<ProfileState> {
       return;
     }
 
-    final result = await getProfileUseCase(user.id, user.role ?? "");
+    final String userRole = user.appMetadata['role'] ?? "";
+
+    final result = await getProfileUseCase(user.id, userRole);
 
     result.fold(
       (error) => value = ProfileErrorState(error),
@@ -33,22 +37,17 @@ class ProfileController extends ValueNotifier<ProfileState> {
     );
   }
 
-  // Future<void> updateProfile(Object profile, {File? imageFile}) async {
-  //   final currentState = value;
-  //   value = ProfileLoadingState();
+  Future<void> updateProfile(Object entity, {File? imageFile}) async {
+    final currentState = value;
+    value = ProfileLoadingState();
 
-  //   final result = await updateProfileUseCase(profile, imageFile: imageFile);
+    final result = await updateProfileUseCase(entity, imageFile: imageFile);
 
-  //   result.fold(
-  //     (error) {
-  //       value = ProfileErrorState(error);
-  //       if (currentState is ProfileSuccessState) {
-  //         value = currentState;
-  //       }
-  //     },
-  //     (_) => fetchProfile(),
-  //   );
-  // }
+    result.fold((error) {
+      value = ProfileErrorState(error);
+      if (currentState is ProfileSuccessState) value = currentState;
+    }, (_) => fetchProfile());
+  }
 
   Future<void> signOut() async {
     await supabaseClient.auth.signOut();

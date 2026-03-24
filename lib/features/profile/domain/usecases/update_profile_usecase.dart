@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:dartz/dartz.dart';
+
 import '../repositories/profile_repository.dart';
 
 class UpdateProfileUseCase {
@@ -5,8 +9,7 @@ class UpdateProfileUseCase {
 
   UpdateProfileUseCase(this.repository);
 
-  // O parâmetro 'profile' agora aceita DriverEntity ou AdminEntity
-  // Future<Either<String, void>> call(Object profile, {File? imageFile}) async {
-  //   return await repository.updateProfile(profile, imageFile: imageFile);
-  // }
+  Future<Either<String, void>> call(Object profile, {File? imageFile}) async {
+    return await repository.updateProfile(profile, imageFile: imageFile);
+  }
 }

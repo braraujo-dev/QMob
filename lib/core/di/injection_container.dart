@@ -4,7 +4,7 @@ import 'package:alternative/features/home/domain/repositories/driver_repository.
 import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
 import 'package:alternative/features/home/domain/usecases/register_driver_usecase.dart';
 import 'package:alternative/features/home/presentation/controllers/driver_controller.dart';
-import 'package:alternative/features/profile/data/datasources/profile_remote_datasouurce.dart';
+import 'package:alternative/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:alternative/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
 import 'package:alternative/features/profile/domain/usecases/get_profile_usecase.dart';
@@ -74,7 +74,6 @@ Future<void> init() async {
     ),
   );
 
-  // Controllers da Queue
   sl.registerFactory(
     () =>
         QueueController(getQueueUseCase: sl(), performCheckoutUseCase: sl(), queueRepository: sl()),

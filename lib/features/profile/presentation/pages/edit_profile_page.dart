@@ -1,8 +1,7 @@
 import 'dart:io';
-
+import 'package:alternative/features/home/domain/entities/profile_result.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -24,37 +23,50 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late final TextEditingController _vehicleModelController;
   late final TextEditingController _vehiclePlateController;
   late final TextEditingController _vehicleColorController;
-  late final ProfileController _controller;
-  File? _imageFile;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // if (_profile == null) {
-    //   _profile = ModalRoute.of(context)!.settings.arguments as ProfileEntity;
-    //   _nameController = TextEditingController(text: _profile!.name);
-    //   _emailController = TextEditingController(text: _profile!.email);
-    //   _phoneController = TextEditingController(text: _profile!.phone);
-    // _vehicleModelController = TextEditingController(text: _profile!.vehicleModel);
-    // _vehiclePlateController = TextEditingController(text: _profile!.vehiclePlate);
-    // _vehicleColorController = TextEditingController(text: _profile!.vehicleColor);
-    // }
-  }
+  late final ProfileController _controller;
+  ProfileResult? _profile;
+  File? _imageFile;
 
   @override
   void initState() {
     super.initState();
     _controller = sl<ProfileController>();
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
+    _vehicleModelController = TextEditingController();
+    _vehiclePlateController = TextEditingController();
+    _vehicleColorController = TextEditingController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_profile == null) {
+      _profile = ModalRoute.of(context)!.settings.arguments as ProfileResult;
+
+      final res = _profile;
+      if (res is AdminProfile) {
+        _nameController.text = res.admin.name;
+        _emailController.text = res.admin.email;
+        _phoneController.text = res.admin.phone ?? '';
+      } else if (res is DriverProfile) {
+        _nameController.text = res.driver.name;
+        _emailController.text = res.driver.email;
+        _phoneController.text = res.driver.phone;
+        _vehicleModelController.text = res.driver.vehicleModel;
+        _vehiclePlateController.text = res.driver.vehiclePlate;
+        _vehicleColorController.text = res.driver.vehicleColor;
+      }
+    }
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
-
     if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+      setState(() => _imageFile = File(pickedFile.path));
     }
   }
 
@@ -69,20 +81,55 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
+  void _onSave() async {
+    final res = _profile;
+    Object? updatedEntity;
+
+    if (res is AdminProfile) {
+      updatedEntity = res.admin.copyWith(name: _nameController.text, phone: _phoneController.text);
+    } else if (res is DriverProfile) {
+      updatedEntity = res.driver.copyWith(
+        name: _nameController.text,
+        phone: _phoneController.text,
+        vehicleModel: _vehicleModelController.text,
+        vehiclePlate: _vehiclePlateController.text,
+        vehicleColor: _vehicleColorController.text,
+      );
+    }
+
+    if (updatedEntity != null) {
+      await _controller.updateProfile(updatedEntity, imageFile: _imageFile);
+
+      if (mounted && _controller.value is! ProfileErrorState) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil atualizado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // if (_profile == null) return const Scaffold();
+    if (_profile == null) return const Scaffold();
+    final isDriver = _profile is DriverProfile;
+    final photoUrl = (_profile is DriverProfile)
+        ? (_profile as DriverProfile).driver.photoUrl
+        : null;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Editar Perfil', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Editar Perfil',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         backgroundColor: AppColors.background,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ValueListenableBuilder<ProfileState>(
         valueListenable: _controller,
@@ -94,61 +141,64 @@ class _EditProfilePageState extends State<EditProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: Stack(
-                          children: [
-                            // CircleAvatar(
-                            //   radius: 55,
-                            //   backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                            //   backgroundImage: _imageFile != null
-                            //       ? FileImage(_imageFile!)
-                            //       : (_profile!.photoUrl != null
-                            //                 ? NetworkImage(_profile!.photoUrl!)
-                            //                 : null)
-                            //             as ImageProvider?,
-                            //   child: (_imageFile == null && _profile!.photoUrl == null)
-                            //       ? const Icon(Icons.person, size: 60, color: AppColors.slate400)
-                            //       : null,
-                            // ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                if (isDriver) ...[
+                  Center(
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 55,
+                                backgroundColor: AppColors.primary.withAlpha(50),
+                                backgroundImage: _imageFile != null
+                                    ? FileImage(_imageFile!)
+                                    : (photoUrl != null ? NetworkImage(photoUrl) : null)
+                                          as ImageProvider?,
+                                child: (_imageFile == null && photoUrl == null)
+                                    ? const Icon(Icons.person, size: 60, color: Colors.grey)
+                                    : null,
                               ),
-                            ),
-                          ],
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt,
+                                    size: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Alterar foto do perfil',
-                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Alterar foto do perfil',
+                          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
+                ],
 
+                // Campos Comuns
                 CustomTextField(
                   label: "Nome Completo",
-                  hintText: "Seu nome",
                   prefixIcon: Icons.person_outline,
                   controller: _nameController,
                 ),
                 const SizedBox(height: 20),
                 CustomTextField(
                   label: "E-mail",
-                  hintText: "seu@email.com",
                   prefixIcon: Icons.email_outlined,
                   controller: _emailController,
                   readOnly: true,
@@ -156,82 +206,47 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 const SizedBox(height: 20),
                 CustomTextField(
                   label: "Telefone",
-                  hintText: "(00) 00000-0000",
                   prefixIcon: Icons.phone_outlined,
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                 ),
 
-                const SizedBox(height: 32),
-                const Text(
-                  'DADOS DO VEÍCULO',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.1,
+                if (isDriver) ...[
+                  const SizedBox(height: 32),
+                  const Text(
+                    'DADOS DO VEÍCULO',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-
-                CustomTextField(
-                  label: "Modelo",
-                  hintText: "Ex: Toyota Corolla",
-                  prefixIcon: Icons.directions_car_outlined,
-                  controller: _vehicleModelController,
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        label: "Placa",
-                        hintText: "BRA-2E19",
-                        controller: _vehiclePlateController,
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    label: "Modelo",
+                    prefixIcon: Icons.directions_car_outlined,
+                    controller: _vehicleModelController,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomTextField(label: "Placa", controller: _vehiclePlateController),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        label: "Cor",
-                        hintText: "Prata",
-                        controller: _vehicleColorController,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: CustomTextField(label: "Cor", controller: _vehicleColorController),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
 
                 const SizedBox(height: 40),
                 PrimaryButton(
                   text: isLoading ? 'Salvando...' : 'Salvar Alterações',
                   icon: isLoading ? null : Icons.save_outlined,
-                  onPressed: isLoading
-                      ? null
-                      : () async {
-                          // final updatedProfile = ProfileEntity(
-                          //   id: _profile!.id,
-                          //   email: _profile!.email,
-                          //   name: _nameController.text,
-                          //   phone: _phoneController.text,
-                          //   vehicleModel: _vehicleModelController.text,
-                          //   vehiclePlate: _vehiclePlateController.text,
-                          //   vehicleColor: _vehicleColorController.text,
-                          //   photoUrl: _profile!.photoUrl,
-                          //   nomeSindicato: _profile!.nomeSindicato,
-                          // );
-
-                          // await _controller.updateProfile(updatedProfile, imageFile: _imageFile);
-
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Perfil atualizado com sucesso!'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                            Navigator.pop(context);
-                          }
-                        },
+                  onPressed: isLoading ? null : _onSave,
                 ),
                 const SizedBox(height: 24),
               ],

@@ -1,6 +1,7 @@
-import 'package:alternative/features/home/domain/entities/admin_entity.dart';
 import 'package:alternative/features/home/domain/entities/driver_entity.dart';
+import 'package:alternative/features/home/domain/entities/profile_result.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../routes/app_routes_manager.dart';
@@ -30,7 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
-          'Ajustes',
+          'Perfil',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: AppColors.background,
@@ -44,7 +45,6 @@ class _ProfilePageState extends State<ProfilePage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is ProfileSuccessState) {
-            // state.profile aqui é um Object (Admin ou Driver)
             return _buildContent(state.profile);
           }
           if (state is ProfileErrorState) {
@@ -69,11 +69,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildContent(Object profile) {
-    // Extração de dados comuns usando a nova sintaxe do Dart
     final (name, email, photoUrl) = switch (profile) {
-      DriverEntity d => (d.name, d.email, d.photoUrl),
-      AdminEntity a => (a.name, a.email, null), // Admin pode não ter foto
-      _ => ('Usuário', '', null),
+      DriverProfile p => (p.driver.name, p.driver.email, p.driver.photoUrl),
+      AdminProfile p => (p.admin.name, p.admin.email, null),
+
+      _ => ('Usuário Desconhecido', 'Tipo: ${profile.runtimeType}', null),
     };
 
     return SingleChildScrollView(
@@ -97,7 +97,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           Text(email, style: const TextStyle(color: AppColors.slate400, fontSize: 14)),
 
-          // Badge opcional para identificar o tipo (útil para você debugar)
           if (profile is DriverEntity)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -147,7 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
               if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.auth);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white.withAlpha(13), // .withValues para versões novas
+              backgroundColor: Colors.white.withAlpha(13),
               foregroundColor: Colors.redAccent,
               minimumSize: const Size(double.infinity, 56),
               elevation: 0,

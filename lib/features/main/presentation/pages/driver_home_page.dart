@@ -4,14 +4,14 @@ import '../../../checkin/presentation/pages/checkin_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../queue/presentation/pages/queue_page.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class DriverHomePage extends StatefulWidget {
+  const DriverHomePage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<DriverHomePage> createState() => _DriverHomePageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _DriverHomePageState extends State<DriverHomePage> {
   int _selectedIndex = 0;
 
   late final List<Widget> _pages;
@@ -22,7 +22,9 @@ class _MainPageState extends State<MainPage> {
     _pages = [
       const CheckinPage(),
       const QueuePage(),
-      const Center(child: Text('Viagens', style: TextStyle(color: Colors.white))),
+      const Center(
+        child: Text('Viagens', style: TextStyle(color: Colors.white)),
+      ),
       const ProfilePage(),
     ];
   }
@@ -36,15 +38,10 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          border: Border(
-            top: BorderSide(color: AppColors.border, width: 1),
-          ),
+          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
         ),
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
