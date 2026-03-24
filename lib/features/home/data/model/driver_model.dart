@@ -1,5 +1,4 @@
-﻿import 'package:alternative/core/utils/enum_class.dart';
-import 'package:alternative/features/home/domain/entities/driver_entity.dart';
+﻿import 'package:alternative/features/home/domain/entities/driver_entity.dart';
 
 class DriverModel extends DriverEntity {
   DriverModel({
@@ -7,8 +6,8 @@ class DriverModel extends DriverEntity {
     required super.email,
     required super.name,
     required super.phone,
-    required super.userType,
     super.photoUrl,
+    required super.baseCity,
     required super.vehicleModel,
     required super.vehicleColor,
     required super.vehiclePlate,
@@ -21,10 +20,7 @@ class DriverModel extends DriverEntity {
       email: map['email'] ?? '',
       name: map['full_name'] ?? '',
       phone: map['phone'] ?? '',
-      userType: UserType.values.firstWhere(
-        (e) => e.name == map['user_type'],
-        orElse: () => UserType.driver,
-      ),
+      baseCity: map['base_city'] ?? '',
       photoUrl: map['photo_url'],
       vehicleModel: map['vehicle_model'] ?? '',
       vehicleColor: map['vehicle_color'] ?? '',
@@ -39,8 +35,8 @@ class DriverModel extends DriverEntity {
       'email': email,
       'full_name': name,
       'phone': phone,
-      'user_type': userType.name,
       'photo_url': photoUrl,
+      'base_city': baseCity,
       'vehicle_model': vehicleModel,
       'vehicle_color': vehicleColor,
       'vehicle_plate': vehiclePlate,

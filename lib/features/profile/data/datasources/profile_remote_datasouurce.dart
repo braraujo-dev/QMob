@@ -1,11 +1,12 @@
-﻿import 'dart:io';
-import 'package:alternative/features/profile/data/models/profile_model.dart';
+﻿import 'package:alternative/features/home/data/model/admin_model.dart';
+import 'package:alternative/features/home/data/model/driver_model.dart';
+import 'package:alternative/features/home/domain/entities/profile_result.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class ProfileRemoteDataSource {
-  Future<ProfileModel> getProfile(String userId);
+  // Retornamos dynamic ou uma Entity comum a ambos
+  Future<ProfileResult> getProfile(String userId, String role);
   Future<void> signOut();
-  Future<void> updateProfile(ProfileModel profile, {File? imageFile});
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -13,47 +14,48 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   ProfileRemoteDataSourceImpl(this.supabaseClient);
 
   @override
-  Future<ProfileModel> getProfile(String userId) async {
-    try {
-      final user = supabaseClient.auth.currentUser;
-      final response = await supabaseClient.from('profiles').select().eq('id', userId).single();
-      return ProfileModel.fromJson(response, user?.email ?? '');
-    } catch (e) {
-      throw ('Erro ao buscar perfil: $e');
+  Future<ProfileResult> getProfile(String userId, String role) async {
+    if (role == 'admin') {
+      final response = await supabaseClient.from('admins').select().eq('id', userId).single();
+      // O AdminModel (Data) preenche a AdminEntity (Domain)
+      return AdminProfile(AdminModel.fromMap(response));
+    } else {
+      final response = await supabaseClient.from('drivers').select().eq('id', userId).single();
+      return DriverProfile(DriverModel.fromMap(response));
     }
   }
 
-  @override
-  Future<void> updateProfile(ProfileModel profile, {File? imageFile}) async {
-    try {
-      String? photoUrl = profile.photoUrl;
+  // @override
+  // Future<void> updateProfile(ProfileModel profile, {File? imageFile}) async {
+  //   try {
+  //     String? photoUrl = profile.photoUrl;
 
-      // Se houver uma nova imagem, fazemos o upload para o Storage do Supabase
-      if (imageFile != null) {
-        final fileName = '${profile.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        
-        await supabaseClient.storage.from('avatars').upload(
-          fileName,
-          imageFile,
-          fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
-        );
+  //     // Se houver uma nova imagem, fazemos o upload para o Storage do Supabase
+  //     if (imageFile != null) {
+  //       final fileName = '${profile.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-        photoUrl = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
-      }
+  //       await supabaseClient.storage.from('avatars').upload(
+  //         fileName,
+  //         imageFile,
+  //         fileOptions: const FileOptions(cacheControl: '3600', upsert: true),
+  //       );
 
-      final dataToUpdate = profile.toJson();
-      if (photoUrl != null) {
-        dataToUpdate['photo_url'] = photoUrl;
-      }
+  //       photoUrl = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
+  //     }
 
-      await supabaseClient
-          .from('profiles')
-          .update(dataToUpdate)
-          .eq('id', profile.id);
-    } catch (e) {
-      throw ('Erro ao atualizar perfil: $e');
-    }
-  }
+  //     final dataToUpdate = profile.toJson();
+  //     if (photoUrl != null) {
+  //       dataToUpdate['photo_url'] = photoUrl;
+  //     }
+
+  //     await supabaseClient
+  //         .from('profiles')
+  //         .update(dataToUpdate)
+  //         .eq('id', profile.id);
+  //   } catch (e) {
+  //     throw ('Erro ao atualizar perfil: $e');
+  //   }
+  // }
 
   @override
   Future<void> signOut() async => await supabaseClient.auth.signOut();

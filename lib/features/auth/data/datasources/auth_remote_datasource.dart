@@ -1,9 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> signIn({required String email, required String password});
-  Future<UserModel?> getCurrentUser();
+  Future<String?> getBaseCity();
   Future<void> sendPasswordResetEmail(String email);
 }
 
@@ -26,21 +27,35 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Usuário não encontrado');
       }
 
-      // Retornamos apenas os dados de Auth, sem buscar tabelas extras
-      return UserModel(id: user.id, email: user.email ?? '');
+      final String userRole = user.appMetadata['role'] ?? 'user';
+
+      return UserModel(id: user.id, email: user.email ?? '', role: userRole);
     } catch (e) {
       throw Exception('Erro ao realizar login: ${e.toString()}');
     }
   }
 
   @override
-  Future<UserModel?> getCurrentUser() async {
-    final user = supabaseClient.auth.currentUser;
+  Future<String?> getBaseCity() async {
+    try {
+      final user = supabaseClient.auth.currentUser;
 
-    if (user != null) {
-      return UserModel(id: user.id, email: user.email ?? '');
+      if (user == null) return null;
+
+      final response = await supabaseClient
+          .from('drivers')
+          .select('base_city')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (response != null && response['base_city'] != null) {
+        return response['base_city'] as String;
+      }
+
+      return null;
+    } catch (e) {
+      throw Exception('Erro ao buscar cidade base: ${e.toString()}');
     }
-    return null;
   }
 
   @override

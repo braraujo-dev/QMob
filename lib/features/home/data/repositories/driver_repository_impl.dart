@@ -15,14 +15,13 @@ class DriverRepositoryImpl implements DriverRepository {
     required String password,
   }) async {
     try {
-      // Agora passamos o ID.
-      // No registro, o ID costuma vir vazio ou ser gerado pelo Auth depois.
       final model = DriverModel(
-        id: driver.id, // O ID que vem da entity (pode ser vazio no cadastro)
+        id: driver.id,
         name: driver.name,
         email: driver.email,
         phone: driver.phone,
         photoUrl: driver.photoUrl,
+        baseCity: driver.baseCity,
         vehicleModel: driver.vehicleModel,
         vehicleColor: driver.vehicleColor,
         vehiclePlate: driver.vehiclePlate,

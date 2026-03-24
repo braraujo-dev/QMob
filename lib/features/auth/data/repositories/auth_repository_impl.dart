@@ -23,8 +23,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<UserEntity?> getCurrentUser() async {
-    return await remoteDataSource.getCurrentUser();
+  Future<String?> getBaseCity() async {
+    return await remoteDataSource.getBaseCity();
   }
 
   @override

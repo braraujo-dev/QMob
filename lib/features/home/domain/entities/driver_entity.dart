@@ -1,11 +1,9 @@
-﻿import 'package:alternative/core/utils/enum_class.dart';
-
-class DriverEntity {
+﻿class DriverEntity {
   final String id;
   final String email;
   final String name;
   final String phone;
-  final UserType userType;
+  final String baseCity;
   final String vehicleModel;
   final String vehicleColor;
   final String vehiclePlate;
@@ -17,7 +15,7 @@ class DriverEntity {
     required this.email,
     required this.name,
     required this.phone,
-    required this.userType,
+    required this.baseCity,
     required this.vehicleModel,
     required this.vehicleColor,
     required this.vehiclePlate,

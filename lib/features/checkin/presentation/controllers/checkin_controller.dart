@@ -35,19 +35,21 @@ class CheckinController extends ValueNotifier<CheckinState> {
     required this.authUseCase,
     required this.checkinRepository,
     required this.queueRepository,
-  }) : super(CheckinState(
-    destination: CapitalEntity(cityName: '', coords: const LatLng(0,0), radius: 0),
-    isLoading: true,
-  ));
+  }) : super(
+         CheckinState(
+           destination: CapitalEntity(cityName: '', coords: const LatLng(0, 0), radius: 0),
+           isLoading: true,
+         ),
+       );
 
   Future<void> init() async {
     try {
       value = value.copyWith(isLoading: true);
 
-      final user = await authUseCase.getCurrentUser();
-      if (user?.baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
+      final baseCity = await authUseCase.getBaseCity();
+      if (baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
 
-      final destination = await checkinRepository.getDestinationByCityName(user!.baseCity!);
+      final destination = await checkinRepository.getDestinationByCityName(baseCity);
 
       _queueStream?.cancel();
       _queueStream = queueRepository.getQueueStream().listen((queue) {
@@ -55,10 +57,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
         value = value.copyWith(isAlreadyInQueue: inQueue);
       });
 
-      value = value.copyWith(
-        destination: destination,
-        isLoading: false,
-      );
+      value = value.copyWith(destination: destination, isLoading: false);
 
       startTracking();
     } catch (e) {
