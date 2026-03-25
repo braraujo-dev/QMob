@@ -39,7 +39,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
           vehicleModel: e.vehicleModel,
           vehicleColor: e.vehicleColor,
           vehiclePlate: e.vehiclePlate,
-          assignedCapital: e.assignedCapital,
         ),
 
         AdminEntity e => AdminModel(

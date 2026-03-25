@@ -49,17 +49,24 @@ class CheckinController extends ValueNotifier<CheckinState> {
       final baseCity = await authUseCase.getBaseCity();
       if (baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
 
-      final destination = await checkinRepository.getDestinationByCityName(baseCity);
+      final result = await checkinRepository.getDestinationByCityName(baseCity);
 
-      _queueStream?.cancel();
-      _queueStream = queueRepository.getQueueStream().listen((queue) {
-        final bool inQueue = queue.any((driver) => driver.isCurrentUser);
-        value = value.copyWith(isAlreadyInQueue: inQueue);
-      });
+      result.fold(
+        (error) {
+          debugPrint('Erro ao buscar destino: $error');
+          value = value.copyWith(isLoading: false);
+        },
+        (destination) {
+          _queueStream?.cancel();
+          _queueStream = queueRepository.getQueueStream().listen((queue) {
+            final bool inQueue = queue.any((driver) => driver.isCurrentUser);
+            value = value.copyWith(isAlreadyInQueue: inQueue);
+          });
 
-      value = value.copyWith(destination: destination, isLoading: false);
-
-      startTracking();
+          value = value.copyWith(destination: destination, isLoading: false);
+          startTracking();
+        },
+      );
     } catch (e) {
       debugPrint('Erro no init do Checkin: $e');
       value = value.copyWith(isLoading: false);

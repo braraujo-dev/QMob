@@ -11,7 +11,6 @@ class DriverModel extends DriverEntity {
     required super.vehicleModel,
     required super.vehicleColor,
     required super.vehiclePlate,
-    required super.assignedCapital,
   });
 
   factory DriverModel.fromMap(Map<String, dynamic> map) {
@@ -25,7 +24,6 @@ class DriverModel extends DriverEntity {
       vehicleModel: map['vehicle_model'] ?? '',
       vehicleColor: map['vehicle_color'] ?? '',
       vehiclePlate: map['vehicle_plate'] ?? '',
-      assignedCapital: (map['assigned_capital'] ?? 0).toDouble(),
     );
   }
 
@@ -40,7 +38,6 @@ class DriverModel extends DriverEntity {
       'vehicle_model': vehicleModel,
       'vehicle_color': vehicleColor,
       'vehicle_plate': vehiclePlate,
-      'assigned_capital': assignedCapital,
     };
   }
 }

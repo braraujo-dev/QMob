@@ -7,7 +7,6 @@
   final String vehicleModel;
   final String vehicleColor;
   final String vehiclePlate;
-  final double assignedCapital;
   final String? photoUrl;
 
   DriverEntity({
@@ -19,7 +18,6 @@
     required this.vehicleModel,
     required this.vehicleColor,
     required this.vehiclePlate,
-    required this.assignedCapital,
     this.photoUrl,
   });
 
@@ -40,7 +38,6 @@
       vehicleModel: vehicleModel ?? this.vehicleModel,
       vehicleColor: vehicleColor ?? this.vehicleColor,
       vehiclePlate: vehiclePlate ?? this.vehiclePlate,
-      assignedCapital: assignedCapital,
       photoUrl: photoUrl ?? this.photoUrl,
     );
   }

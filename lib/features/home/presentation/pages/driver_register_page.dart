@@ -3,7 +3,7 @@ import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
-import '../controllers/driver_controller.dart';
+import '../controllers/driver_register_controller.dart';
 import '../controllers/driver_state.dart';
 
 class DriverRegisterPage extends StatefulWidget {
@@ -14,26 +14,27 @@ class DriverRegisterPage extends StatefulWidget {
 }
 
 class _DriverRegisterPageState extends State<DriverRegisterPage> {
-  late final DriverController _controller;
+  late final DriverTegisterController _controller;
 
-  // Controllers dos campos
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _modelController = TextEditingController();
   final _colorController = TextEditingController();
-  final _baseCityController = TextEditingController();
   final _plateController = TextEditingController();
-  final _capitalController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  String? _selectedBaseCity;
+  final List<String> _capitals = [];
+  final bool _isLoadingCapitals = true;
   bool _agreedToTerms = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = sl<DriverController>();
+    _controller = sl<DriverTegisterController>();
     _controller.addListener(_onStateChanged);
+    _controller.fetchCapitals();
   }
 
   void _onStateChanged() {
@@ -62,12 +63,18 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
     _modelController.dispose();
     _colorController.dispose();
     _plateController.dispose();
-    _capitalController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   void _handleRegister() {
+    if (_selectedBaseCity == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Por favor, selecione uma cidade base.")));
+      return;
+    }
+
     _controller.register(
       name: _nameController.text,
       email: _emailController.text,
@@ -75,8 +82,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       vehicleModel: _modelController.text,
       vehicleColor: _colorController.text,
       vehiclePlate: _plateController.text,
-      baseCity: _baseCityController.text,
-      assignedCapital: double.tryParse(_capitalController.text) ?? 0.0,
+      baseCity: _selectedBaseCity!,
       password: _passwordController.text,
     );
   }
@@ -87,6 +93,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        elevation: 0,
         title: const Text('Cadastro de Motorista', style: TextStyle(color: AppColors.white)),
         centerTitle: true,
       ),
@@ -96,6 +103,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomTextField(
                   label: "Nome Completo",
@@ -117,6 +125,12 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
+
+                const Text("Cidade Base", style: TextStyle(color: AppColors.white, fontSize: 14)),
+                const SizedBox(height: 8),
+                _buildCitySpinner(),
+
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
@@ -133,20 +147,10 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(label: "Placa", controller: _plateController),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: CustomTextField(
-                        label: "Capital (R\$)",
-                        controller: _capitalController,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                  ],
+                CustomTextField(
+                  label: "Placa",
+                  controller: _plateController,
+                  prefixIcon: Icons.directions_car,
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
@@ -166,8 +170,10 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   onChanged: (val) => setState(() => _agreedToTerms = val!),
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
+                  activeColor: AppColors.primary,
                 ),
 
+                const SizedBox(height: 16),
                 PrimaryButton(
                   text: state is DriverLoadingState ? 'Processando...' : 'Cadastrar',
                   onPressed: (_agreedToTerms && state is! DriverLoadingState)
@@ -179,6 +185,27 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildCitySpinner() {
+    return ValueListenableBuilder(
+      valueListenable: _controller,
+      builder: (context, state, _) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedBaseCity,
+              items: _controller.capitals.map((city) {
+                return DropdownMenuItem(value: city, child: Text(city));
+              }).toList(),
+              onChanged: (val) => setState(() => _selectedBaseCity = val),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,9 +1,10 @@
 import 'package:alternative/features/home/data/datasources/driver_remote_datasource.dart';
 import 'package:alternative/features/home/data/repositories/driver_repository_impl.dart';
 import 'package:alternative/features/home/domain/repositories/driver_repository.dart';
+import 'package:alternative/features/home/domain/usecases/get_capitals_usecase.dart';
 import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
 import 'package:alternative/features/home/domain/usecases/register_driver_usecase.dart';
-import 'package:alternative/features/home/presentation/controllers/driver_controller.dart';
+import 'package:alternative/features/home/presentation/controllers/driver_register_controller.dart';
 import 'package:alternative/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:alternative/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
@@ -61,6 +62,7 @@ Future<void> init() async {
   sl.registerLazySingleton<CheckinRemoteDataSource>(() => CheckinRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<CheckinRepository>(() => CheckinRepositoryImpl(sl()));
   sl.registerLazySingleton(() => const GetCheckinStatusUseCase());
+  sl.registerLazySingleton(() => GetCapitalsUseCase(sl()));
 
   sl.registerFactory(
     () => CheckinController(
@@ -97,5 +99,13 @@ Future<void> init() async {
   sl.registerLazySingleton<DriverRepository>(() => DriverRepositoryImpl(sl()));
   sl.registerLazySingleton(() => RegisterDriverUseCase(sl()));
   sl.registerLazySingleton(() => GetDriversUseCase(sl()));
-  sl.registerFactory(() => DriverController(registerDriverUseCase: sl(), getDriversUseCase: sl()));
+
+  // ATUALIZE O FACTORY ABAIXO:
+  sl.registerFactory(
+    () => DriverTegisterController(
+      registerDriverUseCase: sl(),
+      getDriversUseCase: sl(),
+      getCapitalsUseCase: sl(),
+    ),
+  );
 }
