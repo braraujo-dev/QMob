@@ -12,7 +12,7 @@ class CheckinRepositoryImpl implements CheckinRepository {
   Future<Either<String, CapitalEntity>> getDestinationByCityName(String cityName) async {
     try {
       final result = await remoteDataSource.getCapitalData(cityName);
-      return Right(result); // Agora retorna Right(Entidade)
+      return Right(result);
     } catch (e) {
       return Left("Erro ao buscar dados da capital: ${e.toString()}");
     }
