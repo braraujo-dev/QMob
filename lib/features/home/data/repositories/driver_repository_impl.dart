@@ -25,7 +25,6 @@ class DriverRepositoryImpl implements DriverRepository {
         vehicleModel: driver.vehicleModel,
         vehicleColor: driver.vehicleColor,
         vehiclePlate: driver.vehiclePlate,
-        assignedCapital: driver.assignedCapital,
       );
 
       await remoteDataSource.registerDriver(model, password);

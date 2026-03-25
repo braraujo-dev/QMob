@@ -1,8 +1,12 @@
-﻿import 'package:alternative/features/home/domain/entities/profile_result.dart';
+﻿import 'dart:io';
+import 'package:alternative/features/home/data/model/admin_model.dart';
+import 'package:alternative/features/home/data/model/driver_model.dart';
+import 'package:alternative/features/home/domain/entities/admin_entity.dart';
+import 'package:alternative/features/home/domain/entities/driver_entity.dart';
+import 'package:alternative/features/home/domain/entities/profile_result.dart';
 import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
 import 'package:dartz/dartz.dart';
-
-import '../datasources/profile_remote_datasouurce.dart';
+import '../datasources/profile_remote_datasource.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
@@ -18,42 +22,46 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
   }
 
-  // @override
-  // Future<Either<String, void>> updateProfile(ProfileEntity profile, {File? imageFile}) async {
-  //   try {
-  //     // 1. Criamos um Map básico com o que é comum (ProfileModel)
-  //     final model = ProfileModel(
-  //       id: profile.id,
-  //       email: profile.email,
-  //       name: profile.name,
-  //       phone: profile.phone,
-  //     );
+  @override
+  Future<Either<String, void>> updateProfile(Object entity, {File? imageFile}) async {
+    try {
+      final Object modelToUpdate = switch (entity) {
+        DriverModel m => m,
+        AdminModel m => m,
 
-  //     // 2. Se for um Motorista, precisamos converter para DriverModel para incluir os veículos
-  //     if (profile is DriverEntity) {
-  //       final driverModel = DriverModel(
-  //         id: profile.id,
-  //         email: profile.email,
-  //         name: profile.name,
-  //         phone: profile.phone ?? '',
-  //         photoUrl: profile.photoUrl,
-  //         baseCity: profile.base,
-  //         vehicleModel: profile.vehicleModel,
-  //         vehicleColor: profile.vehicleColor,
-  //         vehiclePlate: profile.vehiclePlate,
-  //         assignedCapital: profile.assignedCapital,
-  //       );
-  //       await remoteDataSource.updateProfile(driverModel, imageFile: imageFile);
-  //     } else {
-  //       // 3. Se for Admin, enviamos o modelo base ou um AdminModel
-  //       await remoteDataSource.updateProfile(model, imageFile: imageFile);
-  //     }
+        DriverEntity e => DriverModel(
+          id: e.id,
+          email: e.email,
+          name: e.name,
+          phone: e.phone,
+          photoUrl: e.photoUrl,
+          baseCity: e.baseCity,
+          vehicleModel: e.vehicleModel,
+          vehicleColor: e.vehicleColor,
+          vehiclePlate: e.vehiclePlate,
+        ),
 
-  //     return const Right(null);
-  //   } catch (e) {
-  //     return Left(e.toString());
-  //   }
-  // }
+        AdminEntity e => AdminModel(
+          id: e.id,
+          email: e.email,
+          name: e.name,
+          phone: e.phone,
+          nomeSindicato: e.nomeSindicato,
+          cnpj: e.cnpj,
+          responsavel: e.responsavel,
+          contato: e.contato,
+        ),
+
+        _ => throw Exception("Tipo de entidade não suportado"),
+      };
+
+      await remoteDataSource.updateProfile(modelToUpdate, imageFile: imageFile);
+
+      return const Right(null);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
 
   @override
   Future<void> signOut() async => await remoteDataSource.signOut();

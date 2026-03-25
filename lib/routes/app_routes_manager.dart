@@ -4,7 +4,7 @@ import 'package:alternative/features/checkin/presentation/pages/checkin_page.dar
 import 'package:alternative/features/historic/presentation/pages/historic_page.dart';
 import 'package:alternative/features/home/presentation/pages/admin_home_page.dart';
 import 'package:alternative/features/home/presentation/pages/driver_register_page.dart';
-import 'package:alternative/features/main/presentation/pages/main_page.dart';
+import 'package:alternative/features/main/presentation/pages/driver_home_page.dart';
 import 'package:alternative/features/profile/presentation/pages/profile_page.dart';
 import 'package:alternative/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:alternative/features/queue/presentation/pages/queue_page.dart';
@@ -12,20 +12,20 @@ import 'package:flutter/material.dart';
 
 class AppRoutes {
   static const String auth = '/auth';
-  static const String forgotPassword = '/forgotPassword';
-  static const String main = '/main';
+  static const String forgotPassword = '/forgot-password';
+  static const String driverHome = '/driver-home';
   static const String checkin = '/checkin';
   static const String queue = '/queue';
-  static const String adminHome = '/adminHome';
-  static const String driverRegister = '/driverRegister';
+  static const String adminHome = '/admin-home';
+  static const String driverRegister = '/driver-register';
   static const String profile = '/profile';
-  static const String editProfile = '/editProfile';
+  static const String editProfile = '/edit-profile';
   static const String historic = '/historic';
 
   static Map<String, WidgetBuilder> get routes => {
     auth: (context) => const AuthPage(),
     forgotPassword: (context) => const ForgotPasswordPage(),
-    main: (context) => const MainPage(),
+    driverHome: (context) => const DriverHomePage(),
     checkin: (context) => const CheckinPage(),
     queue: (context) => const QueuePage(),
     adminHome: (context) => const AdminHomePage(),

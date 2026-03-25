@@ -4,6 +4,7 @@ import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> signIn({required String email, required String password});
+  User? getCurrentSession();
   Future<String?> getBaseCity();
   Future<void> sendPasswordResetEmail(String email);
 }
@@ -33,6 +34,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       throw Exception('Erro ao realizar login: ${e.toString()}');
     }
+  }
+
+  @override
+  User? getCurrentSession() {
+    return supabaseClient.auth.currentSession?.user;
   }
 
   @override
