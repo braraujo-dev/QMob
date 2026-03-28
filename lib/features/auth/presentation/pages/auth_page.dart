@@ -203,7 +203,7 @@ class _AuthPageState extends State<AuthPage> {
                   const SizedBox(height: 20),
                   CustomTextField(
                     label: 'Senha',
-                    hintText: 'Sua senha secreta',
+                    hintText: 'Digite a senha',
                     prefixIcon: Icons.lock_open_rounded,
                     isPassword: true,
                     controller: _passwordController,
@@ -231,7 +231,9 @@ class _AuthPageState extends State<AuthPage> {
                           ],
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, AppRoutes.forgotPassword);
+                          },
                           child: const Text(
                             'Esqueci a senha',
                             style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),

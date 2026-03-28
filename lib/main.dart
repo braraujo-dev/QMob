@@ -1,6 +1,7 @@
 import 'package:alternative/core/theme/app_theme.dart';
 import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config/env.dart';
@@ -9,7 +10,12 @@ import 'core/di/injection_container.dart' as di;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabaseAnonKey);
+  await dotenv.load(fileName: ".env");
+
+  await Supabase.initialize(
+    url: Env.supabaseUrl, 
+    anonKey: Env.supabaseAnonKey
+  );
 
   await di.init();
 
