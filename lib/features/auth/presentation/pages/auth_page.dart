@@ -1,4 +1,3 @@
-import 'package:alternative/core/utils/enum_class.dart';
 import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 
@@ -54,10 +53,18 @@ class _AuthPageState extends State<AuthPage> {
       );
       _controller.resetState();
     } else if (state is AuthSuccessState) {
-      Navigator.pushReplacementNamed(
-        context,
-        state.user.role == UserType.admin.name ? AppRoutes.adminHome : AppRoutes.driverHome,
-      );
+      if (state.user.mustChangePassword) {
+        Navigator.pushReplacementNamed(
+          context, 
+          AppRoutes.changePassword, 
+          arguments: true,
+        );
+      } else {
+        Navigator.pushReplacementNamed(
+          context,
+          state.user.isAdmin ? AppRoutes.adminHome : AppRoutes.driverHome,
+        );
+      }
     }
   }
 

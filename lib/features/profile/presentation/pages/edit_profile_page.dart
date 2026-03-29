@@ -190,7 +190,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const SizedBox(height: 32),
                 ],
 
-                // Campos Comuns
                 CustomTextField(
                   label: "Nome Completo",
                   prefixIcon: Icons.person_outline,

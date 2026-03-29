@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_text_field.dart';
@@ -25,8 +26,6 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
   final _passwordController = TextEditingController();
 
   String? _selectedBaseCity;
-  final List<String> _capitals = [];
-  final bool _isLoadingCapitals = true;
   bool _agreedToTerms = false;
 
   @override
@@ -40,17 +39,14 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
   void _onStateChanged() {
     if (_controller.value is DriverSuccessState) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Motorista cadastrado com sucesso!'),
-          backgroundColor: Colors.green,
-        ),
+        const SnackBar(content: Text('Motorista cadastrado com sucesso!'), backgroundColor: Colors.green),
       );
       Navigator.pop(context);
     } else if (_controller.value is DriverErrorState) {
       final state = _controller.value as DriverErrorState;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.message), backgroundColor: Colors.red)
+      );
     }
   }
 
@@ -69,9 +65,11 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
 
   void _handleRegister() {
     if (_selectedBaseCity == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Por favor, selecione uma cidade base.")));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Por favor, selecione uma cidade base.")));
+      return;
+    }
+    if (_passwordController.text.length < 8) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("A senha deve ter no mínimo 8 caracteres.")));
       return;
     }
 
@@ -94,7 +92,11 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Cadastro de Motorista', style: TextStyle(color: AppColors.white)),
+        title: const Text('Novo Motorista', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
         centerTitle: true,
       ),
       body: ValueListenableBuilder<DriverState>(
@@ -108,78 +110,101 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                 CustomTextField(
                   label: "Nome Completo",
                   controller: _nameController,
-                  prefixIcon: Icons.person,
+                  prefixIcon: Icons.person_outline,
+                  hintText: "Ex: João Silva",
+                  textCapitalization: TextCapitalization.words,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 CustomTextField(
-                  label: "Email",
+                  label: "Email de Acesso",
                   controller: _emailController,
-                  prefixIcon: Icons.email,
+                  prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
+                  hintText: "motorista@empresa.com",
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 CustomTextField(
-                  label: "Telefone",
+                  label: "Telefone / WhatsApp",
                   controller: _phoneController,
-                  prefixIcon: Icons.phone,
+                  prefixIcon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
+                  hintText: "(00) 00000-0000",
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                const Text("Cidade Base", style: TextStyle(color: AppColors.white, fontSize: 14)),
+                const Text("Cidade Base", style: TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
-                _buildCitySpinner(),
+                _buildCitySelector(),
 
+                const SizedBox(height: 24),
+                const Text('DADOS DO VEÍCULO', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
                 const SizedBox(height: 16),
+                
+                CustomTextField(
+                  label: "Modelo do Carro",
+                  controller: _modelController,
+                  prefixIcon: Icons.directions_car_outlined,
+                  hintText: "Ex: Toyota Corolla",
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
                       child: CustomTextField(
-                        label: "Veículo",
-                        hintText: "Modelo",
-                        controller: _modelController,
+                        label: "Placa",
+                        controller: _plateController,
+                        hintText: "BRA-2E19",
+                        textCapitalization: TextCapitalization.characters,
+                        inputFormatters: [UpperCaseTextFormatter()],
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 16),
                     Expanded(
-                      child: CustomTextField(label: "Cor", controller: _colorController),
+                      child: CustomTextField(
+                        label: "Cor",
+                        controller: _colorController,
+                        hintText: "Prata",
+                        textCapitalization: TextCapitalization.words,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 CustomTextField(
-                  label: "Placa",
-                  controller: _plateController,
-                  prefixIcon: Icons.directions_car,
-                ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  label: "Senha",
+                  label: "Senha Inicial",
                   controller: _passwordController,
-                  prefixIcon: Icons.lock,
+                  prefixIcon: Icons.lock_outline,
                   isPassword: true,
+                  hintText: "Mínimo 8 caracteres",
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
-                CheckboxListTile(
-                  title: const Text(
-                    "Aceito os termos",
-                    style: TextStyle(color: AppColors.slate400, fontSize: 12),
-                  ),
-                  value: _agreedToTerms,
-                  onChanged: (val) => setState(() => _agreedToTerms = val!),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  contentPadding: EdgeInsets.zero,
-                  activeColor: AppColors.primary,
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _agreedToTerms,
+                      onChanged: (val) => setState(() => _agreedToTerms = val!),
+                      activeColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        "Confirmo que os dados acima estão corretos para o cadastro operacional.",
+                        style: TextStyle(color: AppColors.slate400, fontSize: 12),
+                      ),
+                    ),
+                  ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 32),
                 PrimaryButton(
-                  text: state is DriverLoadingState ? 'Processando...' : 'Cadastrar',
+                  text: state is DriverLoadingState ? 'Cadastrando...' : 'Cadastrar motorista',
                   onPressed: (_agreedToTerms && state is! DriverLoadingState)
                       ? _handleRegister
                       : null,
                 ),
+                const SizedBox(height: 40),
               ],
             ),
           );
@@ -188,24 +213,38 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
     );
   }
 
-  Widget _buildCitySpinner() {
-    return ValueListenableBuilder(
-      valueListenable: _controller,
-      builder: (context, state, _) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedBaseCity,
-              items: _controller.capitals.map((city) {
-                return DropdownMenuItem(value: city, child: Text(city));
-              }).toList(),
-              onChanged: (val) => setState(() => _selectedBaseCity = val),
-            ),
-          ),
-        );
-      },
+  Widget _buildCitySelector() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.slate500.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedBaseCity,
+          hint: const Text("Selecione a capital", style: TextStyle(color: AppColors.slate400, fontSize: 14)),
+          dropdownColor: AppColors.inputBackground,
+          icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.slate400),
+          isExpanded: true,
+          style: const TextStyle(color: AppColors.white, fontSize: 15),
+          items: _controller.capitals.map((city) {
+            return DropdownMenuItem(value: city, child: Text(city));
+          }).toList(),
+          onChanged: (val) => setState(() => _selectedBaseCity = val),
+        ),
+      ),
+    );
+  }
+}
+
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    return TextEditingValue(
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }

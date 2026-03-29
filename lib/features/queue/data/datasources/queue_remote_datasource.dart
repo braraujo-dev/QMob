@@ -17,22 +17,17 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
 
   @override
   Future<List<DriverQueueModel>> getQueue() async {
-    try {
-      final currentUserId = supabaseClient.auth.currentUser?.id ?? '';
+    final currentUserId = supabaseClient.auth.currentUser?.id ?? '';
 
-      final response = await supabaseClient
-          .from('queue')
-          .select('*, drivers(full_name, vehicle_model, vehicle_color)')
-          .order('checkin_time', ascending: true);
+    final response = await supabaseClient
+        .from('queue')
+        .select('*, drivers(full_name, vehicle_model, vehicle_color)')
+        .order('checkin_time', ascending: true);
 
-      final list = response as List;
-      return list.asMap().entries.map((entry) {
-        return DriverQueueModel.fromJson(entry.value, currentUserId, entry.key);
-      }).toList();
-    } catch (e) {
-      print('Erro ao buscar fila: $e');
-      rethrow;
-    }
+    final list = response as List;
+    return list.asMap().entries.map((entry) {
+      return DriverQueueModel.fromJson(entry.value, currentUserId, entry.key);
+    }).toList();
   }
 
   @override

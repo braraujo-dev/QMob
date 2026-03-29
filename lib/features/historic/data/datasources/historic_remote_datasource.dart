@@ -3,7 +3,7 @@ import '../models/historic_model.dart';
 
 abstract class HistoricRemoteDataSource {
   Future<List<HistoricModel>> getHistoric(String userId);
-  Stream<List<HistoricModel>> getHistoricStream(String userId); // Novo
+  Stream<List<HistoricModel>> getHistoricStream(String userId);
   Future<void> addHistoric(String userId, String origin, String destination, String status);
 }
 

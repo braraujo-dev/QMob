@@ -7,6 +7,7 @@ import 'package:alternative/features/home/presentation/pages/driver_register_pag
 import 'package:alternative/features/main/presentation/pages/driver_home_page.dart';
 import 'package:alternative/features/profile/presentation/pages/profile_page.dart';
 import 'package:alternative/features/profile/presentation/pages/edit_profile_page.dart';
+import 'package:alternative/features/profile/presentation/pages/change_password_page.dart';
 import 'package:alternative/features/queue/presentation/pages/queue_page.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +22,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String editProfile = '/edit-profile';
   static const String historic = '/historic';
+  static const String changePassword = '/change-password';
 
   static Map<String, WidgetBuilder> get routes => {
     auth: (context) => const AuthPage(),
@@ -33,5 +35,9 @@ class AppRoutes {
     profile: (context) => const ProfilePage(),
     editProfile: (context) => const EditProfilePage(),
     historic: (context) => const HistoricPage(),
+    changePassword: (context) {
+      final isFirstAccess = ModalRoute.of(context)?.settings.arguments as bool? ?? false;
+      return ChangePasswordPage(isFirstAccess: isFirstAccess);
+    },
   };
 }

@@ -6,14 +6,16 @@ class UserModel extends UserEntity {
     required super.email,
     required super.role,
     super.baseCity,
+    super.mustChangePassword,
   });
 
-  factory UserModel.fromSupabase(Map<String, dynamic> json, {String? baseCity, bool isAdmin = false}) {
+  factory UserModel.fromSupabase(Map<String, dynamic> json, {String? baseCity, bool mustChange = false}) {
     return UserModel(
       id: json['id'],
-      email: json['email'],
-      role: json['role'],
+      email: json['email'] ?? '',
+      role: json['role'] ?? 'driver',
       baseCity: baseCity,
+      mustChangePassword: mustChange,
     );
   }
 }

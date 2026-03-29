@@ -10,7 +10,9 @@ class DriverTegisterController extends ValueNotifier<DriverState> {
   final RegisterDriverUseCase registerDriverUseCase;
   final GetDriversUseCase getDriversUseCase;
   final GetCapitalsUseCase getCapitalsUseCase;
-  List<DriverEntity> drivers = [];
+  
+  List<DriverEntity> _allDrivers = [];
+  List<DriverEntity> filteredDrivers = [];
 
   DriverTegisterController({
     required this.registerDriverUseCase,
@@ -33,14 +35,27 @@ class DriverTegisterController extends ValueNotifier<DriverState> {
     final result = await getDriversUseCase();
 
     result.fold(
-      (error) {
-        return value = DriverErrorState(error);
-      },
+      (error) => value = DriverErrorState(error),
       (list) {
-        drivers = list;
+        _allDrivers = list;
+        filteredDrivers = list;
         value = DriverSuccessState();
       },
     );
+  }
+
+  void searchDrivers(String query) {
+    if (query.isEmpty) {
+      filteredDrivers = _allDrivers;
+    } else {
+      filteredDrivers = _allDrivers.where((driver) {
+        final name = driver.name.toLowerCase();
+        final plate = driver.vehiclePlate.toLowerCase();
+        final search = query.toLowerCase();
+        return name.contains(search) || plate.contains(search);
+      }).toList();
+    }
+    notifyListeners();
   }
 
   Future<void> register({

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/domain/usecases/auth_usecase.dart';
 import '../controllers/queue_controller.dart';
 import '../controllers/queue_state.dart';
 import '../../domain/entities/driver_queue_entity.dart';
@@ -14,12 +15,23 @@ class QueuePage extends StatefulWidget {
 
 class _QueuePageState extends State<QueuePage> {
   late final QueueController _controller;
+  bool _isAdmin = false;
 
   @override
   void initState() {
     super.initState();
     _controller = sl<QueueController>();
     _controller.fetchQueue();
+    _checkRole();
+  }
+
+  Future<void> _checkRole() async {
+    final user = await sl<AuthUseCase>().getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _isAdmin = user?.isAdmin ?? false;
+      });
+    }
   }
 
   @override
@@ -30,37 +42,8 @@ class _QueuePageState extends State<QueuePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Fila de Espera', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: false,
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'AO VIVO',
-                  style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      body: ValueListenableBuilder<QueueState>(
+    return SafeArea(
+      child: ValueListenableBuilder<QueueState>(
         valueListenable: _controller,
         builder: (context, state, child) {
           if (state is QueueLoadingState) {
@@ -81,6 +64,7 @@ class _QueuePageState extends State<QueuePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text('Erro ao carregar fila', style: TextStyle(color: Colors.white)),
+                  const SizedBox(height: 16),
                   TextButton(onPressed: () => _controller.fetchQueue(), child: const Text('Tentar novamente')),
                 ],
               ),
@@ -109,15 +93,17 @@ class _QueuePageState extends State<QueuePage> {
           ),
           const SizedBox(height: 32),
           const Text(
-            'Nenhum motorista na fila no momento',
+            'Fila vazia',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Seja o primeiro a fazer check-in e iniciar a fila de volta para sua cidade.',
+          Text(
+            _isAdmin 
+              ? 'Nenhum motorista realizou check-in até o momento.' 
+              : 'Seja o primeiro a fazer check-in e iniciar a fila de volta para sua cidade.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.slate400, fontSize: 14),
+            style: const TextStyle(color: AppColors.slate400, fontSize: 14),
           ),
         ],
       ),
@@ -222,7 +208,7 @@ class _QueuePageState extends State<QueuePage> {
             ),
           ),
         ),
-        if (state.currentUser != null)
+        if (state.currentUser != null && !_isAdmin)
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: ElevatedButton.icon(

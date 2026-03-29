@@ -24,18 +24,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       final driverDoc = await supabaseClient
           .from('drivers')
-          .select('base_city')
+          .select('base_city, must_change_password')
           .eq('id', response.user!.id)
           .maybeSingle();
 
       bool isAdmin = false;
-      if (driverDoc == null) {
+      bool mustChange = false;
+
+      if (driverDoc != null) {
+        mustChange = driverDoc['must_change_password'] ?? false;
+      } else {
         final adminDoc = await supabaseClient
             .from('admins')
-            .select('id')
+            .select('id, must_change_password')
             .eq('id', response.user!.id)
             .maybeSingle();
         isAdmin = adminDoc != null;
+        mustChange = adminDoc?['must_change_password'] ?? false;
       }
 
       final String userRole = response.user!.appMetadata['role'] ?? (isAdmin ? 'admin' : 'driver');
@@ -45,6 +50,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         email: response.user!.email ?? '',
         role: userRole,
         baseCity: driverDoc?['base_city'],
+        mustChangePassword: mustChange,
       );
     } catch (e) {
       throw Exception('Erro ao realizar login: ${e.toString()}');
@@ -58,11 +64,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     final driverDoc = await supabaseClient
         .from('drivers')
-        .select('base_city')
+        .select('base_city, must_change_password')
         .eq('id', user.id)
         .maybeSingle();
 
-    final bool isAdmin = driverDoc == null;
+    bool isAdmin = false;
+    bool mustChange = false;
+
+    if (driverDoc != null) {
+      mustChange = driverDoc['must_change_password'] ?? false;
+    } else {
+      final adminDoc = await supabaseClient
+          .from('admins')
+          .select('id, must_change_password')
+          .eq('id', user.id)
+          .maybeSingle();
+      isAdmin = adminDoc != null;
+      mustChange = adminDoc?['must_change_password'] ?? false;
+    }
+
     final String userRole = user.appMetadata['role'] ?? (isAdmin ? 'admin' : 'driver');
 
     return UserModel(
@@ -70,6 +90,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       email: user.email ?? '',
       role: userRole,
       baseCity: driverDoc?['base_city'],
+      mustChangePassword: mustChange,
     );
   }
 

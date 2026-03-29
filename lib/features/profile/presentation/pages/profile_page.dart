@@ -129,7 +129,11 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 32),
 
           _buildSectionTitle('SEGURANÇA'),
-          _buildOptionTile(Icons.lock_outline, 'Alterar senha'),
+          _buildOptionTile(
+            Icons.lock_outline, 
+            'Alterar senha', 
+            onTap: () => Navigator.pushNamed(context, AppRoutes.changePassword, arguments: false),
+          ),
           _buildOptionTile(Icons.fingerprint, 'Autenticação biométrica'),
 
           const SizedBox(height: 24),
@@ -187,7 +191,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildOptionTile(IconData icon, String title) {
+  Widget _buildOptionTile(IconData icon, String title, {VoidCallback? onTap}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -198,7 +202,7 @@ class _ProfilePageState extends State<ProfilePage> {
         leading: Icon(icon, color: AppColors.primary, size: 22),
         title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 15)),
         trailing: const Icon(Icons.chevron_right, color: AppColors.slate500),
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }

@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 
 class CustomTextField extends StatefulWidget {
   final String label;
-  final String hintText; // Removido o 'required'
-  final IconData? prefixIcon; // Agora opcional (para Placa/Cor)
-  final IconData? suffixIcon; // Novo
+  final String hintText;
+  final IconData? prefixIcon;
+  final IconData? suffixIcon;
   final bool isPassword;
-  final bool readOnly; // Novo
+  final bool readOnly;
   final TextEditingController? controller;
   final String? errorText;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization; // Adicionado
+  final List<TextInputFormatter>? inputFormatters; // Adicionado
   final Function(String)? onChanged;
   final Function(String)? onFieldSubmitted;
 
   const CustomTextField({
     super.key,
     required this.label,
-    this.hintText = '', // Valor padrão vazio
+    this.hintText = '',
     this.prefixIcon,
     this.suffixIcon,
     this.isPassword = false,
@@ -27,6 +30,8 @@ class CustomTextField extends StatefulWidget {
     this.errorText,
     this.keyboardType,
     this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
     this.onChanged,
     this.onFieldSubmitted,
   });
@@ -57,9 +62,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
         TextFormField(
           controller: widget.controller,
           obscureText: _obscureText,
-          readOnly: widget.readOnly, // Aplicando o readOnly
+          readOnly: widget.readOnly,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
+          textCapitalization: widget.textCapitalization,
+          inputFormatters: widget.inputFormatters,
           onChanged: widget.onChanged,
           onFieldSubmitted: widget.onFieldSubmitted,
           style: TextStyle(color: widget.readOnly ? AppColors.slate400 : AppColors.white),
@@ -67,7 +74,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
             hintStyle: const TextStyle(color: AppColors.slate400),
             hintText: widget.hintText,
             errorText: widget.errorText,
-            // Só mostra o ícone se ele for passado
             prefixIcon: widget.prefixIcon != null
                 ? Icon(widget.prefixIcon, size: 20, color: AppColors.primary)
                 : null,
