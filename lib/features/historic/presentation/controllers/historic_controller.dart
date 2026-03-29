@@ -1,12 +1,11 @@
 import 'dart:async';
+import 'package:alternative/core/utils/enum_class.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/historic_entity.dart';
 import '../../domain/repositories/historic_repository.dart';
 import '../../domain/usecases/get_historic_usecase.dart';
 import 'historic_state.dart';
-
-enum HistoricFilter { month, week, custom }
 
 class HistoricController extends ValueNotifier<HistoricState> {
   final GetHistoricUseCase getHistoricUseCase;
@@ -32,7 +31,7 @@ class HistoricController extends ValueNotifier<HistoricState> {
 
   void startListening() {
     value = HistoricLoadingState();
-    
+
     final userId = supabaseClient.auth.currentUser?.id;
     if (userId == null) {
       value = HistoricErrorState('Usuário não autenticado');
@@ -40,35 +39,36 @@ class HistoricController extends ValueNotifier<HistoricState> {
     }
 
     _historicSubscription?.cancel();
-    _historicSubscription = historicRepository.getHistoricStream(userId).listen(
-      (historic) {
-        final filteredList = _applyFilter(historic);
-        value = HistoricSuccessState(filteredList);
-      },
-      onError: (error) {
-        value = HistoricErrorState(error.toString());
-      },
-    );
+    _historicSubscription = historicRepository
+        .getHistoricStream(userId)
+        .listen(
+          (historic) {
+            final filteredList = _applyFilter(historic);
+            value = HistoricSuccessState(filteredList);
+          },
+          onError: (error) {
+            value = HistoricErrorState(error.toString());
+          },
+        );
   }
 
   List<HistoricEntity> _applyFilter(List<HistoricEntity> historic) {
     final now = DateTime.now();
+
     return historic.where((item) {
-      if (selectedFilter == HistoricFilter.week) {
-        return item.date.isAfter(now.subtract(const Duration(days: 7)));
-      } 
-      
-      if (selectedFilter == HistoricFilter.month) {
-        return item.date.month == now.month && item.date.year == now.year;
+      switch (selectedFilter) {
+        case HistoricFilter.week:
+          return item.date.isAfter(now.subtract(const Duration(days: 7)));
+        case HistoricFilter.month:
+          return item.date.month == now.month && item.date.year == now.year;
+        case HistoricFilter.older:
+          return item.date.isBefore(now.subtract(const Duration(days: 30)));
+        case HistoricFilter.custom:
+          if (selectedDate == null) return true;
+          return item.date.day == selectedDate!.day &&
+              item.date.month == selectedDate!.month &&
+              item.date.year == selectedDate!.year;
       }
-
-      if (selectedFilter == HistoricFilter.custom && selectedDate != null) {
-        return item.date.day == selectedDate!.day &&
-               item.date.month == selectedDate!.month &&
-               item.date.year == selectedDate!.year;
-      }
-
-      return true;
     }).toList();
   }
 

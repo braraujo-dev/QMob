@@ -39,14 +39,17 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
   void _onStateChanged() {
     if (_controller.value is DriverSuccessState) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Motorista cadastrado com sucesso!'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('Motorista cadastrado com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
       );
       Navigator.pop(context);
     } else if (_controller.value is DriverErrorState) {
       final state = _controller.value as DriverErrorState;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message), backgroundColor: Colors.red)
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red));
     }
   }
 
@@ -65,11 +68,15 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
 
   void _handleRegister() {
     if (_selectedBaseCity == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Por favor, selecione uma cidade base.")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Por favor, selecione uma cidade base.")));
       return;
     }
     if (_passwordController.text.length < 8) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("A senha deve ter no mínimo 8 caracteres.")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("A senha deve ter no mínimo 8 caracteres.")));
       return;
     }
 
@@ -92,7 +99,10 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Novo Motorista', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Novo Motorista',
+          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -113,6 +123,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   prefixIcon: Icons.person_outline,
                   hintText: "Ex: João Silva",
                   textCapitalization: TextCapitalization.words,
+                  textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 20),
                 CustomTextField(
@@ -121,6 +132,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   prefixIcon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   hintText: "motorista@empresa.com",
+                  textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 20),
                 CustomTextField(
@@ -129,23 +141,37 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   prefixIcon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                   hintText: "(00) 00000-0000",
+                  textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 20),
-
-                const Text("Cidade Base", style: TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w600)),
+                const Text(
+                  "Cidade Base",
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 _buildCitySelector(),
-
                 const SizedBox(height: 24),
-                const Text('DADOS DO VEÍCULO', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+                const Text(
+                  'DADOS DO VEÍCULO',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.1,
+                  ),
+                ),
                 const SizedBox(height: 16),
-                
                 CustomTextField(
                   label: "Modelo do Carro",
                   controller: _modelController,
                   prefixIcon: Icons.directions_car_outlined,
                   hintText: "Ex: Toyota Corolla",
                   textCapitalization: TextCapitalization.sentences,
+                  textInputAction: TextInputAction.next,
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -157,6 +183,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                         hintText: "BRA-2E19",
                         textCapitalization: TextCapitalization.characters,
                         inputFormatters: [UpperCaseTextFormatter()],
+                        textInputAction: TextInputAction.next,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -166,6 +193,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                         controller: _colorController,
                         hintText: "Prata",
                         textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
                       ),
                     ),
                   ],
@@ -176,10 +204,9 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   controller: _passwordController,
                   prefixIcon: Icons.lock_outline,
                   isPassword: true,
-                  hintText: "Mínimo 8 caracteres",
+                  hintText: "Digite sua senha",
                 ),
                 const SizedBox(height: 32),
-
                 Row(
                   children: [
                     Checkbox(
@@ -196,7 +223,6 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 32),
                 PrimaryButton(
                   text: state is DriverLoadingState ? 'Cadastrando...' : 'Cadastrar motorista',
@@ -224,7 +250,10 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedBaseCity,
-          hint: const Text("Selecione a capital", style: TextStyle(color: AppColors.slate400, fontSize: 14)),
+          hint: const Text(
+            "Selecione a capital",
+            style: TextStyle(color: AppColors.slate400, fontSize: 14),
+          ),
           dropdownColor: AppColors.inputBackground,
           icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.slate400),
           isExpanded: true,
@@ -242,9 +271,6 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
 class UpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    return TextEditingValue(
-      text: newValue.text.toUpperCase(),
-      selection: newValue.selection,
-    );
+    return TextEditingValue(text: newValue.text.toUpperCase(), selection: newValue.selection);
   }
 }

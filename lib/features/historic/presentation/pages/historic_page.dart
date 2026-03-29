@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:alternative/core/utils/enum_class.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -23,6 +24,19 @@ class _HistoricPageState extends State<HistoricPage> {
     _controller.fetchHistoric();
   }
 
+  String _getPeriodLabel(HistoricFilter filter) {
+    switch (filter) {
+      case HistoricFilter.week:
+        return 'Últimos 7 dias';
+      case HistoricFilter.older:
+        return 'Mais de 30 dias';
+      case HistoricFilter.month:
+        return 'Este Mês';
+      case HistoricFilter.custom:
+        return 'Personalizado';
+    }
+  }
+
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -44,7 +58,6 @@ class _HistoricPageState extends State<HistoricPage> {
         );
       },
     );
-    
     if (picked != null) {
       _controller.setFilter(HistoricFilter.custom, date: picked);
     }
@@ -66,11 +79,9 @@ class _HistoricPageState extends State<HistoricPage> {
           if (state is HistoricLoadingState) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (state is HistoricSuccessState) {
             return _buildBody(state);
           }
-
           return const Center(child: Text('Erro ao carregar histórico'));
         },
       ),
@@ -95,34 +106,40 @@ class _HistoricPageState extends State<HistoricPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _controller.selectedFilter == HistoricFilter.month ? 'VIAGENS NO MÊS' : 
-                  (_controller.selectedFilter == HistoricFilter.week ? 'ÚLTIMOS 7 DIAS' : 'VIAGENS NO DIA'),
-                  style: const TextStyle(color: AppColors.slate500, fontSize: 12, fontWeight: FontWeight.bold),
+                  _getPeriodLabel(_controller.selectedFilter).toUpperCase(),
+                  style: const TextStyle(
+                    color: AppColors.slate500,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '${state.historic.length}',
-                  style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
           ),
         ),
-
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Row(
             children: [
-              _buildFilterButton('Este Mês', HistoricFilter.month),
+              Expanded(child: _buildTimeRangeSpinner()),
               const SizedBox(width: 12),
-              _buildFilterButton('Últimos 7 dias', HistoricFilter.week),
-              const SizedBox(width: 12),
-              _buildFilterButton('Personalizado', HistoricFilter.custom, onTap: _selectDate),
+              _buildFilterButton(
+                icon: Icons.calendar_month_outlined,
+                isSelected: _controller.selectedFilter == HistoricFilter.custom,
+                onTap: _selectDate,
+              ),
             ],
           ),
         ),
-
         const SizedBox(height: 32),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 24),
@@ -134,47 +151,87 @@ class _HistoricPageState extends State<HistoricPage> {
         const SizedBox(height: 16),
 
         Expanded(
-          child: state.historic.isEmpty 
-            ? const Center(child: Text('Nenhuma viagem encontrada.', style: TextStyle(color: AppColors.slate400)))
-            : ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                itemCount: state.historic.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  return _buildHistoricCard(state.historic[index]);
-                },
-              ),
+          child: state.historic.isEmpty
+              ? const Center(
+                  child: Text(
+                    'Nenhuma viagem encontrada.',
+                    style: TextStyle(color: AppColors.slate400),
+                  ),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  itemCount: state.historic.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) => _buildHistoricCard(state.historic[index]),
+                ),
         ),
       ],
     );
   }
 
-  Widget _buildFilterButton(String label, HistoricFilter filter, {VoidCallback? onTap}) {
-    final bool isSelected = _controller.selectedFilter == filter;
-    return GestureDetector(
-      onTap: onTap ?? () => _controller.setFilter(filter),
+  Widget _buildTimeRangeSpinner() {
+    final bool isTimeFilter = _controller.selectedFilter != HistoricFilter.custom;
+
+    return PopupMenuButton<HistoricFilter>(
+      offset: const Offset(0, 45),
+      color: AppColors.inputBackground,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (filter) => _controller.setFilter(filter),
+      itemBuilder: (context) => [
+        _buildPopupItem('Últimos 7 dias', HistoricFilter.week),
+        _buildPopupItem('Este Mês', HistoricFilter.month),
+        _buildPopupItem('Mais de 30 dias', HistoricFilter.older),
+      ],
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isTimeFilter ? AppColors.primary : AppColors.inputBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isTimeFilter ? AppColors.primary : AppColors.border),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              isTimeFilter ? _getPeriodLabel(_controller.selectedFilter) : 'Selecionar Período',
+              style: TextStyle(
+                color: isTimeFilter ? Colors.white : AppColors.slate400,
+                fontWeight: isTimeFilter ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: isTimeFilter ? Colors.white : AppColors.slate400,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<HistoricFilter> _buildPopupItem(String text, HistoricFilter value) {
+    return PopupMenuItem(
+      value: value,
+      child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 14)),
+    );
+  }
+
+  Widget _buildFilterButton({
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : AppColors.inputBackground,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
         ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.white : AppColors.slate400,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: 8),
-              const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 16),
-            ]
-          ],
-        ),
+        child: Icon(icon, color: isSelected ? Colors.white : AppColors.slate400, size: 20),
       ),
     );
   }
@@ -194,15 +251,8 @@ class _HistoricPageState extends State<HistoricPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isEntry ? Icons.login : Icons.logout, 
-              color: statusColor, 
-              size: 20
-            ),
+            decoration: BoxDecoration(color: statusColor.withOpacity(0.1), shape: BoxShape.circle),
+            child: Icon(isEntry ? Icons.login : Icons.logout, color: statusColor, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -212,11 +262,15 @@ class _HistoricPageState extends State<HistoricPage> {
                 Text.rich(
                   TextSpan(
                     text: '${item.origin} ',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                     children: [
                       TextSpan(
-                        text: '→ ', 
-                        style: TextStyle(color: statusColor)
+                        text: '→ ',
+                        style: TextStyle(color: statusColor),
                       ),
                       TextSpan(text: item.destination),
                     ],
@@ -233,16 +287,12 @@ class _HistoricPageState extends State<HistoricPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
+              color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
               item.status.toUpperCase(),
-              style: TextStyle(
-                color: statusColor,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold),
             ),
           ),
         ],
