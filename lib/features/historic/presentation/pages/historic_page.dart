@@ -1,241 +1,251 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/di/injection_container.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../domain/entities/historic_entity.dart';
+import '../controllers/historic_controller.dart';
+import '../controllers/historic_state.dart';
 
-class HistoricPage extends StatelessWidget {
+class HistoricPage extends StatefulWidget {
   const HistoricPage({super.key});
 
   @override
+  State<HistoricPage> createState() => _HistoricPageState();
+}
+
+class _HistoricPageState extends State<HistoricPage> {
+  late final HistoricController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = sl<HistoricController>();
+    _controller.fetchHistoric();
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2023),
+      lastDate: DateTime.now(),
+      locale: const Locale('pt', 'BR'),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              surface: AppColors.inputBackground,
+              onSurface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    
+    if (picked != null) {
+      _controller.setFilter(HistoricFilter.custom, date: picked);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const ResumoMesCard(quantidadeViagens: 45),
-          const SizedBox(height: 25),
-          // Substitua sua Row por isso:
-          // Substitua sua Row por isso:
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal, // Habilita o scroll lateral
-            child: Row(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text('Meu Histórico', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        centerTitle: false,
+      ),
+      body: ValueListenableBuilder<HistoricState>(
+        valueListenable: _controller,
+        builder: (context, state, child) {
+          if (state is HistoricLoadingState) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is HistoricSuccessState) {
+            return _buildBody(state);
+          }
+
+          return const Center(child: Text('Erro ao carregar histórico'));
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody(HistoricSuccessState state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.inputBackground,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FilterButton(text: 'Este Mês', icon: Icons.keyboard_arrow_down, isSelected: true),
-                const SizedBox(width: 10),
-                FilterButton(
-                  text: 'Últimos 7 dias',
-                  icon: Icons.keyboard_arrow_down,
-                  isSelected: false,
+                Text(
+                  _controller.selectedFilter == HistoricFilter.month ? 'VIAGENS NO MÊS' : 
+                  (_controller.selectedFilter == HistoricFilter.week ? 'ÚLTIMOS 7 DIAS' : 'VIAGENS NO DIA'),
+                  style: const TextStyle(color: AppColors.slate500, fontSize: 12, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(width: 10),
-                FilterButton(
-                  text: 'Personalizado',
-                  icon: Icons.keyboard_arrow_down,
-                  isSelected: false,
-                  isCut: true,
+                const SizedBox(height: 8),
+                Text(
+                  '${state.historic.length}',
+                  style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 25),
+        ),
 
-          Text(
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              _buildFilterButton('Este Mês', HistoricFilter.month),
+              const SizedBox(width: 12),
+              _buildFilterButton('Últimos 7 dias', HistoricFilter.week),
+              const SizedBox(width: 12),
+              _buildFilterButton('Personalizado', HistoricFilter.custom, onTap: _selectDate),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 32),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
             'VIAGENS RECENTES',
-            style: Theme.of(context).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppColors.slate500, fontSize: 12, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 15),
+        ),
+        const SizedBox(height: 16),
 
-          const TripCard(
-            origem: 'São Paulo',
-            destino: 'Campinas',
-            data: '12 Out',
-            hora: '14:30',
-            status: TripStatus.concluida,
-          ),
-          const TripCard(
-            origem: 'São Paulo',
-            destino: 'Santos',
-            data: '11 Out',
-            hora: '09:15',
-            status: TripStatus.concluida,
-          ),
-          const TripCard(
-            origem: 'Barueri',
-            destino: 'Jundiaí',
-            data: '10 Out',
-            hora: '18:45',
-            status: TripStatus.cancelada,
-          ),
-          const SizedBox(height: 20),
-        ],
+        Expanded(
+          child: state.historic.isEmpty 
+            ? const Center(child: Text('Nenhuma viagem encontrada.', style: TextStyle(color: AppColors.slate400)))
+            : ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                itemCount: state.historic.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  return _buildHistoricCard(state.historic[index]);
+                },
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterButton(String label, HistoricFilter filter, {VoidCallback? onTap}) {
+    final bool isSelected = _controller.selectedFilter == filter;
+    return GestureDetector(
+      onTap: onTap ?? () => _controller.setFilter(filter),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.inputBackground,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.white : AppColors.slate400,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 16),
+            ]
+          ],
+        ),
       ),
     );
   }
-}
 
-class ResumoMesCard extends StatelessWidget {
-  final int quantidadeViagens;
+  Widget _buildHistoricCard(HistoricEntity item) {
+    final bool isEntry = item.status.toLowerCase() == 'chegada';
+    final Color statusColor = isEntry ? Colors.green : Colors.redAccent;
 
-  const ResumoMesCard({super.key, required this.quantidadeViagens});
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(25.0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('VIAGENS NO MÊS', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 10),
-          Text('$quantidadeViagens', style: Theme.of(context).textTheme.displayLarge),
-        ],
-      ),
-    );
-  }
-}
-
-class FilterButton extends StatelessWidget {
-  final String text;
-  final IconData icon;
-  final bool isSelected;
-  final bool isCut;
-
-  const FilterButton({
-    super.key,
-    required this.text,
-    required this.icon,
-    required this.isSelected,
-    this.isCut = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF1E51D3) : const Color(0xFF1E2432),
-        borderRadius: isCut
-            ? const BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8))
-            : BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            text,
-            style: TextStyle(color: Colors.white.withOpacity(isSelected ? 1.0 : 0.8), fontSize: 15),
-          ),
-          const SizedBox(width: 8),
-          Icon(icon, color: Colors.white, size: 20),
-        ],
-      ),
-    );
-  }
-}
-
-enum TripStatus { concluida, cancelada }
-
-class TripCard extends StatelessWidget {
-  final String origem;
-  final String destino;
-  final String data;
-  final String hora;
-  final TripStatus status;
-
-  const TripCard({
-    super.key,
-    required this.origem,
-    required this.destino,
-    required this.data,
-    required this.hora,
-    required this.status,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(18.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: AppColors.inputBackground,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF262C3A),
-              borderRadius: BorderRadius.circular(50),
+              color: statusColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.directions_car_filled_outlined,
-              color: Color(0xFF3469E2),
-              size: 28,
+            child: Icon(
+              isEntry ? Icons.login : Icons.logout, 
+              color: statusColor, 
+              size: 20
             ),
           ),
-          const SizedBox(width: 15),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RichText(
-                  text: TextSpan(
-                    style: const TextStyle(
-                      fontSize: 17,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    children: <TextSpan>[
-                      TextSpan(text: origem),
-                      const TextSpan(
-                        text: ' ➔ ',
-                        style: TextStyle(color: Color(0xFF3469E2)),
+                Text.rich(
+                  TextSpan(
+                    text: '${item.origin} ',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                    children: [
+                      TextSpan(
+                        text: '→ ', 
+                        style: TextStyle(color: statusColor)
                       ),
-                      TextSpan(text: destino),
+                      TextSpan(text: item.destination),
                     ],
                   ),
                 ),
-                const SizedBox(height: 5),
-                Text('$data, $hora', style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 4),
+                Text(
+                  DateFormat('dd MMM, HH:mm', 'pt_BR').format(item.date),
+                  style: const TextStyle(color: AppColors.slate500, fontSize: 12),
+                ),
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          _buildStatusTag(status),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              item.status.toUpperCase(),
+              style: TextStyle(
+                color: statusColor,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStatusTag(TripStatus status) {
-    String text;
-    Color bgColor;
-    Color textColor;
-
-    switch (status) {
-      case TripStatus.concluida:
-        text = 'CONCLUÍDA';
-        bgColor = const Color(0xFF13362A);
-        textColor = const Color(0xFF2DC489);
-        break;
-      case TripStatus.cancelada:
-        text = 'CANCELADA';
-        bgColor = const Color(0xFF3A2D1F);
-        textColor = const Color(0xFFD49C4A);
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(5)),
-      child: Text(
-        text,
-        style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold),
       ),
     );
   }

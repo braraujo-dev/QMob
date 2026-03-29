@@ -3,6 +3,7 @@ import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/config/env.dart';
 import 'core/di/injection_container.dart' as di;
@@ -41,7 +42,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final String initialRoute;
-
+  
   const MyApp({super.key, required this.initialRoute});
 
   @override
@@ -52,6 +53,14 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.darkTheme,
       initialRoute: initialRoute,
       routes: AppRoutes.routes,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+      ],
     );
   }
 }

@@ -8,6 +8,7 @@ class DriverQueueModel extends DriverQueueEntity {
     required super.vehicle,
     required super.color,
     required super.arrivalTime,
+    required super.cityName,
     required super.position,
     super.isCurrentUser,
   });
@@ -18,11 +19,9 @@ class DriverQueueModel extends DriverQueueEntity {
     if (json['checkin_time'] != null) {
       try {
         DateTime dt = DateTime.parse(json['checkin_time']);
-        
         if (!dt.isUtc) {
           dt = DateTime.parse(json['checkin_time'] + 'Z');
         }
-        
         formattedTime = DateFormat('HH:mm').format(dt.toLocal());
       } catch (e) {
         print('Erro ao formatar data: $e');
@@ -31,9 +30,10 @@ class DriverQueueModel extends DriverQueueEntity {
 
     return DriverQueueModel(
       id: json['id']?.toString() ?? '',
-      name: json['profiles']?['full_name'] ?? 'Motorista',
-      vehicle: json['profiles']?['vehicle_model'] ?? 'Veículo',
-      color: json['profiles']?['vehicle_color'] ?? '',
+      name: json['drivers']?['full_name'] ?? 'Motorista',
+      vehicle: json['drivers']?['vehicle_model'] ?? 'Veículo',
+      color: json['drivers']?['vehicle_color'] ?? '',
+      cityName: json['city_name'] ?? '',
       arrivalTime: formattedTime,
       position: index + 1,
       isCurrentUser: json['driver_id'] == currentUserId,

@@ -4,6 +4,7 @@ class DriverQueueEntity {
   final String vehicle;
   final String color;
   final String arrivalTime;
+  final String cityName;
   final int position;
   final bool isCurrentUser;
 
@@ -13,6 +14,7 @@ class DriverQueueEntity {
     required this.vehicle,
     required this.color,
     required this.arrivalTime,
+    required this.cityName,
     required this.position,
     this.isCurrentUser = false,
   });

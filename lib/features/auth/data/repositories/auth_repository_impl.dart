@@ -23,18 +23,8 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<UserEntity?> getCurrentSession() async {
-    final user = remoteDataSource.getCurrentSession();
-    if (user != null) {
-      final role = user.appMetadata['role'] ?? 'user';
-      return UserEntity(id: user.id, email: user.email ?? '', role: role);
-    }
-    return null;
-  }
-
-  @override
-  Future<String?> getBaseCity() async {
-    return await remoteDataSource.getBaseCity();
+  Future<UserEntity?> getCurrentUser() async {
+    return await remoteDataSource.getCurrentUser();
   }
 
   @override

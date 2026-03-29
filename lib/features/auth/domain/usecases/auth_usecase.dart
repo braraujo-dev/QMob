@@ -14,8 +14,8 @@ class AuthUseCase {
     return await repository.signIn(email: email, password: password);
   }
 
-  Future<String?> getBaseCity() async {
-    return await repository.getBaseCity();
+  Future<UserEntity?> getCurrentUser() async {
+    return await repository.getCurrentUser();
   }
 
   Future<void> saveEmail(String email) async {

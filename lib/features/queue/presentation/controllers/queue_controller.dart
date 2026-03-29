@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../historic/domain/usecases/add_historic_usecase.dart';
 import '../../domain/entities/driver_queue_entity.dart';
 import '../../domain/usecases/get_queue_usecase.dart';
 import '../../domain/usecases/perform_checkout_usecase.dart';
@@ -10,6 +11,7 @@ class QueueController extends ValueNotifier<QueueState> {
   final GetQueueUseCase getQueueUseCase;
   final PerformCheckoutUseCase performCheckoutUseCase;
   final QueueRepository queueRepository;
+  final AddHistoricUseCase addHistoricUseCase;
   
   StreamSubscription<List<DriverQueueEntity>>? _queueStreamSubscription;
 
@@ -17,6 +19,7 @@ class QueueController extends ValueNotifier<QueueState> {
     required this.getQueueUseCase,
     required this.performCheckoutUseCase,
     required this.queueRepository,
+    required this.addHistoricUseCase,
   }) : super(QueueInitialState());
 
   void startListening() {
@@ -44,7 +47,18 @@ class QueueController extends ValueNotifier<QueueState> {
 
   Future<void> checkout() async {
     try {
-      await performCheckoutUseCase();
+      final currentState = value;
+      if (currentState is QueueLoadedState && currentState.currentUser != null) {
+        final String currentCapital = currentState.currentUser!.cityName;
+        
+        await performCheckoutUseCase();
+
+        await addHistoricUseCase(
+          origin: currentCapital.isNotEmpty ? currentCapital : 'Capital',
+          destination: 'Base',
+          status: 'Saída',
+        );
+      }
     } catch (e) {
       value = QueueErrorState(e.toString());
     }

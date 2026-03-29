@@ -22,7 +22,7 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
 
       final response = await supabaseClient
           .from('queue')
-          .select('*, profiles(full_name, vehicle_model, vehicle_color)')
+          .select('*, drivers(full_name, vehicle_model, vehicle_color)')
           .order('checkin_time', ascending: true);
 
       final list = response as List;

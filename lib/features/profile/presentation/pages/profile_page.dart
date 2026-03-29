@@ -141,9 +141,13 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 32),
 
           ElevatedButton.icon(
-            onPressed: () async {
-              await _controller.signOut();
-              if (mounted) Navigator.pushReplacementNamed(context, AppRoutes.auth);
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                context, 
+                AppRoutes.auth, 
+                (route) => false,
+              );
+              _controller.signOut();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white.withAlpha(13),

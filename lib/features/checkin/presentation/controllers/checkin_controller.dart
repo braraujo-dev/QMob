@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../auth/domain/usecases/auth_usecase.dart';
 import '../../../queue/domain/entities/driver_queue_entity.dart';
 import '../../../queue/domain/repositories/queue_repository.dart';
 import '../../../queue/domain/usecases/perform_checkin_usecase.dart';
-import '../../../queue/domain/usecases/is_user_in_queue_usecase.dart';
+import '../../../historic/domain/usecases/add_historic_usecase.dart';
 import '../../domain/entities/capital_entity.dart';
 import '../../domain/repositories/checkin_repository.dart';
 import '../../domain/usecases/get_checkin_status_usecase.dart';
@@ -18,10 +18,10 @@ class CheckinController extends ValueNotifier<CheckinState> {
   final ILocationService locationService;
   final GetCheckinStatusUseCase getCheckinStatusUseCase;
   final PerformCheckinUseCase performCheckinUseCase;
-  final IsUserInQueueUseCase isUserInQueueUseCase;
   final AuthUseCase authUseCase;
   final CheckinRepository checkinRepository;
   final QueueRepository queueRepository;
+  final AddHistoricUseCase addHistoricUseCase;
 
   StreamSubscription<Position>? _positionStream;
   StreamSubscription<List<DriverQueueEntity>>? _queueStream;
@@ -31,10 +31,10 @@ class CheckinController extends ValueNotifier<CheckinState> {
     required this.locationService,
     required this.getCheckinStatusUseCase,
     required this.performCheckinUseCase,
-    required this.isUserInQueueUseCase,
     required this.authUseCase,
     required this.checkinRepository,
     required this.queueRepository,
+    required this.addHistoricUseCase,
   }) : super(
          CheckinState(
            destination: CapitalEntity(cityName: '', coords: const LatLng(0, 0), radius: 0),
@@ -46,10 +46,10 @@ class CheckinController extends ValueNotifier<CheckinState> {
     try {
       value = value.copyWith(isLoading: true);
 
-      final baseCity = await authUseCase.getBaseCity();
-      if (baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
+      final user = await authUseCase.getCurrentUser();
+      if (user?.baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
 
-      final result = await checkinRepository.getDestinationByCityName(baseCity);
+      final result = await checkinRepository.getDestinationByCityName(user!.baseCity!);
 
       result.fold(
         (error) {
@@ -77,6 +77,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
     final hasPermission = await locationService.checkPermission();
     if (!hasPermission) return;
 
+    _positionStream?.cancel();
     _positionStream = locationService.getPositionStream().listen(_updatePosition);
   }
 
@@ -91,6 +92,14 @@ class CheckinController extends ValueNotifier<CheckinState> {
     value = value.copyWith(isLoading: true);
     try {
       await performCheckinUseCase(value.destination.cityName);
+      
+      final user = await authUseCase.getCurrentUser();
+      await addHistoricUseCase(
+        origin: 'Base',
+        destination: user?.baseCity ?? value.destination.cityName,
+        status: 'Chegada',
+      );
+
       value = value.copyWith(isLoading: false);
     } catch (e) {
       value = value.copyWith(isLoading: false);

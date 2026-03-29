@@ -3,6 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../checkin/presentation/pages/checkin_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../queue/presentation/pages/queue_page.dart';
+import '../../../historic/presentation/pages/historic_page.dart';
 
 class DriverHomePage extends StatefulWidget {
   const DriverHomePage({super.key});
@@ -22,9 +23,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
     _pages = [
       const CheckinPage(),
       const QueuePage(),
-      const Center(
-        child: Text('Viagens', style: TextStyle(color: Colors.white)),
-      ),
+      const HistoricPage(),
       const ProfilePage(),
     ];
   }

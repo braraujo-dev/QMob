@@ -11,6 +11,12 @@ import 'package:alternative/features/profile/domain/repositories/profile_reposit
 import 'package:alternative/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:alternative/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:alternative/features/profile/presentation/controllers/profile_controller.dart';
+import 'package:alternative/features/historic/data/datasources/historic_remote_datasource.dart';
+import 'package:alternative/features/historic/data/repositories/historic_repository_impl.dart';
+import 'package:alternative/features/historic/domain/repositories/historic_repository.dart';
+import 'package:alternative/features/historic/domain/usecases/get_historic_usecase.dart';
+import 'package:alternative/features/historic/domain/usecases/add_historic_usecase.dart';
+import 'package:alternative/features/historic/presentation/controllers/historic_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -37,10 +43,7 @@ import '../services/location_service.dart';
 final sl = GetIt.instance;
 
 Future<void> init() async {
-  // External
   sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
-
-  // Core Services
   sl.registerLazySingleton<ILocationService>(() => LocationService());
 
   // Auth
@@ -58,6 +61,17 @@ Future<void> init() async {
   sl.registerLazySingleton(() => PerformCheckoutUseCase(sl()));
   sl.registerLazySingleton(() => IsUserInQueueUseCase(sl()));
 
+  // Historic
+  sl.registerLazySingleton<HistoricRemoteDataSource>(() => HistoricRemoteDataSourceImpl(sl()));
+  sl.registerLazySingleton<HistoricRepository>(() => HistoricRepositoryImpl(sl(), sl()));
+  sl.registerLazySingleton(() => GetHistoricUseCase(sl()));
+  sl.registerLazySingleton(() => AddHistoricUseCase(sl()));
+  sl.registerFactory(() => HistoricController(
+    getHistoricUseCase: sl(),
+    historicRepository: sl(),
+    supabaseClient: sl(),
+  ));
+
   // Checkin
   sl.registerLazySingleton<CheckinRemoteDataSource>(() => CheckinRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<CheckinRepository>(() => CheckinRepositoryImpl(sl()));
@@ -69,19 +83,23 @@ Future<void> init() async {
       locationService: sl(),
       getCheckinStatusUseCase: sl(),
       performCheckinUseCase: sl(),
-      isUserInQueueUseCase: sl(),
       authUseCase: sl(),
       checkinRepository: sl(),
       queueRepository: sl(),
+      addHistoricUseCase: sl(),
     ),
   );
 
   sl.registerFactory(
-    () =>
-        QueueController(getQueueUseCase: sl(), performCheckoutUseCase: sl(), queueRepository: sl()),
+    () => QueueController(
+      getQueueUseCase: sl(), 
+      performCheckoutUseCase: sl(), 
+      queueRepository: sl(),
+      addHistoricUseCase: sl(),
+    ),
   );
 
-  // Profile Feature
+  // Profile
   sl.registerLazySingleton<ProfileRemoteDataSource>(() => ProfileRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<ProfileRepository>(() => ProfileRepositoryImpl(sl()));
   sl.registerLazySingleton(() => GetProfileUseCase(sl()));
@@ -94,13 +112,12 @@ Future<void> init() async {
     ),
   );
 
-  // Driver Feature
+  // Driver
   sl.registerLazySingleton<DriverRemoteDataSource>(() => DriverRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<DriverRepository>(() => DriverRepositoryImpl(sl()));
   sl.registerLazySingleton(() => RegisterDriverUseCase(sl()));
   sl.registerLazySingleton(() => GetDriversUseCase(sl()));
 
-  // ATUALIZE O FACTORY ABAIXO:
   sl.registerFactory(
     () => DriverTegisterController(
       registerDriverUseCase: sl(),
