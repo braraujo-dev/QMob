@@ -72,7 +72,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final (name, email, photoUrl) = switch (profile) {
       DriverProfile p => (p.driver.name, p.driver.email, p.driver.photoUrl),
       AdminProfile p => (p.admin.name, p.admin.email, null),
-
       _ => ('Usuário Desconhecido', 'Tipo: ${profile.runtimeType}', null),
     };
 
@@ -96,11 +95,10 @@ class _ProfilePageState extends State<ProfilePage> {
             style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Text(email, style: const TextStyle(color: AppColors.slate400, fontSize: 14)),
-
           if (profile is DriverEntity)
             Padding(
               padding: const EdgeInsets.only(top: 8),
-              child: Text(
+              child: const Text(
                 "MOTORISTA",
                 style: TextStyle(
                   color: AppColors.primary,
@@ -109,9 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-
           const SizedBox(height: 24),
-
           ElevatedButton(
             onPressed: () =>
                 Navigator.pushNamed(context, AppRoutes.editProfile, arguments: profile),
@@ -125,32 +121,35 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
-
           const SizedBox(height: 32),
-
           _buildSectionTitle('SEGURANÇA'),
           _buildOptionTile(
-            Icons.lock_outline, 
-            'Alterar senha', 
+            Icons.lock_outline,
+            'Alterar senha',
             onTap: () => Navigator.pushNamed(context, AppRoutes.changePassword, arguments: false),
           ),
           _buildOptionTile(Icons.fingerprint, 'Autenticação biométrica'),
-
           const SizedBox(height: 24),
           _buildSectionTitle('AJUDA E SUPORTE'),
-          _buildOptionTile(Icons.help_outline, 'Dúvidas'),
-          _buildOptionTile(Icons.headset_mic_outlined, 'Suporte'),
-          _buildOptionTile(Icons.description_outlined, 'Termos de Privacidade'),
-
+          _buildOptionTile(
+            Icons.help_outline,
+            'Dúvidas',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.faq),
+          ),
+          _buildOptionTile(
+            Icons.headset_mic_outlined,
+            'Suporte',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.support),
+          ),
+          _buildOptionTile(
+            Icons.description_outlined,
+            'Termos de Privacidade',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.privacy),
+          ),
           const SizedBox(height: 32),
-
           ElevatedButton.icon(
             onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context, 
-                AppRoutes.auth, 
-                (route) => false,
-              );
+              Navigator.pushNamedAndRemoveUntil(context, AppRoutes.auth, (route) => false);
               _controller.signOut();
             },
             style: ElevatedButton.styleFrom(
@@ -163,7 +162,6 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: const Icon(Icons.logout),
             label: const Text('Encerrar sessão', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-
           const SizedBox(height: 16),
           const Text(
             'Versão 1.0.0 (Build 1)',
