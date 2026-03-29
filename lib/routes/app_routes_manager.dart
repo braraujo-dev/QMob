@@ -1,5 +1,6 @@
 ﻿import 'package:alternative/features/profile/presentation/pages/faq_page.dart';
 import 'package:alternative/features/profile/presentation/pages/privacy_page.dart';
+import 'package:alternative/features/root/presentation/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:alternative/features/auth/presentation/pages/auth_page.dart';
 import 'package:alternative/features/auth/presentation/pages/forgot_password_page.dart';
@@ -29,6 +30,7 @@ class AppRoutes {
   static const String faq = '/faq';
   static const String privacy = '/privacy';
   static const String historic = '/historic';
+  static const String splash = '/splash';
 
   static Map<String, WidgetBuilder> get routes => {
     auth: (context) => const AuthPage(),
@@ -38,19 +40,16 @@ class AppRoutes {
     queue: (context) => const QueuePage(),
     adminHome: (context) => const AdminHomePage(),
     driverRegister: (context) => const DriverRegisterPage(),
-
-    // Profile
     profile: (context) => const ProfilePage(),
     editProfile: (context) => const EditProfilePage(),
     changePassword: (context) {
       final isFirstAccess = ModalRoute.of(context)?.settings.arguments as bool? ?? false;
       return ChangePasswordPage(isFirstAccess: isFirstAccess);
     },
-
     support: (context) => const SupportPage(),
     faq: (context) => const FAQPage(),
     privacy: (context) => const PrivacyPage(),
-
     historic: (context) => const HistoricPage(),
+    splash: (context) => const SplashPage(),
   };
 }

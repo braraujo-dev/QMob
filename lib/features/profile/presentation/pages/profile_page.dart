@@ -1,7 +1,6 @@
-import 'package:alternative/features/home/domain/entities/driver_entity.dart';
 import 'package:alternative/features/home/domain/entities/profile_result.dart';
 import 'package:flutter/material.dart';
-
+import 'package:local_auth/local_auth.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../routes/app_routes_manager.dart';
@@ -17,12 +16,37 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late final ProfileController _controller;
+  final LocalAuthentication auth = LocalAuthentication();
+  bool _isBiometricEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _controller = sl<ProfileController>();
     _controller.fetchProfile();
+    _loadBiometricStatus();
+  }
+
+  Future<void> _loadBiometricStatus() async {
+    final bool isEnabled = await _controller.getBiometricSetting();
+    setState(() {
+      _isBiometricEnabled = isEnabled;
+    });
+  }
+
+  Future<void> _handleBiometricToggle(bool value) async {
+    if (value) {
+      final bool didAuthenticate = await _controller.authenticateUser();
+      if (didAuthenticate) {
+        setState(() => _isBiometricEnabled = true);
+        await _controller.updateBiometricSetting(true);
+      } else {
+        setState(() => _isBiometricEnabled = false);
+      }
+    } else {
+      setState(() => _isBiometricEnabled = false);
+      await _controller.updateBiometricSetting(false);
+    }
   }
 
   @override
@@ -95,10 +119,10 @@ class _ProfilePageState extends State<ProfilePage> {
             style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Text(email, style: const TextStyle(color: AppColors.slate400, fontSize: 14)),
-          if (profile is DriverEntity)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: const Text(
+          if (profile is DriverProfile)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
                 "MOTORISTA",
                 style: TextStyle(
                   color: AppColors.primary,
@@ -128,7 +152,15 @@ class _ProfilePageState extends State<ProfilePage> {
             'Alterar senha',
             onTap: () => Navigator.pushNamed(context, AppRoutes.changePassword, arguments: false),
           ),
-          _buildOptionTile(Icons.fingerprint, 'Autenticação biométrica'),
+          _buildOptionTile(
+            Icons.fingerprint,
+            'Autenticação biométrica',
+            suffix: Switch(
+              value: _isBiometricEnabled,
+              activeThumbColor: AppColors.primary,
+              onChanged: _handleBiometricToggle,
+            ),
+          ),
           const SizedBox(height: 24),
           _buildSectionTitle('AJUDA E SUPORTE'),
           _buildOptionTile(
@@ -189,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildOptionTile(IconData icon, String title, {VoidCallback? onTap}) {
+  Widget _buildOptionTile(IconData icon, String title, {VoidCallback? onTap, Widget? suffix}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -199,8 +231,8 @@ class _ProfilePageState extends State<ProfilePage> {
       child: ListTile(
         leading: Icon(icon, color: AppColors.primary, size: 22),
         title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 15)),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.slate500),
-        onTap: onTap,
+        trailing: suffix ?? const Icon(Icons.chevron_right, color: AppColors.slate500),
+        onTap: suffix == null ? onTap : null,
       ),
     );
   }

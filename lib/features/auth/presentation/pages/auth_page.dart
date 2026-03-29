@@ -53,18 +53,7 @@ class _AuthPageState extends State<AuthPage> {
       );
       _controller.resetState();
     } else if (state is AuthSuccessState) {
-      if (state.user.mustChangePassword) {
-        Navigator.pushReplacementNamed(
-          context, 
-          AppRoutes.changePassword, 
-          arguments: true,
-        );
-      } else {
-        Navigator.pushReplacementNamed(
-          context,
-          state.user.isAdmin ? AppRoutes.adminHome : AppRoutes.driverHome,
-        );
-      }
+      Navigator.pushReplacementNamed(context, AppRoutes.splash);
     }
   }
 

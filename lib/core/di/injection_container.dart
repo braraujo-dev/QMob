@@ -17,6 +17,7 @@ import 'package:alternative/features/historic/domain/repositories/historic_repos
 import 'package:alternative/features/historic/domain/usecases/get_historic_usecase.dart';
 import 'package:alternative/features/historic/domain/usecases/add_historic_usecase.dart';
 import 'package:alternative/features/historic/presentation/controllers/historic_controller.dart';
+import 'package:alternative/features/root/presentation/controllers/splash_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -46,6 +47,9 @@ Future<void> init() async {
   sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
   sl.registerLazySingleton<ILocationService>(() => LocationService());
 
+  // Splash
+  sl.registerFactory(() => SplashController(authUseCase: sl(), profileController: sl()));
+
   // Auth
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl()));
   sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(sl()));
@@ -66,11 +70,13 @@ Future<void> init() async {
   sl.registerLazySingleton<HistoricRepository>(() => HistoricRepositoryImpl(sl(), sl()));
   sl.registerLazySingleton(() => GetHistoricUseCase(sl()));
   sl.registerLazySingleton(() => AddHistoricUseCase(sl()));
-  sl.registerFactory(() => HistoricController(
-    getHistoricUseCase: sl(),
-    historicRepository: sl(),
-    supabaseClient: sl(),
-  ));
+  sl.registerFactory(
+    () => HistoricController(
+      getHistoricUseCase: sl(),
+      historicRepository: sl(),
+      supabaseClient: sl(),
+    ),
+  );
 
   // Checkin
   sl.registerLazySingleton<CheckinRemoteDataSource>(() => CheckinRemoteDataSourceImpl(sl()));
@@ -92,8 +98,8 @@ Future<void> init() async {
 
   sl.registerFactory(
     () => QueueController(
-      getQueueUseCase: sl(), 
-      performCheckoutUseCase: sl(), 
+      getQueueUseCase: sl(),
+      performCheckoutUseCase: sl(),
       queueRepository: sl(),
       addHistoricUseCase: sl(),
     ),
