@@ -10,7 +10,7 @@ class PrivacyPage extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
-          'Privacidade e Termos',
+          "Política de Privacidade",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Colors.transparent,
@@ -26,17 +26,6 @@ class PrivacyPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Política de Privacidade",
-              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Última atualização: Março de 2026",
-              style: TextStyle(color: AppColors.slate500, fontSize: 13),
-            ),
-            const SizedBox(height: 32),
-
             _buildPrivacySection(
               "1. Coleta de Dados",
               "Coletamos informações básicas como nome, e-mail e localização em tempo real para possibilitar a conexão entre motoristas e passageiros de forma eficiente.",
