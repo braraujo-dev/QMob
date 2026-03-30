@@ -35,7 +35,16 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
 
   @override
   Future<List<DriverModel>> getAllDrivers() async {
-    final response = await supabase.from('drivers').select().order('full_name');
+    final adminId = supabase.auth.currentUser?.id;
+
+    if (adminId == null) return [];
+
+    final response = await supabase
+        .from('drivers')
+        .select()
+        .eq('admin_id', adminId)
+        .order('full_name');
+
     return (response as List).map((m) => DriverModel.fromMap(m)).toList();
   }
 }

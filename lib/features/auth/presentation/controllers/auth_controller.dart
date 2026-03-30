@@ -44,7 +44,6 @@ class AuthController extends ValueNotifier<AuthState> {
     }
   }
 
-
   Future<String> getInitialRoute() async {
     try {
       final user = await authUseCase.getCurrentUser();
@@ -161,7 +160,7 @@ Aguardo o retorno para finalização do acesso!
 
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'felipemoreira512@outlook.com',
+      path: 'fmoreirasouza701@gmail.com',
       query: _encodeQueryParameters({
         'subject': 'Solicitação de Cadastro: Sindicato de Motoristas',
         'body': body,
