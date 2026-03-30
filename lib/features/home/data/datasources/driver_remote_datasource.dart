@@ -13,8 +13,10 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
   @override
   Future<void> registerDriver(DriverModel driver, String password) async {
     try {
+      final adminId = supabase.auth.currentUser?.id;
+
       final AuthResponse res = await supabase.auth.signUp(
-        email: driver.email, 
+        email: driver.email,
         password: password,
         data: {'role': 'driver'},
       );
@@ -22,18 +24,12 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
       if (res.user != null) {
         final driverData = driver.toMap();
         driverData['id'] = res.user!.id;
-        
-        driverData.remove('created_at');
+        driverData['admin_id'] = adminId;
 
         await supabase.from('drivers').insert(driverData);
       }
-    } on AuthException catch (e) {
-      if (e.message.contains('already registered')) {
-        throw 'Este e-mail já está sendo usado por outro usuário no sistema de autenticação.';
-      }
-      rethrow;
     } catch (e) {
-      throw 'Erro inesperado: $e';
+      rethrow;
     }
   }
 

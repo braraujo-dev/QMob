@@ -1,5 +1,6 @@
 ﻿class DriverEntity {
   final String id;
+  final String? adminId;
   final String email;
   final String name;
   final String phone;
@@ -11,6 +12,7 @@
 
   DriverEntity({
     required this.id,
+    this.adminId,
     required this.email,
     required this.name,
     required this.phone,

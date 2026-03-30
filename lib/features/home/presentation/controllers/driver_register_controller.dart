@@ -10,7 +10,7 @@ class DriverTegisterController extends ValueNotifier<DriverState> {
   final RegisterDriverUseCase registerDriverUseCase;
   final GetDriversUseCase getDriversUseCase;
   final GetCapitalsUseCase getCapitalsUseCase;
-  
+
   List<DriverEntity> _allDrivers = [];
   List<DriverEntity> filteredDrivers = [];
 
@@ -34,14 +34,11 @@ class DriverTegisterController extends ValueNotifier<DriverState> {
     value = DriverLoadingState();
     final result = await getDriversUseCase();
 
-    result.fold(
-      (error) => value = DriverErrorState(error),
-      (list) {
-        _allDrivers = list;
-        filteredDrivers = list;
-        value = DriverSuccessState();
-      },
-    );
+    result.fold((error) => value = DriverErrorState(error), (list) {
+      _allDrivers = list;
+      filteredDrivers = list;
+      value = DriverSuccessState();
+    });
   }
 
   void searchDrivers(String query) {
@@ -72,6 +69,7 @@ class DriverTegisterController extends ValueNotifier<DriverState> {
 
     final driver = DriverEntity(
       id: '',
+      adminId: null,
       name: name,
       email: email,
       phone: phone,

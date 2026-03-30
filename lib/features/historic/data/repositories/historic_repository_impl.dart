@@ -22,10 +22,10 @@ class HistoricRepositoryImpl implements HistoricRepository {
   }
 
   @override
-  Stream<List<HistoricEntity>> getHistoricStream(String userId) {
-    return remoteDataSource.getHistoricStream(userId).map(
-      (models) => models.cast<HistoricEntity>()
-    );
+  Stream<List<HistoricEntity>> getHistoricStream(String? userId) {
+    return remoteDataSource
+        .getHistoricStream(userId)
+        .map((models) => models.cast<HistoricEntity>());
   }
 
   @override

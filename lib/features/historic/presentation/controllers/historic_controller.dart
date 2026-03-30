@@ -32,24 +32,21 @@ class HistoricController extends ValueNotifier<HistoricState> {
   void startListening() {
     value = HistoricLoadingState();
 
-    final userId = supabaseClient.auth.currentUser?.id;
-    if (userId == null) {
+    final currentUser = supabaseClient.auth.currentUser;
+    if (currentUser == null) {
       value = HistoricErrorState('Usuário não autenticado');
       return;
     }
 
+    final bool isAdmin = currentUser.appMetadata['role'] == 'admin';
+
+    final String? filterId = isAdmin ? null : currentUser.id;
+
     _historicSubscription?.cancel();
-    _historicSubscription = historicRepository
-        .getHistoricStream(userId)
-        .listen(
-          (historic) {
-            final filteredList = _applyFilter(historic);
-            value = HistoricSuccessState(filteredList);
-          },
-          onError: (error) {
-            value = HistoricErrorState(error.toString());
-          },
-        );
+    _historicSubscription = historicRepository.getHistoricStream(filterId).listen((historic) {
+      final filteredList = _applyFilter(historic);
+      value = HistoricSuccessState(filteredList);
+    }, onError: (error) => value = HistoricErrorState(error.toString()));
   }
 
   List<HistoricEntity> _applyFilter(List<HistoricEntity> historic) {

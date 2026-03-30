@@ -116,8 +116,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               prefixIcon: Icons.lock_reset,
               isPassword: true,
               controller: _confirmPasswordController,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _handleChange(),
             ),
-
             ValueListenableBuilder<ProfileState>(
               valueListenable: _controller,
               builder: (context, state, child) {

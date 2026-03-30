@@ -30,6 +30,7 @@ class DriverModel extends DriverEntity {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'admin_id': adminId,
       'email': email,
       'full_name': name,
       'phone': phone,

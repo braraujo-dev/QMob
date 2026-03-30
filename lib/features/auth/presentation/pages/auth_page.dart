@@ -212,7 +212,6 @@ class _AuthPageState extends State<AuthPage> {
                     prefixIcon: Icons.lock_open_rounded,
                     isPassword: true,
                     controller: _passwordController,
-                    textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _controller.isFormValid
                         ? _controller.signIn(_emailController.text, _passwordController.text)
                         : null,
