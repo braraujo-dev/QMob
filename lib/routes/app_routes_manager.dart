@@ -1,6 +1,5 @@
 ﻿import 'package:alternative/features/profile/presentation/pages/faq_page.dart';
 import 'package:alternative/features/profile/presentation/pages/privacy_page.dart';
-import 'package:alternative/features/root/presentation/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:alternative/features/auth/presentation/pages/auth_page.dart';
 import 'package:alternative/features/auth/presentation/pages/forgot_password_page.dart';
@@ -50,6 +49,5 @@ class AppRoutes {
     faq: (context) => const FAQPage(),
     privacy: (context) => const PrivacyPage(),
     historic: (context) => const HistoricPage(),
-    splash: (context) => const SplashPage(),
   };
 }

@@ -1,5 +1,9 @@
+import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../domain/usecases/auth_usecase.dart';
 import '../../domain/usecases/send_password_reset_email_usecase.dart';
 import 'auth_state.dart';
@@ -7,11 +11,58 @@ import 'auth_state.dart';
 class AuthController extends ValueNotifier<AuthState> {
   final AuthUseCase authUseCase;
   final SendPasswordResetEmailUseCase sendPasswordResetEmailUseCase;
+  final LocalAuthentication _localAuth = LocalAuthentication();
+  static const String _biometricKey = 'use_biometry';
 
-  AuthController({
-    required this.authUseCase,
-    required this.sendPasswordResetEmailUseCase,
-  }) : super(AuthInitialState());
+  AuthController({required this.authUseCase, required this.sendPasswordResetEmailUseCase})
+    : super(AuthInitialState());
+
+  Future<bool> isBiometricEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_biometricKey) ?? false;
+  }
+
+  Future<void> updateBiometricSetting(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_biometricKey, enabled);
+  }
+
+  Future<bool> authenticateWithBiometrics() async {
+    try {
+      final bool canCheck = await _localAuth.canCheckBiometrics;
+      final bool isSupported = await _localAuth.isDeviceSupported();
+
+      if (!canCheck || !isSupported) return false;
+
+      return await _localAuth.authenticate(
+        localizedReason: 'Acesse o Alternative com sua biometria',
+        biometricOnly: true,
+        persistAcrossBackgrounding: true,
+      );
+    } catch (e) {
+      return false;
+    }
+  }
+
+
+  Future<String> getInitialRoute() async {
+    try {
+      final user = await authUseCase.getCurrentUser();
+
+      if (user == null) return AppRoutes.auth;
+
+      final bool biometricActive = await isBiometricEnabled();
+      if (biometricActive) {
+        final bool success = await authenticateWithBiometrics();
+        if (!success) return AppRoutes.auth;
+      }
+
+      if (user.mustChangePassword) return AppRoutes.changePassword;
+      return user.role == 'admin' ? AppRoutes.adminHome : AppRoutes.driverHome;
+    } catch (e) {
+      return AppRoutes.auth;
+    }
+  }
 
   bool isFormValid = false;
   bool rememberMe = false;
@@ -78,10 +129,7 @@ class AuthController extends ValueNotifier<AuthState> {
   Future<void> sendPasswordResetEmail(String email) async {
     value = AuthLoadingState();
     final result = await sendPasswordResetEmailUseCase(email);
-    result.fold(
-      (error) => value = AuthErrorState(error),
-      (_) => value = AuthInitialState(),
-    );
+    result.fold((error) => value = AuthErrorState(error), (_) => value = AuthInitialState());
   }
 
   Future<String?> getSavedEmail() async {

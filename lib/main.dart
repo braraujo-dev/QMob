@@ -1,4 +1,5 @@
 import 'package:alternative/core/theme/app_theme.dart';
+import 'package:alternative/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:alternative/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -16,11 +17,15 @@ void main() async {
   await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabaseAnonKey);
   await di.init();
 
-  runApp(const MyApp());
+  final authController = di.sl<AuthController>();
+  final String startRoute = await authController.getInitialRoute();
+
+  runApp(MyApp(initialRoute: startRoute));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +33,7 @@ class MyApp extends StatelessWidget {
       title: 'Alternative',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      initialRoute: AppRoutes.splash,
+      initialRoute: initialRoute,
       routes: AppRoutes.routes,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

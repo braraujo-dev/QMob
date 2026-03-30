@@ -17,7 +17,6 @@ import 'package:alternative/features/historic/domain/repositories/historic_repos
 import 'package:alternative/features/historic/domain/usecases/get_historic_usecase.dart';
 import 'package:alternative/features/historic/domain/usecases/add_historic_usecase.dart';
 import 'package:alternative/features/historic/presentation/controllers/historic_controller.dart';
-import 'package:alternative/features/root/presentation/controllers/splash_controller.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
@@ -46,9 +45,6 @@ final sl = GetIt.instance;
 Future<void> init() async {
   sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
   sl.registerLazySingleton<ILocationService>(() => LocationService());
-
-  // Splash
-  sl.registerFactory(() => SplashController(authUseCase: sl(), profileController: sl()));
 
   // Auth
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(sl()));

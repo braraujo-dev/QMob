@@ -1,6 +1,7 @@
+import 'package:alternative/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:alternative/features/home/domain/entities/profile_result.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
+
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../routes/app_routes_manager.dart';
@@ -16,19 +17,20 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late final ProfileController _controller;
-  final LocalAuthentication auth = LocalAuthentication();
+  late final AuthController _authController;
   bool _isBiometricEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _controller = sl<ProfileController>();
+    _authController = sl<AuthController>();
     _controller.fetchProfile();
     _loadBiometricStatus();
   }
 
   Future<void> _loadBiometricStatus() async {
-    final bool isEnabled = await _controller.getBiometricSetting();
+    final bool isEnabled = await _authController.isBiometricEnabled();
     setState(() {
       _isBiometricEnabled = isEnabled;
     });
@@ -36,16 +38,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _handleBiometricToggle(bool value) async {
     if (value) {
-      final bool didAuthenticate = await _controller.authenticateUser();
+      final bool didAuthenticate = await _authController.authenticateWithBiometrics();
       if (didAuthenticate) {
         setState(() => _isBiometricEnabled = true);
-        await _controller.updateBiometricSetting(true);
+        await _authController.updateBiometricSetting(true);
       } else {
         setState(() => _isBiometricEnabled = false);
       }
     } else {
       setState(() => _isBiometricEnabled = false);
-      await _controller.updateBiometricSetting(false);
+      await _authController.updateBiometricSetting(false);
     }
   }
 
@@ -119,19 +121,9 @@ class _ProfilePageState extends State<ProfilePage> {
             style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Text(email, style: const TextStyle(color: AppColors.slate400, fontSize: 14)),
-          if (profile is DriverProfile)
-            const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Text(
-                "MOTORISTA",
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+
           const SizedBox(height: 24),
+
           ElevatedButton(
             onPressed: () =>
                 Navigator.pushNamed(context, AppRoutes.editProfile, arguments: profile),
@@ -145,6 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
+
           const SizedBox(height: 32),
           _buildSectionTitle('SEGURANÇA'),
           _buildOptionTile(
@@ -161,6 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
               onChanged: _handleBiometricToggle,
             ),
           ),
+
           const SizedBox(height: 24),
           _buildSectionTitle('AJUDA E SUPORTE'),
           _buildOptionTile(
@@ -178,7 +172,9 @@ class _ProfilePageState extends State<ProfilePage> {
             'Termos de Privacidade',
             onTap: () => Navigator.pushNamed(context, AppRoutes.privacy),
           ),
+
           const SizedBox(height: 32),
+
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pushNamedAndRemoveUntil(context, AppRoutes.auth, (route) => false);
@@ -194,6 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: const Icon(Icons.logout),
             label: const Text('Encerrar sessão', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
+
           const SizedBox(height: 16),
           const Text(
             'Versão 1.0.0 (Build 1)',
