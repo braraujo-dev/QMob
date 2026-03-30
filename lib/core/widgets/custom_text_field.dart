@@ -13,8 +13,8 @@ class CustomTextField extends StatefulWidget {
   final String? errorText;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
-  final TextCapitalization textCapitalization; // Adicionado
-  final List<TextInputFormatter>? inputFormatters; // Adicionado
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
   final Function(String)? onChanged;
   final Function(String)? onFieldSubmitted;
 
@@ -85,6 +85,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       size: 20,
                     ),
                     onPressed: () => setState(() => _obscureText = !_obscureText),
+                    focusNode: FocusNode(skipTraversal: true),
                   )
                 : (widget.suffixIcon != null
                       ? Icon(widget.suffixIcon, size: 20, color: AppColors.slate400)

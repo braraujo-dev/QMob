@@ -92,7 +92,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
     value = value.copyWith(isLoading: true);
     try {
       await performCheckinUseCase(value.destination.cityName);
-      
+
       final user = await authUseCase.getCurrentUser();
       await addHistoricUseCase(
         origin: 'Base',
@@ -111,22 +111,34 @@ class CheckinController extends ValueNotifier<CheckinState> {
     final destination = value.destination;
     if (destination.radius == 0) return;
 
+    // --- COORDENADAS MOCADAS AQUI ---
+    const double mockLat = -3.7319;
+    const double mockLng = -38.5267;
+
     final distance = locationService.calculateDistance(
-      position.latitude,
-      position.longitude,
+      mockLat, // Alterado de position.latitude
+      mockLng,
       destination.coords.latitude,
       destination.coords.longitude,
     );
 
     if (distance < 25000 && _cachedCity == null) {
-      _cachedCity = await locationService.getCityFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      _cachedCity = await locationService.getCityFromCoordinates(mockLat, mockLng);
     }
 
     final isInside = getCheckinStatusUseCase.isInsideGeofence(
-      currentPosition: position,
+      currentPosition: Position(
+        latitude: mockLat,
+        longitude: mockLng,
+        timestamp: DateTime.now(),
+        accuracy: position.accuracy,
+        altitude: position.altitude,
+        heading: position.heading,
+        speed: position.speed,
+        speedAccuracy: position.speedAccuracy,
+        altitudeAccuracy: position.altitudeAccuracy,
+        headingAccuracy: position.headingAccuracy,
+      ),
       destination: destination,
       currentCity: _cachedCity,
     );

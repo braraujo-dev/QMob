@@ -56,16 +56,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
       if (widget.isFirstAccess) {
         final user = await sl<AuthUseCase>().getCurrentUser();
-        
+
         if (mounted) {
           final targetRoute = user?.isAdmin == true ? AppRoutes.adminHome : AppRoutes.driverHome;
           debugPrint('Redirecionando para a rota: $targetRoute');
-          
-          Navigator.pushNamedAndRemoveUntil(
-            context, 
-            targetRoute, 
-            (route) => false,
-          );
+
+          Navigator.pushNamedAndRemoveUntil(context, targetRoute, (route) => false);
         }
       } else {
         Navigator.pop(context);
@@ -78,7 +74,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Alterar Senha', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text(
+          'Alterar Senha',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -101,13 +100,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               const SizedBox(height: 32),
             ],
-            
+
             CustomTextField(
               label: "Nova Senha",
               hintText: "Mínimo 8 caracteres",
               prefixIcon: Icons.lock_outline,
               isPassword: true,
               controller: _newPasswordController,
+              textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 20),
             CustomTextField(
@@ -117,7 +117,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               isPassword: true,
               controller: _confirmPasswordController,
             ),
-            
+
             ValueListenableBuilder<ProfileState>(
               valueListenable: _controller,
               builder: (context, state, child) {
@@ -128,7 +128,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   children: [
                     if (errorMessage != null) ...[
                       const SizedBox(height: 12),
-                      Text(errorMessage, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+                      Text(
+                        errorMessage,
+                        style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                      ),
                     ],
                     const SizedBox(height: 40),
                     PrimaryButton(
