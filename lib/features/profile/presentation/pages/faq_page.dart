@@ -36,7 +36,7 @@ class FAQPage extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.inputBackground.withOpacity(0.5),
+        color: AppColors.inputBackground.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
       ),

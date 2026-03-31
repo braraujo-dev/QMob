@@ -64,7 +64,7 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
-  Future<void> _requestSindicatoAccess() async {
+  Future<void> _requestUnionAccess() async {
     final nomeSindicatoController = TextEditingController();
     final cnpjController = TextEditingController();
     final responsavelController = TextEditingController();
@@ -72,78 +72,106 @@ class _AuthPageState extends State<AuthPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: const Color(0xFF1E293B),
-        title: const Text('Solicitar Cadastro', style: TextStyle(color: Colors.white)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Preencha os dados da sua entidade sindical.',
-                style: TextStyle(color: AppColors.slate400, fontSize: 13),
-              ),
-              const SizedBox(height: 16),
-              _buildDialogField('Nome do Sindicato', nomeSindicatoController),
-              _buildDialogField('CNPJ', cnpjController, keyboardType: TextInputType.number),
-              _buildDialogField('Nome do Responsável', responsavelController),
-              _buildDialogField(
-                'Telefone/WhatsApp',
-                telefoneController,
-                keyboardType: TextInputType.phone,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-            onPressed: () async {
-              final success = await _controller.sendSindicatoRequest(
-                nome: nomeSindicatoController.text,
-                cnpj: cnpjController.text,
-                responsavel: responsavelController.text,
-                telefone: telefoneController.text,
-              );
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Solicitar Cadastro',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Preencha os dados da sua entidade sindical.',
+                      style: TextStyle(color: AppColors.slate400, fontSize: 13),
+                    ),
+                    const SizedBox(height: 24),
+                    CustomTextField(
+                      label: 'Nome do Sindicato',
+                      hintText: 'Digite o nome',
+                      prefixIcon: Icons.business_outlined,
+                      controller: nomeSindicatoController,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      label: 'CNPJ',
+                      hintText: '00.000.000/0000-00',
+                      prefixIcon: Icons.description_outlined,
+                      controller: cnpjController,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      label: 'Nome do Responsável',
+                      hintText: 'Nome do gestor',
+                      prefixIcon: Icons.person_outline_rounded,
+                      controller: responsavelController,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      label: 'Telefone/WhatsApp',
+                      hintText: '(00) 00000-0000',
+                      prefixIcon: Icons.phone_android_rounded,
+                      controller: telefoneController,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.done,
+                    ),
+                    const SizedBox(height: 16),
+                    PrimaryButton(
+                      text: 'Enviar Solicitação',
+                      onPressed: () async {
+                        final nome = nomeSindicatoController.text;
+                        final cnpj = cnpjController.text;
+                        final resp = responsavelController.text;
+                        final tel = telefoneController.text;
 
-              if (!success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Não encontramos um app de e-mail configurado.'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              } else if (mounted) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Enviar Solicitação'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDialogField(
-    String label,
-    TextEditingController controller, {
-    TextInputType? keyboardType,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: AppColors.slate400),
-          enabledBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: AppColors.slate400),
-          ),
-          focusedBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: AppColors.primary),
-          ),
+                        final success = await _controller.sendSindicatoRequest(
+                          nome: nome,
+                          cnpj: cnpj,
+                          responsavel: resp,
+                          telefone: tel,
+                        );
+                        if (!dialogContext.mounted) return;
+                        if (!success) {
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                            const SnackBar(
+                              content: Text('Erro ao abrir app de e-mail.'),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                        } else {
+                          Navigator.pop(dialogContext);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              right: 8,
+              top: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: AppColors.slate400, size: 22),
+                onPressed: () => Navigator.pop(dialogContext),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -267,7 +295,7 @@ class _AuthPageState extends State<AuthPage> {
                         style: TextStyle(color: AppColors.slate400, fontSize: 14),
                       ),
                       TextButton(
-                        onPressed: _requestSindicatoAccess,
+                        onPressed: _requestUnionAccess,
                         child: const Text(
                           'Solicite seu cadastro aqui',
                           style: TextStyle(

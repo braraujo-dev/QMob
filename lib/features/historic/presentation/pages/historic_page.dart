@@ -251,7 +251,10 @@ class _HistoricPageState extends State<HistoricPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: statusColor.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
             child: Icon(isEntry ? Icons.login : Icons.logout, color: statusColor, size: 20),
           ),
           const SizedBox(width: 16),
@@ -287,7 +290,7 @@ class _HistoricPageState extends State<HistoricPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
