@@ -58,9 +58,12 @@ class CheckinController extends ValueNotifier<CheckinState> {
         },
         (destination) {
           _queueStream?.cancel();
+
           _queueStream = queueRepository.getQueueStream().listen((queue) {
             final bool inQueue = queue.any((driver) => driver.isCurrentUser);
-            value = value.copyWith(isAlreadyInQueue: inQueue);
+            if (value.isAlreadyInQueue != inQueue) {
+              value = value.copyWith(isAlreadyInQueue: inQueue);
+            }
           });
 
           value = value.copyWith(destination: destination, isLoading: false);
@@ -87,9 +90,10 @@ class CheckinController extends ValueNotifier<CheckinState> {
   }
 
   Future<void> performCheckin() async {
-    if (value.isAlreadyInQueue || !value.isInsideGeofence) return;
+    if (value.isAlreadyInQueue || value.isLoading || !value.isInsideGeofence) return;
 
     value = value.copyWith(isLoading: true);
+
     try {
       await performCheckinUseCase(value.destination.cityName);
 
@@ -100,7 +104,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
         status: 'Chegada',
       );
 
-      value = value.copyWith(isLoading: false);
+      value = value.copyWith(isLoading: false, isAlreadyInQueue: true);
     } catch (e) {
       value = value.copyWith(isLoading: false);
       rethrow;
