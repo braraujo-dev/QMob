@@ -55,14 +55,12 @@ class _AuthPageState extends State<AuthPage> {
     } else if (state is AuthSuccessState) {
       final user = state.user;
 
-      String nextRoute;
       if (user.mustChangePassword) {
-        nextRoute = AppRoutes.changePassword;
+        Navigator.pushReplacementNamed(context, AppRoutes.changePassword, arguments: true);
       } else {
-        nextRoute = user.role == 'admin' ? AppRoutes.adminHome : AppRoutes.driverHome;
+        final nextRoute = user.role == 'admin' ? AppRoutes.adminHome : AppRoutes.driverHome;
+        Navigator.pushReplacementNamed(context, nextRoute);
       }
-
-      Navigator.pushReplacementNamed(context, nextRoute);
     }
   }
 
