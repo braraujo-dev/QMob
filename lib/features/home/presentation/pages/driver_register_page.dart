@@ -36,20 +36,48 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
     _controller.fetchCapitals();
   }
 
-  void _onStateChanged() {
-    if (_controller.value is DriverSuccessState) {
+  void _onStateChanged() async {
+    final state = _controller.value;
+    if (state is DriverSuccessState) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Motorista cadastrado com sucesso!'),
-          backgroundColor: Colors.green,
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 12),
+              Text(
+                'Motorista cadastrado com sucesso!',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green.shade700,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.all(20),
         ),
       );
-      Navigator.pop(context);
-    } else if (_controller.value is DriverErrorState) {
-      final state = _controller.value as DriverErrorState;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red));
+      await Future.delayed(const Duration(milliseconds: 1800));
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } else if (state is DriverErrorState) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text(state.message)),
+            ],
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
     }
   }
 

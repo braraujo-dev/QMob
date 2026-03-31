@@ -1,4 +1,5 @@
-﻿import 'package:alternative/features/home/data/model/driver_model.dart';
+﻿import 'package:alternative/core/config/env.dart';
+import 'package:alternative/features/home/data/model/driver_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class DriverRemoteDataSource {
@@ -15,7 +16,18 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
     try {
       final adminId = supabase.auth.currentUser?.id;
 
-      final AuthResponse res = await supabase.auth.signUp(
+      if (adminId == null) throw Exception("Sessão administrativa expirada.");
+
+      final tempClient = SupabaseClient(
+        Env.supabaseUrl,
+        Env.supabaseAnonKey,
+        authOptions: const AuthClientOptions(
+          authFlowType: AuthFlowType.implicit,
+          autoRefreshToken: false,
+        ),
+      );
+
+      final AuthResponse res = await tempClient.auth.signUp(
         email: driver.email,
         password: password,
         data: {'role': 'driver'},
@@ -27,6 +39,8 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
         driverData['admin_id'] = adminId;
 
         await supabase.from('drivers').insert(driverData);
+
+        await tempClient.auth.signOut();
       }
     } catch (e) {
       rethrow;
@@ -36,14 +50,13 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
   @override
   Future<List<DriverModel>> getAllDrivers() async {
     final adminId = supabase.auth.currentUser?.id;
-
     if (adminId == null) return [];
 
     final response = await supabase
         .from('drivers')
         .select()
         .eq('admin_id', adminId)
-        .order('full_name');
+        .order('created_at', ascending: true);
 
     return (response as List).map((m) => DriverModel.fromMap(m)).toList();
   }
