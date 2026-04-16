@@ -18,14 +18,10 @@ class FAQPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          _buildFAQTile(
-            "Como alterar minha rota?",
-            "Você pode alterar a rota nas configurações de viagem...",
-          ),
-          _buildFAQTile("Formas de pagamento", "Aceitamos Cartão, Pix e Dinheiro..."),
+          _buildFAQTile("Formas de pagamento", "Aceitamos Cartão, Pix e Dinheiro."),
           _buildFAQTile(
             "Esqueci um objeto no veículo",
-            "Entre em contato com o suporte imediatamente...",
+            "Entre em contato com o suporte imediatamente.",
           ),
         ],
       ),
