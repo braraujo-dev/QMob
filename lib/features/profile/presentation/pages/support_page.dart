@@ -8,8 +8,8 @@ class SupportPage extends StatelessWidget {
   Future<void> _launchEmail() async {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: 'tcc98845@gmail.com',
-      query: 'subject=Suporte - Alternative App',
+      path: 'suporte@qmob.com',
+      query: 'subject=Suporte - Q Mob',
     );
     if (await canLaunchUrl(emailLaunchUri)) {
       await launchUrl(emailLaunchUri);
@@ -56,7 +56,7 @@ class SupportPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const Text(
-              "Alternative App",
+              "Q Mob",
               style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -74,7 +74,7 @@ class SupportPage extends StatelessWidget {
             _buildActionCard(
               icon: Icons.email_outlined,
               title: "Suporte Geral",
-              subtitle: "tcc98845@gmail.com",
+              subtitle: "suporte@qmob.com",
               onTap: _launchEmail,
             ),
             const SizedBox(height: 64),
@@ -84,7 +84,7 @@ class SupportPage extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             const Text(
-              "© 2026 Alternative App",
+              "© 2026 Q Mob",
               style: TextStyle(color: AppColors.slate500, fontSize: 12),
             ),
             const SizedBox(height: 32),

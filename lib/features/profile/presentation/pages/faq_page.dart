@@ -18,10 +18,10 @@ class FAQPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          _buildFAQTile("Formas de pagamento", "Aceitamos Cartão, Pix e Dinheiro."),
+          _buildFAQTile("Como realizar o check-in", "Fique dentro do raio definido no mapa e o botão será habilitado."),
           _buildFAQTile(
-            "Esqueci um objeto no veículo",
-            "Entre em contato com o suporte imediatamente.",
+            "Como entro em contato com o suporte",
+            "",
           ),
         ],
       ),

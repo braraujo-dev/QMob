@@ -59,7 +59,7 @@ class PrivacyPage extends StatelessWidget {
                   SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      "Dúvidas sobre como tratamos seus dados? Entre em contato com nosso DPO pelo e-mail suporte@alternative.com",
+                      "Dúvidas sobre como tratamos seus dados? Entre em contato com nosso DPO pelo e-mail suporte@qmob.com",
                       style: TextStyle(color: Colors.white, fontSize: 13),
                     ),
                   ),

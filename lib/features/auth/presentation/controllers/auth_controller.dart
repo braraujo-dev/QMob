@@ -35,7 +35,7 @@ class AuthController extends ValueNotifier<AuthState> {
       if (!canCheck || !isSupported) return false;
 
       return await _localAuth.authenticate(
-        localizedReason: 'Acesse o Alternative com sua biometria',
+        localizedReason: 'Acesse o Q Mob com sua biometria',
         biometricOnly: true,
         persistAcrossBackgrounding: true,
       );
@@ -147,7 +147,7 @@ class AuthController extends ValueNotifier<AuthState> {
   }) async {
     final String body =
         '''
-Olá, gostaria de solicitar o cadastro no sistema Alternative.
+Olá, gostaria de solicitar o cadastro no sistema Q Mob.
 
 DADOS DO SINDICATO:
 - Nome: $nome
