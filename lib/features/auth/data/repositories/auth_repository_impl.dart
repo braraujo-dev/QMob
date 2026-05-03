@@ -61,4 +61,24 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> signOut() async {
     await remoteDataSource.signOut();
   }
+
+  @override
+  Future<Either<String, void>> saveUnionRequest({
+    required String name,
+    required String cnpj,
+    required String responsible,
+    required String phone,
+  }) async {
+    try {
+      await remoteDataSource.saveUnionRequest(
+        name: name,
+        cnpj: cnpj,
+        responsible: responsible,
+        phone: phone,
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
 }

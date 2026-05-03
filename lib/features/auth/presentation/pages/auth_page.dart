@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/mask_formatters.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../controllers/auth_controller.dart';
@@ -113,6 +114,7 @@ class _AuthPageState extends State<AuthPage> {
                       controller: cnpjController,
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.next,
+                      inputFormatters: [CnpjInputFormatter()],
                     ),
                     const SizedBox(height: 16),
                     CustomTextField(
@@ -130,6 +132,7 @@ class _AuthPageState extends State<AuthPage> {
                       controller: telefoneController,
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.done,
+                      inputFormatters: [PhoneInputFormatter()],
                     ),
                     const SizedBox(height: 16),
                     PrimaryButton(
@@ -140,22 +143,30 @@ class _AuthPageState extends State<AuthPage> {
                         final resp = responsavelController.text;
                         final tel = telefoneController.text;
 
+                        if (nome.isEmpty || cnpj.isEmpty || resp.isEmpty || tel.isEmpty) {
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                            const SnackBar(content: Text('Preencha todos os campos.')),
+                          );
+                          return;
+                        }
+
                         final success = await _controller.sendSindicatoRequest(
                           nome: nome,
                           cnpj: cnpj,
                           responsavel: resp,
                           telefone: tel,
                         );
+                        
                         if (!dialogContext.mounted) return;
-                        if (!success) {
-                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        
+                        if (success) {
+                          Navigator.pop(dialogContext);
+                          ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Erro ao abrir app de e-mail.'),
-                              backgroundColor: Colors.orange,
+                              content: Text('Solicitação enviada com sucesso! Analisaremos os dados.'),
+                              backgroundColor: Colors.green,
                             ),
                           );
-                        } else {
-                          Navigator.pop(dialogContext);
                         }
                       },
                     ),

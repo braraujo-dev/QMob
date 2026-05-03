@@ -9,4 +9,10 @@ abstract class AuthRepository {
   Future<void> removeRememberedEmail();
   Future<Either<String, void>> sendPasswordResetEmail(String email);
   Future<void> signOut();
+  Future<Either<String, void>> saveUnionRequest({
+    required String name,
+    required String cnpj,
+    required String responsible,
+    required String phone,
+  });
 }

@@ -36,8 +36,7 @@ class AuthController extends ValueNotifier<AuthState> {
 
       return await _localAuth.authenticate(
         localizedReason: 'Acesse o Q Mob com sua biometria',
-        biometricOnly: true,
-        persistAcrossBackgrounding: true,
+        biometricOnly: false,
       );
     } catch (e) {
       return false;
@@ -46,15 +45,11 @@ class AuthController extends ValueNotifier<AuthState> {
 
   Future<String> getInitialRoute() async {
     try {
-      // Verifica se o usuário marcou "Lembrar-me" anteriormente
       final savedEmail = await authUseCase.getSavedEmail();
-      
       final user = await authUseCase.getCurrentUser();
 
       if (user == null) return AppRoutes.auth;
 
-      // Se existe uma sessão mas NÃO existe e-mail salvo, o "Lembrar-me" não foi marcado.
-      // Nesse caso, limpamos a sessão e mandamos para o login.
       if (savedEmail == null) {
         await authUseCase.signOut();
         return AppRoutes.auth;
@@ -155,6 +150,15 @@ class AuthController extends ValueNotifier<AuthState> {
     required String responsavel,
     required String telefone,
   }) async {
+    // 1. Salva no banco de dados primeiro (Supabase)
+    await authUseCase.sendUnionRequest(
+      name: nome,
+      cnpj: cnpj,
+      responsible: responsavel,
+      phone: telefone,
+    );
+
+    // 2. Prepara o link para abrir o app de e-mail (fallback/cópia para o usuário)
     final String body =
         '''
 Olá, gostaria de solicitar o cadastro no sistema Q Mob.
@@ -168,9 +172,11 @@ DADOS DO SINDICATO:
 Aguardo o retorno para finalização do acesso!
 ''';
 
+    // Email de apresentação visual: suporte@qmob.com
+    // Email real de recebimento (TCC): tcc98845@gmail.com
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'fmoreirasouza701@gmail.com',
+      path: 'tcc98845@gmail.com',
       query: _encodeQueryParameters({
         'subject': 'Solicitação de Cadastro: Sindicato de Motoristas',
         'body': body,
@@ -180,7 +186,8 @@ Aguardo o retorno para finalização do acesso!
     try {
       return await launchUrl(emailUri, mode: LaunchMode.externalNonBrowserApplication);
     } catch (e) {
-      return false;
+      // Se falhar o app de e-mail, retorna true porque já salvamos no banco
+      return true;
     }
   }
 

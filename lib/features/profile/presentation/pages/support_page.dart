@@ -6,9 +6,11 @@ class SupportPage extends StatelessWidget {
   const SupportPage({super.key});
 
   Future<void> _launchEmail() async {
+    // Email de apresentação: suporte@qmob.com
+    // Email real (TCC): tcc98845@gmail.com
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: 'suporte@qmob.com',
+      path: 'tcc98845@gmail.com',
       query: 'subject=Suporte - Q Mob',
     );
     if (await canLaunchUrl(emailLaunchUri)) {

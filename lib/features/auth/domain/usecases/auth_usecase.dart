@@ -33,4 +33,18 @@ class AuthUseCase {
   Future<void> signOut() async {
     await repository.signOut();
   }
+
+  Future<Either<String, void>> sendUnionRequest({
+    required String name,
+    required String cnpj,
+    required String responsible,
+    required String phone,
+  }) async {
+    return await repository.saveUnionRequest(
+      name: name,
+      cnpj: cnpj,
+      responsible: responsible,
+      phone: phone,
+    );
+  }
 }

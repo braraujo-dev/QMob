@@ -6,6 +6,12 @@ abstract class AuthRemoteDataSource {
   Future<UserModel?> getCurrentUser();
   Future<void> sendPasswordResetEmail(String email);
   Future<void> signOut();
+  Future<void> saveUnionRequest({
+    required String name,
+    required String cnpj,
+    required String responsible,
+    required String phone,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -115,5 +121,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     await supabaseClient.auth.signOut();
+  }
+
+  @override
+  Future<void> saveUnionRequest({
+    required String name,
+    required String cnpj,
+    required String responsible,
+    required String phone,
+  }) async {
+    await supabaseClient.from('union_requests').insert({
+      'union_name': name,
+      'cnpj': cnpj,
+      'responsible_name': responsible,
+      'phone': phone,
+      'created_at': DateTime.now().toUtc().toIso8601String(),
+    });
   }
 }
