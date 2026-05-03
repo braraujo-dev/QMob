@@ -3,6 +3,7 @@
 class DriverModel extends DriverEntity {
   DriverModel({
     required super.id,
+    super.adminId,
     required super.email,
     required super.name,
     required super.phone,
@@ -16,6 +17,7 @@ class DriverModel extends DriverEntity {
   factory DriverModel.fromMap(Map<String, dynamic> map) {
     return DriverModel(
       id: map['id'] ?? '',
+      adminId: map['admin_id'],
       email: map['email'] ?? '',
       name: map['full_name'] ?? '',
       phone: map['phone'] ?? '',

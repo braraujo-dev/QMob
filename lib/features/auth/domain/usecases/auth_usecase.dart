@@ -29,4 +29,8 @@ class AuthUseCase {
   Future<void> removeSavedEmail() async {
     await repository.removeRememberedEmail();
   }
+
+  Future<void> signOut() async {
+    await repository.signOut();
+  }
 }

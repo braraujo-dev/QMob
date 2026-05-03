@@ -15,7 +15,7 @@ class DriverRegisterPage extends StatefulWidget {
 }
 
 class _DriverRegisterPageState extends State<DriverRegisterPage> {
-  late final DriverTegisterController _controller;
+  late final DriverRegisterController _controller;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -31,7 +31,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
   @override
   void initState() {
     super.initState();
-    _controller = sl<DriverTegisterController>();
+    _controller = sl<DriverRegisterController>();
     _controller.addListener(_onStateChanged);
     _controller.fetchCapitals();
   }

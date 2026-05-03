@@ -18,7 +18,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = await remoteDataSource.signIn(email: email, password: password);
       return Right(userModel);
     } catch (e) {
-      return Left(e.toString());
+      // Limpa a mensagem de erro removendo o prefixo "Exception: "
+      final errorMessage = e.toString().replaceAll('Exception: ', '');
+      return Left(errorMessage);
     }
   }
 
@@ -51,7 +53,12 @@ class AuthRepositoryImpl implements AuthRepository {
       await remoteDataSource.sendPasswordResetEmail(email);
       return const Right(null);
     } catch (e) {
-      return Left(e.toString());
+      return Left(e.toString().replaceAll('Exception: ', ''));
     }
+  }
+
+  @override
+  Future<void> signOut() async {
+    await remoteDataSource.signOut();
   }
 }

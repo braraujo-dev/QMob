@@ -1,6 +1,7 @@
 import 'package:alternative/features/home/data/datasources/driver_remote_datasource.dart';
 import 'package:alternative/features/home/data/repositories/driver_repository_impl.dart';
 import 'package:alternative/features/home/domain/repositories/driver_repository.dart';
+import 'package:alternative/features/home/domain/usecases/delete_driver_usecase.dart';
 import 'package:alternative/features/home/domain/usecases/get_capitals_usecase.dart';
 import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
 import 'package:alternative/features/home/domain/usecases/register_driver_usecase.dart';
@@ -119,12 +120,14 @@ Future<void> init() async {
   sl.registerLazySingleton<DriverRepository>(() => DriverRepositoryImpl(sl()));
   sl.registerLazySingleton(() => RegisterDriverUseCase(sl()));
   sl.registerLazySingleton(() => GetDriversUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteDriverUseCase(sl()));
 
   sl.registerFactory(
-    () => DriverTegisterController(
+    () => DriverRegisterController(
       registerDriverUseCase: sl(),
       getDriversUseCase: sl(),
       getCapitalsUseCase: sl(),
+      deleteDriverUseCase: sl(),
     ),
   );
 }

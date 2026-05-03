@@ -5,6 +5,7 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> signIn({required String email, required String password});
   Future<UserModel?> getCurrentUser();
   Future<void> sendPasswordResetEmail(String email);
+  Future<void> signOut();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -22,37 +23,45 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (response.user == null) throw Exception('Usuário não encontrado');
 
+      // Verificação rigorosa: o usuário PRECISA existir em uma das tabelas de perfil
       final driverDoc = await supabaseClient
           .from('drivers')
-          .select('base_city, must_change_password')
+          .select('id, base_city, must_change_password')
           .eq('id', response.user!.id)
           .maybeSingle();
 
-      bool isAdmin = false;
-      bool mustChange = false;
-
       if (driverDoc != null) {
-        mustChange = driverDoc['must_change_password'] ?? false;
-      } else {
-        final adminDoc = await supabaseClient
-            .from('admins')
-            .select('id, must_change_password')
-            .eq('id', response.user!.id)
-            .maybeSingle();
-        isAdmin = adminDoc != null;
-        mustChange = adminDoc?['must_change_password'] ?? false;
+        return UserModel(
+          id: response.user!.id,
+          email: response.user!.email ?? '',
+          role: 'driver',
+          baseCity: driverDoc['base_city'],
+          mustChangePassword: driverDoc['must_change_password'] ?? false,
+        );
       }
 
-      final String userRole = response.user!.appMetadata['role'] ?? (isAdmin ? 'admin' : 'driver');
+      final adminDoc = await supabaseClient
+          .from('admins')
+          .select('id, must_change_password')
+          .eq('id', response.user!.id)
+          .maybeSingle();
+      
+      if (adminDoc != null) {
+        return UserModel(
+          id: response.user!.id,
+          email: response.user!.email ?? '',
+          role: 'admin',
+          baseCity: null,
+          mustChangePassword: adminDoc['must_change_password'] ?? false,
+        );
+      }
 
-      return UserModel(
-        id: response.user!.id,
-        email: response.user!.email ?? '',
-        role: userRole,
-        baseCity: driverDoc?['base_city'],
-        mustChangePassword: mustChange,
-      );
+      // Se não encontrou em nenhum lugar, a conta foi deletada da tabela publica
+      await supabaseClient.auth.signOut();
+      throw Exception('Sua conta foi removida ou desativada pelo administrador.');
+
     } catch (e) {
+      if (e is Exception) rethrow;
       throw Exception('Erro ao realizar login: ${e.toString()}');
     }
   }
@@ -64,38 +73,47 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     final driverDoc = await supabaseClient
         .from('drivers')
-        .select('base_city, must_change_password')
+        .select('id, base_city, must_change_password')
         .eq('id', user.id)
         .maybeSingle();
 
-    bool isAdmin = false;
-    bool mustChange = false;
-
     if (driverDoc != null) {
-      mustChange = driverDoc['must_change_password'] ?? false;
-    } else {
-      final adminDoc = await supabaseClient
-          .from('admins')
-          .select('id, must_change_password')
-          .eq('id', user.id)
-          .maybeSingle();
-      isAdmin = adminDoc != null;
-      mustChange = adminDoc?['must_change_password'] ?? false;
+      return UserModel(
+        id: user.id,
+        email: user.email ?? '',
+        role: user.appMetadata['role'] ?? 'driver',
+        baseCity: driverDoc['base_city'],
+        mustChangePassword: driverDoc['must_change_password'] ?? false,
+      );
     }
 
-    final String userRole = user.appMetadata['role'] ?? (isAdmin ? 'admin' : 'driver');
-
+    final adminDoc = await supabaseClient
+        .from('admins')
+        .select('id, must_change_password')
+        .eq('id', user.id)
+        .maybeSingle();
+    
+    if (adminDoc == null) {
+      await supabaseClient.auth.signOut();
+      return null;
+    }
+    
     return UserModel(
       id: user.id,
       email: user.email ?? '',
-      role: userRole,
-      baseCity: driverDoc?['base_city'],
-      mustChangePassword: mustChange,
+      role: 'admin',
+      baseCity: null,
+      mustChangePassword: adminDoc['must_change_password'] ?? false,
     );
   }
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
     await supabaseClient.auth.resetPasswordForEmail(email);
+  }
+
+  @override
+  Future<void> signOut() async {
+    await supabaseClient.auth.signOut();
   }
 }

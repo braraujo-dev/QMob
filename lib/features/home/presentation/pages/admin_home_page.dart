@@ -16,7 +16,7 @@ class AdminHomePage extends StatefulWidget {
 }
 
 class _AdminHomePageState extends State<AdminHomePage> {
-  final controller = sl<DriverTegisterController>();
+  final controller = sl<DriverRegisterController>();
   int _currentIndex = 0;
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
@@ -31,10 +31,22 @@ class _AdminHomePageState extends State<AdminHomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.fetchDrivers();
     });
+
+    controller.addListener(_onStateChanged);
+  }
+
+  void _onStateChanged() {
+    if (controller.value is DriverErrorState) {
+      final state = controller.value as DriverErrorState;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
   void dispose() {
+    controller.removeListener(_onStateChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -201,6 +213,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
               Container(
                 width: 40,
                 height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
                   color: Colors.white24,
                   borderRadius: BorderRadius.circular(2),
@@ -208,10 +221,56 @@ class _AdminHomePageState extends State<AdminHomePage> {
               ),
               _buildDetailRow(Icons.email_outlined, "E-mail", m.email),
               _buildDetailRow(Icons.phone_outlined, "Telefone", m.phone),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showDeleteConfirmation(m),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
+                    foregroundColor: Colors.redAccent,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Colors.redAccent, width: 1),
+                    ),
+                  ),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text("EXCLUIR MOTORISTA", style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           ),
         );
       },
+    );
+  }
+
+  void _showDeleteConfirmation(DriverEntity m) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text("Excluir Motorista", style: TextStyle(color: Colors.white)),
+        content: Text("Tem certeza que deseja excluir o motorista ${m.name}? Esta ação não pode ser desfeita.", 
+          style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CANCELAR", style: TextStyle(color: Colors.white38)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Fecha dialog
+              Navigator.pop(context); // Fecha bottom sheet
+              controller.deleteDriver(m.id);
+            },
+            child: const Text("EXCLUIR", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
     );
   }
 

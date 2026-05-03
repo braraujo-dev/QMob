@@ -45,4 +45,14 @@ class DriverRepositoryImpl implements DriverRepository {
       return Left("Erro ao carregar motoristas: ${e.toString()}");
     }
   }
+
+  @override
+  Future<Either<String, void>> deleteDriver(String driverId) async {
+    try {
+      await remoteDataSource.deleteDriver(driverId);
+      return const Right(null);
+    } catch (e) {
+      return Left("Erro ao excluir motorista: ${e.toString()}");
+    }
+  }
 }

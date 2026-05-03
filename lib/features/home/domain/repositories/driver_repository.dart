@@ -7,4 +7,5 @@ abstract class DriverRepository {
     required String password,
   });
   Future<Either<String, List<DriverEntity>>> getDrivers();
+  Future<Either<String, void>> deleteDriver(String driverId);
 }

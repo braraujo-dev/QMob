@@ -46,9 +46,19 @@ class AuthController extends ValueNotifier<AuthState> {
 
   Future<String> getInitialRoute() async {
     try {
+      // Verifica se o usuário marcou "Lembrar-me" anteriormente
+      final savedEmail = await authUseCase.getSavedEmail();
+      
       final user = await authUseCase.getCurrentUser();
 
       if (user == null) return AppRoutes.auth;
+
+      // Se existe uma sessão mas NÃO existe e-mail salvo, o "Lembrar-me" não foi marcado.
+      // Nesse caso, limpamos a sessão e mandamos para o login.
+      if (savedEmail == null) {
+        await authUseCase.signOut();
+        return AppRoutes.auth;
+      }
 
       final bool biometricActive = await isBiometricEnabled();
       if (biometricActive) {
@@ -181,5 +191,12 @@ Aguardo o retorno para finalização do acesso!
               '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value).replaceAll('+', '%20')}',
         )
         .join('&');
+  }
+
+  Future<void> logout() async {
+    await authUseCase.removeSavedEmail();
+    await authUseCase.signOut();
+    rememberMe = false;
+    notifyListeners();
   }
 }
