@@ -15,13 +15,33 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
 
   QueueRemoteDataSourceImpl(this.supabaseClient);
 
+  Future<String?> _getAdminId() async {
+    final user = supabaseClient.auth.currentUser;
+    if (user == null) return null;
+
+    final role = user.appMetadata['role'];
+    if (role == 'admin') return user.id;
+
+    final driverData = await supabaseClient
+        .from('drivers')
+        .select('admin_id')
+        .eq('id', user.id)
+        .maybeSingle();
+    
+    return driverData?['admin_id'];
+  }
+
   @override
   Future<List<DriverQueueModel>> getQueue() async {
     final currentUserId = supabaseClient.auth.currentUser?.id ?? '';
+    final adminId = await _getAdminId();
+
+    if (adminId == null) return [];
 
     final response = await supabaseClient
         .from('queue')
         .select('*, drivers(full_name, vehicle_model, vehicle_color)')
+        .eq('admin_id', adminId) // Filtra pela fila do admin específico
         .order('checkin_time', ascending: true);
 
     final list = response as List;
@@ -32,11 +52,16 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
 
   @override
   Stream<List<DriverQueueModel>> getQueueStream() {
-    return supabaseClient
-        .from('queue')
-        .stream(primaryKey: ['id'])
-        .order('checkin_time', ascending: true)
-        .asyncMap((_) => getQueue());
+    return Stream.fromFuture(_getAdminId()).asyncExpand((adminId) {
+      if (adminId == null) return Stream.value([]);
+      
+      return supabaseClient
+          .from('queue')
+          .stream(primaryKey: ['id'])
+          .eq('admin_id', adminId)
+          .order('checkin_time', ascending: true)
+          .asyncMap((_) => getQueue());
+    });
   }
 
   @override
@@ -50,8 +75,12 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
 
   @override
   Future<void> performCheckin(String driverId, String cityName) async {
+    final adminId = await _getAdminId();
+    if (adminId == null) throw Exception('Admin não encontrado para este motorista');
+
     await supabaseClient.from('queue').insert({
       'driver_id': driverId,
+      'admin_id': adminId, // Salva para qual admin a fila pertence
       'city_name': cityName,
       'checkin_time': DateTime.now().toUtc().toIso8601String(),
     });

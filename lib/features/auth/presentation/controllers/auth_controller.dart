@@ -150,7 +150,6 @@ class AuthController extends ValueNotifier<AuthState> {
     required String responsavel,
     required String telefone,
   }) async {
-    // 1. Salva no banco de dados primeiro (Supabase)
     await authUseCase.sendUnionRequest(
       name: nome,
       cnpj: cnpj,
@@ -158,7 +157,6 @@ class AuthController extends ValueNotifier<AuthState> {
       phone: telefone,
     );
 
-    // 2. Prepara o link para abrir o app de e-mail (fallback/cópia para o usuário)
     final String body =
         '''
 Olá, gostaria de solicitar o cadastro no sistema Q Mob.
@@ -186,7 +184,6 @@ Aguardo o retorno para finalização do acesso!
     try {
       return await launchUrl(emailUri, mode: LaunchMode.externalNonBrowserApplication);
     } catch (e) {
-      // Se falhar o app de e-mail, retorna true porque já salvamos no banco
       return true;
     }
   }

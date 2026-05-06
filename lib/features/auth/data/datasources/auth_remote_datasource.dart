@@ -29,7 +29,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       if (response.user == null) throw Exception('Usuário não encontrado');
 
-      // Verificação rigorosa: o usuário PRECISA existir em uma das tabelas de perfil
       final driverDoc = await supabaseClient
           .from('drivers')
           .select('id, base_city, must_change_password')
@@ -62,7 +61,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
 
-      // Se não encontrou em nenhum lugar, a conta foi deletada da tabela publica
       await supabaseClient.auth.signOut();
       throw Exception('Sua conta foi removida ou desativada pelo administrador.');
 

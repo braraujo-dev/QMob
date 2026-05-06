@@ -263,8 +263,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Fecha dialog
-              Navigator.pop(context); // Fecha bottom sheet
+              Navigator.pop(context);
+              Navigator.pop(context);
               controller.deleteDriver(m.id);
             },
             child: const Text("EXCLUIR", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),

@@ -62,13 +62,9 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
   @override
   Future<void> deleteDriver(String driverId) async {
     try {
-      // 1. Limpar referências em todas as tabelas conhecidas primeiro
-      // Isso evita erros de 'Foreign Key Violation' que bloqueiam o delete principal
       await supabase.from('queue').delete().eq('driver_id', driverId);
       await supabase.from('historic').delete().eq('user_id', driverId);
       
-      // 2. Tentar deletar o motorista da tabela pública
-      // O .select() força o banco a retornar o que foi deletado. Se retornar vazio, nada foi apagado.
       final List<dynamic> result = await supabase
           .from('drivers')
           .delete()
@@ -76,12 +72,9 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
           .select();
       
       if (result.isEmpty) {
-        // Se a lista é vazia, o banco de dados recusou a exclusão (provavelmente RLS ou registro inexistente)
         throw Exception("O banco de dados não permitiu a exclusão do registro. Verifique se as políticas de RLS (Políticas) no Supabase permitem que você delete motoristas.");
       }
-      
-      // Se a exclusão na tabela 'drivers' funcionou, o seu Trigger no Supabase 
-      // deve apagar o usuário do Auth automaticamente.
+
     } on PostgrestException catch (e) {
       throw Exception("Erro no Banco (Supabase): ${e.message}");
     } catch (e) {

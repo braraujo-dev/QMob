@@ -18,7 +18,6 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = await remoteDataSource.signIn(email: email, password: password);
       return Right(userModel);
     } catch (e) {
-      // Limpa a mensagem de erro removendo o prefixo "Exception: "
       final errorMessage = e.toString().replaceAll('Exception: ', '');
       return Left(errorMessage);
     }

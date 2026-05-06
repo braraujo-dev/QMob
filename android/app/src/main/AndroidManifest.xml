@@ -16,7 +16,7 @@
     </queries>
 
     <application
-        android:label="alternative"
+        android:label="Q Mob"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
