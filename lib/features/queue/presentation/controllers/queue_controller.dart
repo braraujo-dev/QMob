@@ -23,7 +23,9 @@ class QueueController extends ValueNotifier<QueueState> {
   }) : super(QueueInitialState());
 
   void startListening() {
-    value = QueueLoadingState();
+    if (value is QueueInitialState || value is QueueErrorState) {
+      value = QueueLoadingState();
+    }
     
     _queueStreamSubscription?.cancel();
     _queueStreamSubscription = queueRepository.getQueueStream().listen(
@@ -36,7 +38,8 @@ class QueueController extends ValueNotifier<QueueState> {
         }
       },
       onError: (e) {
-        value = QueueErrorState(e.toString());
+        debugPrint('Erro no Stream da Fila: $e');
+        value = QueueErrorState('Conexão instável. Verifique sua internet.');
       },
     );
   }
@@ -46,21 +49,40 @@ class QueueController extends ValueNotifier<QueueState> {
   }
 
   Future<void> checkout() async {
-    try {
-      final currentState = value;
-      if (currentState is QueueLoadedState && currentState.currentUser != null) {
-        final String currentCapital = currentState.currentUser!.cityName;
-        
-        await performCheckoutUseCase();
+    final currentState = value;
+    if (currentState is! QueueLoadedState || currentState.currentUser == null) return;
 
-        await addHistoricUseCase(
-          origin: currentCapital.isNotEmpty ? currentCapital : 'Capital',
-          destination: 'Base',
-          status: 'Saída',
-        );
-      }
+    final String currentCity = currentState.currentUser!.cityName;
+    final previousState = value;
+    
+    value = QueueLoadingState();
+
+    try {
+      debugPrint('Realizando checkout...');
+      
+      await performCheckoutUseCase().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw TimeoutException('O servidor demorou muito para responder.'),
+      );
+
+      addHistoricUseCase(
+        origin: currentCity.isNotEmpty ? currentCity : 'Capital',
+        destination: 'Base',
+        status: 'Saída',
+      ).catchError((e) => debugPrint('Erro ao salvar histórico: $e'));
+
+      await Future.delayed(const Duration(milliseconds: 800));
+      fetchQueue();
+      
     } catch (e) {
-      value = QueueErrorState(e.toString());
+      debugPrint('Erro fatal no checkout: $e');
+      value = QueueErrorState('Falha ao sair da fila: ${e.toString()}');
+      
+      Future.delayed(const Duration(seconds: 3), () {
+        if (value is QueueErrorState) {
+          fetchQueue();
+        }
+      });
     }
   }
 

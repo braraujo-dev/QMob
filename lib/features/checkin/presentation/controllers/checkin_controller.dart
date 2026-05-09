@@ -5,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/services/location_service.dart';
 import '../../../auth/domain/usecases/auth_usecase.dart';
-import '../../../queue/domain/entities/driver_queue_entity.dart';
 import '../../../queue/domain/repositories/queue_repository.dart';
 import '../../../queue/domain/usecases/perform_checkin_usecase.dart';
 import '../../../historic/domain/usecases/add_historic_usecase.dart';
@@ -24,7 +23,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
   final AddHistoricUseCase addHistoricUseCase;
 
   StreamSubscription<Position>? _positionStream;
-  StreamSubscription<List<DriverQueueEntity>>? _queueStream;
+  StreamSubscription<bool>? _queueStream;
   String? _cachedCity;
 
   CheckinController({
@@ -46,6 +45,9 @@ class CheckinController extends ValueNotifier<CheckinState> {
     try {
       value = value.copyWith(isLoading: true);
 
+      final inQueueInitially = await queueRepository.isUserInQueue();
+      value = value.copyWith(isAlreadyInQueue: inQueueInitially);
+
       final user = await authUseCase.getCurrentUser();
       if (user?.baseCity == null) throw Exception('Cidade base não cadastrada no perfil.');
 
@@ -57,16 +59,8 @@ class CheckinController extends ValueNotifier<CheckinState> {
           value = value.copyWith(isLoading: false);
         },
         (destination) {
-          _queueStream?.cancel();
-
-          _queueStream = queueRepository.getQueueStream().listen((queue) {
-            final bool inQueue = queue.any((driver) => driver.isCurrentUser);
-            if (value.isAlreadyInQueue != inQueue) {
-              value = value.copyWith(isAlreadyInQueue: inQueue);
-            }
-          });
-
           value = value.copyWith(destination: destination, isLoading: false);
+          _setupQueueListener();
           startTracking();
         },
       );
@@ -74,6 +68,22 @@ class CheckinController extends ValueNotifier<CheckinState> {
       debugPrint('Erro no init do Checkin: $e');
       value = value.copyWith(isLoading: false);
     }
+  }
+
+  void _setupQueueListener() {
+    _queueStream?.cancel();
+    _queueStream = queueRepository.isUserInQueueStream().listen(
+      (inQueue) {
+        if (value.isAlreadyInQueue != inQueue) {
+          debugPrint('CheckinController: Status da fila alterado via Realtime -> $inQueue');
+          value = value.copyWith(isAlreadyInQueue: inQueue);
+        }
+      },
+      onError: (e) {
+        debugPrint('Erro no Stream de Realtime: $e');
+        Future.delayed(const Duration(seconds: 5), () => _setupQueueListener());
+      },
+    );
   }
 
   void startTracking() async {
@@ -104,7 +114,7 @@ class CheckinController extends ValueNotifier<CheckinState> {
         status: 'Chegada',
       );
 
-      value = value.copyWith(isLoading: false, isAlreadyInQueue: true);
+      value = value.copyWith(isLoading: false);
     } catch (e) {
       value = value.copyWith(isLoading: false);
       rethrow;

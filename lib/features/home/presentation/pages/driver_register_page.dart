@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/mask_formatters.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../controllers/driver_register_controller.dart';
@@ -170,6 +170,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   keyboardType: TextInputType.phone,
                   hintText: "(00) 00000-0000",
                   textInputAction: TextInputAction.next,
+                  inputFormatters: [PhoneInputFormatter()],
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -232,7 +233,7 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
                   controller: _passwordController,
                   prefixIcon: Icons.lock_outline,
                   isPassword: true,
-                  hintText: "Digite sua senha",
+                  hintText: "Digite uma senha para o motorista",
                 ),
                 const SizedBox(height: 32),
                 Row(
@@ -293,12 +294,5 @@ class _DriverRegisterPageState extends State<DriverRegisterPage> {
         ),
       ),
     );
-  }
-}
-
-class UpperCaseTextFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    return TextEditingValue(text: newValue.text.toUpperCase(), selection: newValue.selection);
   }
 }
