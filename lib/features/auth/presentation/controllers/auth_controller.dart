@@ -35,7 +35,7 @@ class AuthController extends ValueNotifier<AuthState> {
       if (!canCheck || !isSupported) return false;
 
       return await _localAuth.authenticate(
-        localizedReason: 'Acesse o Q Mob com sua biometria',
+        localizedReason: 'Acesse o QMob com sua biometria',
         biometricOnly: false,
       );
     } catch (e) {
@@ -159,7 +159,7 @@ class AuthController extends ValueNotifier<AuthState> {
 
     final String body =
         '''
-Olá, gostaria de solicitar o cadastro no sistema Q Mob.
+Olá, gostaria de solicitar o cadastro no sistema QMob.
 
 DADOS DO SINDICATO:
 - Nome: $nome

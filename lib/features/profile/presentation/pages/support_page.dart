@@ -11,7 +11,7 @@ class SupportPage extends StatelessWidget {
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: 'tcc98845@gmail.com',
-      query: 'subject=Suporte - Q Mob',
+      query: 'subject=Suporte - QMob',
     );
     if (await canLaunchUrl(emailLaunchUri)) {
       await launchUrl(emailLaunchUri);
@@ -58,7 +58,7 @@ class SupportPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const Text(
-              "Q Mob",
+              "QMob",
               style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -86,7 +86,7 @@ class SupportPage extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             const Text(
-              "© 2026 Q Mob",
+              "© 2026 QMob",
               style: TextStyle(color: AppColors.slate500, fontSize: 12),
             ),
             const SizedBox(height: 32),

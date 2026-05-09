@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Q mob',
+      title: 'QMob',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       initialRoute: initialRoute,
