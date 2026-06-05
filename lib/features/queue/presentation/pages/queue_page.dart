@@ -65,7 +65,10 @@ class _QueuePageState extends State<QueuePage> {
                 children: [
                   const Text('Erro ao carregar fila', style: TextStyle(color: Colors.white)),
                   const SizedBox(height: 16),
-                  TextButton(onPressed: () => _controller.fetchQueue(), child: const Text('Tentar novamente')),
+                  TextButton(
+                    onPressed: () => _controller.fetchQueue(),
+                    child: const Text('Tentar novamente'),
+                  ),
                 ],
               ),
             );
@@ -99,9 +102,9 @@ class _QueuePageState extends State<QueuePage> {
           ),
           const SizedBox(height: 16),
           Text(
-            _isAdmin 
-              ? 'Nenhum motorista realizou check-in até o momento.' 
-              : 'Seja o primeiro a fazer check-in e iniciar a fila de volta para sua cidade.',
+            _isAdmin
+                ? 'Nenhum motorista realizou check-in até o momento.'
+                : 'Seja o primeiro a fazer check-in e iniciar a fila de volta para sua cidade.',
             textAlign: TextAlign.center,
             style: const TextStyle(color: AppColors.slate400, fontSize: 14),
           ),
@@ -134,8 +137,8 @@ class _QueuePageState extends State<QueuePage> {
                           color: AppColors.primary.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
-                        )
-                      ]
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
@@ -145,10 +148,19 @@ class _QueuePageState extends State<QueuePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Sua posição atual', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                                  const Text(
+                                    'Sua posição atual',
+                                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                                  ),
                                   const SizedBox(height: 4),
-                                  Text('${state.currentUser!.position}º Lugar', 
-                                    style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                                  Text(
+                                    '${state.currentUser!.position}º Lugar',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 32,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -158,7 +170,11 @@ class _QueuePageState extends State<QueuePage> {
                                 color: Colors.white.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(Icons.person_pin_outlined, size: 32, color: Colors.white),
+                              child: const Icon(
+                                Icons.person_pin_outlined,
+                                size: 32,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
@@ -166,14 +182,21 @@ class _QueuePageState extends State<QueuePage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Progresso na fila', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                            Text('${state.currentUser!.position - 1} motoristas à frente', 
-                              style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                            const Text(
+                              'Progresso na fila',
+                              style: TextStyle(color: Colors.white70, fontSize: 12),
+                            ),
+                            Text(
+                              '${state.currentUser!.position - 1} motoristas à frente',
+                              style: const TextStyle(color: Colors.white70, fontSize: 12),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
                         LinearProgressIndicator(
-                          value: state.queue.isEmpty ? 0 : (1 - (state.currentUser!.position / state.queue.length)), 
+                          value: state.queue.isEmpty
+                              ? 0
+                              : (1 - (state.currentUser!.position / state.queue.length)),
                           backgroundColor: Colors.white24,
                           valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                           borderRadius: BorderRadius.circular(4),
@@ -184,16 +207,26 @@ class _QueuePageState extends State<QueuePage> {
                   ),
                   const SizedBox(height: 32),
                 ],
-                
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Próximos da Vez', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text('Total: ${state.queue.length} motoristas', style: const TextStyle(color: AppColors.slate500, fontSize: 12)),
+                    const Text(
+                      'Próximos da Vez',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Total de motorista(s): ${state.queue.length}',
+                      style: const TextStyle(color: AppColors.slate500, fontSize: 12),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -221,7 +254,10 @@ class _QueuePageState extends State<QueuePage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.logout, size: 24),
-              label: const Text('Sair da fila (Checkout)', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+              label: const Text(
+                'Sair da Fila (Check-out)',
+                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.1),
+              ),
             ),
           ),
       ],
@@ -234,8 +270,14 @@ class _QueuePageState extends State<QueuePage> {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.inputBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Sair da Fila?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text('Você perderá sua posição atual e precisará fazer um novo check-in quando retornar.', style: TextStyle(color: AppColors.slate400)),
+        title: const Text(
+          'Sair da fila?',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Você perderá sua posição atual e precisará fazer um novo check-in quando retornar.',
+          style: TextStyle(color: AppColors.slate400),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -246,7 +288,10 @@ class _QueuePageState extends State<QueuePage> {
               Navigator.pop(context);
               _controller.checkout();
             },
-            child: const Text('SAIR AGORA', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'SAIR AGORA',
+              style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -260,10 +305,7 @@ class _QueuePageState extends State<QueuePage> {
       decoration: BoxDecoration(
         color: AppColors.inputBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isMe ? AppColors.primary : AppColors.border,
-          width: isMe ? 2 : 1,
-        ),
+        border: Border.all(color: isMe ? AppColors.primary : AppColors.border, width: isMe ? 2 : 1),
       ),
       child: Row(
         children: [
@@ -275,8 +317,13 @@ class _QueuePageState extends State<QueuePage> {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Text('${driver.position}', 
-              style: TextStyle(color: isMe ? Colors.white : AppColors.slate400, fontWeight: FontWeight.bold)),
+            child: Text(
+              '${driver.position}',
+              style: TextStyle(
+                color: isMe ? Colors.white : AppColors.slate400,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -285,18 +332,34 @@ class _QueuePageState extends State<QueuePage> {
               children: [
                 Row(
                   children: [
-                    Text(driver.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    Text(
+                      driver.name,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
                     if (isMe) ...[
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4)),
-                        child: const Text('VOCÊ', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'VOCÊ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ],
                 ),
-                Text('${driver.vehicle} • ${driver.color}', style: const TextStyle(color: AppColors.slate500, fontSize: 12)),
+                Text(
+                  '${driver.vehicle} • ${driver.color}',
+                  style: const TextStyle(color: AppColors.slate500, fontSize: 12),
+                ),
               ],
             ),
           ),
@@ -304,7 +367,14 @@ class _QueuePageState extends State<QueuePage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               const Text('Chegada', style: TextStyle(color: AppColors.slate500, fontSize: 10)),
-              Text(driver.arrivalTime, style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(
+                driver.arrivalTime,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
         ],

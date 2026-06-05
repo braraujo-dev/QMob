@@ -27,7 +27,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   void _validate() {
     final email = _emailController.text;
-    final emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
+    final emailValid = RegExp(
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+    ).hasMatch(email);
     setState(() {
       _isFormValid = emailValid;
     });
@@ -73,7 +75,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       ),
                       const SizedBox(height: 32),
                       const Text(
-                        'Esqueci minha senha',
+                        'Esqueci minha Senha',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 28,
@@ -82,12 +84,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        'Insira seu e-mail de usuário abaixo. Enviaremos um link com as instruções para recuperar sua conta e criar uma nova senha.',
-                        style: TextStyle(
-                          color: AppColors.slate400,
-                          fontSize: 16,
-                          height: 1.5,
-                        ),
+                        'Insira seu e-mail de usuário. Enviaremos um link com as instruções para recuperar sua conta e criar uma nova senha.',
+                        style: TextStyle(color: AppColors.slate400, fontSize: 16, height: 1.5),
                       ),
                       const SizedBox(height: 40),
                       CustomTextField(
@@ -105,9 +103,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           return PrimaryButton(
                             text: isLoading ? 'Enviando...' : 'Enviar Link de Recuperação',
                             icon: isLoading ? null : Icons.send,
-                            onPressed: (_isFormValid && !isLoading) 
-                              ? () => _controller.sendPasswordResetEmail(_emailController.text)
-                              : null,
+                            onPressed: (_isFormValid && !isLoading)
+                                ? () => _controller.sendPasswordResetEmail(_emailController.text)
+                                : null,
                           );
                         },
                       ),
@@ -124,7 +122,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             GestureDetector(
                               onTap: () {},
                               child: const Text(
-                                'Contatar suporte',
+                                'Contatar Suporte',
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 14,
@@ -142,7 +140,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               ),
             ),
           );
-        }
+        },
       ),
     );
   }

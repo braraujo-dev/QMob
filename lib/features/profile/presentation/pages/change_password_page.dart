@@ -136,7 +136,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ],
                     const SizedBox(height: 40),
                     PrimaryButton(
-                      text: state is ProfileLoadingState ? 'Alterando...' : 'Salvar nova senha',
+                      text: state is ProfileLoadingState ? 'Alterando...' : 'Salvar Nova Senha',
                       onPressed: state is ProfileLoadingState ? null : _handleChange,
                     ),
                   ],

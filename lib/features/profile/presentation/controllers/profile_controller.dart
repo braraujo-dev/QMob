@@ -51,7 +51,7 @@ class ProfileController extends ValueNotifier<ProfileState> {
       value = ProfileErrorState(_mapErrorMessage(e.message));
       return false;
     } catch (e) {
-      value = ProfileErrorState('Erro ao salvar nova senha.');
+      value = ProfileErrorState('Erro ao salvar Nova Senha.');
       return false;
     }
   }

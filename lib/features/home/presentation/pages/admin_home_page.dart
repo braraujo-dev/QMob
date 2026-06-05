@@ -38,9 +38,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
   void _onStateChanged() {
     if (controller.value is DriverErrorState) {
       final state = controller.value as DriverErrorState;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red));
     }
   }
 
@@ -180,7 +180,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
               ),
             ),
             Text(
-              "Gestão de ${motoristas.length} condutores",
+              "Gestão de ${motoristas.length} condutor(es)",
               style: const TextStyle(color: Colors.white38, fontSize: 12),
             ),
             const SizedBox(height: 20),
@@ -237,7 +237,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     ),
                   ),
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text("EXCLUIR MOTORISTA", style: TextStyle(fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    "EXCLUIR MOTORISTA",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -254,8 +257,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E293B),
         title: const Text("Excluir Motorista", style: TextStyle(color: Colors.white)),
-        content: Text("Tem certeza que deseja excluir o motorista ${m.name}? Esta ação não pode ser desfeita.", 
-          style: const TextStyle(color: Colors.white70)),
+        content: Text(
+          "Tem certeza que deseja excluir o motorista ${m.name}? Esta ação não pode ser desfeita.",
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -267,7 +272,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
               Navigator.pop(context);
               controller.deleteDriver(m.id);
             },
-            child: const Text("EXCLUIR", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: const Text(
+              "EXCLUIR",
+              style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),

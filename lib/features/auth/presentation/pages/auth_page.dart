@@ -156,14 +156,16 @@ class _AuthPageState extends State<AuthPage> {
                           responsavel: resp,
                           telefone: tel,
                         );
-                        
+
                         if (!dialogContext.mounted) return;
-                        
+
                         if (success) {
                           Navigator.pop(dialogContext);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Solicitação enviada com sucesso! Analisaremos os dados.'),
+                              content: Text(
+                                'Solicitação enviada com sucesso! Analisaremos os dados.',
+                              ),
                               backgroundColor: Colors.green,
                             ),
                           );
@@ -276,7 +278,7 @@ class _AuthPageState extends State<AuthPage> {
                             Navigator.pushNamed(context, AppRoutes.forgotPassword);
                           },
                           child: const Text(
-                            'Esqueci a senha',
+                            'Esqueci a Senha',
                             style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
                           ),
                         ),
@@ -308,7 +310,7 @@ class _AuthPageState extends State<AuthPage> {
                       TextButton(
                         onPressed: _requestUnionAccess,
                         child: const Text(
-                          'Solicite seu cadastro aqui',
+                          'Solicite seu Cadastro Aqui',
                           style: TextStyle(
                             color: AppColors.primary,
                             fontSize: 13,

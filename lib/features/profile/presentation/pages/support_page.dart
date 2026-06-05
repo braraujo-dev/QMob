@@ -72,7 +72,7 @@ class SupportPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            _buildSectionTitle("PRECISA DE AJUDA?"),
+            _buildSectionTitle("Precisa de Ajuda?"),
             _buildActionCard(
               icon: Icons.email_outlined,
               title: "Suporte Geral",
@@ -85,10 +85,7 @@ class SupportPage extends StatelessWidget {
               style: TextStyle(color: AppColors.slate500, fontSize: 13),
             ),
             const SizedBox(height: 4),
-            const Text(
-              "© 2026 QMob",
-              style: TextStyle(color: AppColors.slate500, fontSize: 12),
-            ),
+            const Text("© 2026 QMob", style: TextStyle(color: AppColors.slate500, fontSize: 12)),
             const SizedBox(height: 32),
           ],
         ),

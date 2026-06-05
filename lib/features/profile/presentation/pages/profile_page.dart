@@ -133,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text(
-              'Editar perfil',
+              'Editar Perfil',
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
@@ -142,12 +142,12 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildSectionTitle('SEGURANÇA'),
           _buildOptionTile(
             Icons.lock_outline,
-            'Alterar senha',
+            'Alterar Senha',
             onTap: () => Navigator.pushNamed(context, AppRoutes.changePassword, arguments: false),
           ),
           _buildOptionTile(
             Icons.fingerprint,
-            'Autenticação biométrica',
+            'Autenticação Biométrica',
             suffix: Switch(
               value: _isBiometricEnabled,
               activeThumbColor: AppColors.primary,
@@ -188,7 +188,7 @@ class _ProfilePageState extends State<ProfilePage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             icon: const Icon(Icons.logout),
-            label: const Text('Encerrar sessão', style: TextStyle(fontWeight: FontWeight.bold)),
+            label: const Text('Encerrar Sessão', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
 
           const SizedBox(height: 16),
