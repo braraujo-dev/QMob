@@ -1,0 +1,81 @@
+import 'dart:async';
+import 'package:alternative/core/utils/enum_class.dart';
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../domain/entities/historic_entity.dart';
+import '../../domain/repositories/historic_repository.dart';
+import '../../domain/usecases/get_historic_usecase.dart';
+import 'historic_state.dart';
+
+class HistoricController extends ValueNotifier<HistoricState> {
+  final GetHistoricUseCase getHistoricUseCase;
+  final HistoricRepository historicRepository;
+  final SupabaseClient supabaseClient;
+
+  HistoricFilter selectedFilter = HistoricFilter.month;
+  DateTime? selectedDate;
+
+  StreamSubscription<List<HistoricEntity>>? _historicSubscription;
+
+  HistoricController({
+    required this.getHistoricUseCase,
+    required this.historicRepository,
+    required this.supabaseClient,
+  }) : super(HistoricInitialState());
+
+  void setFilter(HistoricFilter filter, {DateTime? date}) {
+    selectedFilter = filter;
+    selectedDate = date;
+    startListening();
+  }
+
+  void startListening() {
+    value = HistoricLoadingState();
+
+    final currentUser = supabaseClient.auth.currentUser;
+    if (currentUser == null) {
+      value = HistoricErrorState('Usuário não autenticado');
+      return;
+    }
+
+    final bool isAdmin = currentUser.appMetadata['role'] == 'admin';
+
+    final String? filterId = isAdmin ? null : currentUser.id;
+
+    _historicSubscription?.cancel();
+    _historicSubscription = historicRepository.getHistoricStream(filterId).listen((historic) {
+      final filteredList = _applyFilter(historic);
+      value = HistoricSuccessState(filteredList);
+    }, onError: (error) => value = HistoricErrorState(error.toString()));
+  }
+
+  List<HistoricEntity> _applyFilter(List<HistoricEntity> historic) {
+    final now = DateTime.now();
+
+    return historic.where((item) {
+      switch (selectedFilter) {
+        case HistoricFilter.week:
+          return item.date.isAfter(now.subtract(const Duration(days: 7)));
+        case HistoricFilter.month:
+          return item.date.month == now.month && item.date.year == now.year;
+        case HistoricFilter.older:
+          return item.date.isBefore(now.subtract(const Duration(days: 30)));
+        case HistoricFilter.custom:
+          if (selectedDate == null) return true;
+          return item.date.day == selectedDate!.day &&
+              item.date.month == selectedDate!.month &&
+              item.date.year == selectedDate!.year;
+      }
+    }).toList();
+  }
+
+  Future<void> fetchHistoric() async {
+    startListening();
+  }
+
+  @override
+  void dispose() {
+    _historicSubscription?.cancel();
+    super.dispose();
+  }
+}
