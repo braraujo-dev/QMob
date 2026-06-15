@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:alternative/features/home/domain/entities/profile_result.dart';
+import 'package:qmob/features/home/domain/entities/profile_result.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/di/injection_container.dart';

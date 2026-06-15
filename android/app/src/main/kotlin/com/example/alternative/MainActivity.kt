@@ -1,4 +1,4 @@
-package com.example.alternative
+package com.example.qmob
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

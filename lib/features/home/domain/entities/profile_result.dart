@@ -1,5 +1,5 @@
-﻿import 'package:alternative/features/home/domain/entities/admin_entity.dart';
-import 'package:alternative/features/home/domain/entities/driver_entity.dart';
+﻿import 'package:qmob/features/home/domain/entities/admin_entity.dart';
+import 'package:qmob/features/home/domain/entities/driver_entity.dart';
 
 sealed class ProfileResult {}
 

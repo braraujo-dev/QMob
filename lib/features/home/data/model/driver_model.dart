@@ -1,4 +1,4 @@
-﻿import 'package:alternative/features/home/domain/entities/driver_entity.dart';
+﻿import 'package:qmob/features/home/domain/entities/driver_entity.dart';
 
 class DriverModel extends DriverEntity {
   DriverModel({

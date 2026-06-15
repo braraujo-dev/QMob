@@ -1,4 +1,4 @@
-﻿import 'package:alternative/features/checkin/domain/repositories/checkin_repository.dart';
+﻿import 'package:qmob/features/checkin/domain/repositories/checkin_repository.dart';
 import 'package:dartz/dartz.dart';
 
 class GetCapitalsUseCase {

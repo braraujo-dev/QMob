@@ -1,7 +1,7 @@
-﻿import 'package:alternative/features/home/data/datasources/driver_remote_datasource.dart';
-import 'package:alternative/features/home/data/model/driver_model.dart';
-import 'package:alternative/features/home/domain/entities/driver_entity.dart';
-import 'package:alternative/features/home/domain/repositories/driver_repository.dart';
+﻿import 'package:qmob/features/home/data/datasources/driver_remote_datasource.dart';
+import 'package:qmob/features/home/data/model/driver_model.dart';
+import 'package:qmob/features/home/domain/entities/driver_entity.dart';
+import 'package:qmob/features/home/domain/repositories/driver_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

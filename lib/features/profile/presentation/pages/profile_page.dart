@@ -1,5 +1,5 @@
-import 'package:alternative/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:alternative/features/home/domain/entities/profile_result.dart';
+import 'package:qmob/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:qmob/features/home/domain/entities/profile_result.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/di/injection_container.dart';

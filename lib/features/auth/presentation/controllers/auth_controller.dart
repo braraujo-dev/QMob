@@ -1,4 +1,4 @@
-import 'package:alternative/routes/app_routes_manager.dart';
+import 'package:qmob/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';

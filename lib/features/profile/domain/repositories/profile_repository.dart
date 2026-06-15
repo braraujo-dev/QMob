@@ -1,5 +1,5 @@
 ﻿import 'dart:io';
-import 'package:alternative/features/home/domain/entities/profile_result.dart';
+import 'package:qmob/features/home/domain/entities/profile_result.dart';
 import 'package:dartz/dartz.dart';
 
 abstract class ProfileRepository {
