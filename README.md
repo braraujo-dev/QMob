@@ -12,6 +12,10 @@
 
 O **QMob** é um aplicativo Flutter desenvolvido em Dart para gestão de filas de motoristas, focado em sindicatos e administradores de transporte. A aplicação permite que motoristas realizem check-in em uma região geográfica (geofencing), entrem em uma fila virtual e acompanhem sua posição em tempo real. Administradores podem gerenciar motoristas, visualizar a fila e acessar histórico de viagens.
 
+---
+
+## 🗂️ Arquitetura e Estrutura do Projeto
+
 O projeto segue os princípios da **Clean Architecture**, separando o código em três camadas principais:
 - **Data**: Implementações de repositórios, fontes de dados remotas (Supabase) e modelos.
 - **Domain**: Entidades, casos de uso e interfaces de repositórios.
@@ -89,15 +93,25 @@ A injeção de dependências é feita com **GetIt**, e o estado da UI é gerenci
 
 ---
 
-## 🗂️ Arquitetura e Estrutura do Projeto
+## 🧪 Fluxos do aplicativo
 
+### Administrador
 
-Cada feature possui:
-- **data**: datasources (Supabase), repositories impl, models.
-- **domain**: entities, repository interfaces, use cases.
-- **presentation**: controllers (ValueNotifier), states, views (pages).
+1. Login com credenciais de admin.
+2. Cadastra novos motoristas (cria usuário no Auth e registra na tabela drivers).
+3. Visualiza lista de motoristas, busca e exclui.
+4. Acompanha a fila em tempo real (atualização automática).
+5. Visualiza histórico de todas as viagens dos motoristas.
 
----
+### Motorista
+
+1. Login com e-mail e senha fornecidos pelo admin.
+2. Se for primeiro acesso, altera a senha.
+3. Na tela principal, visualiza o mapa com o geofence da sua cidade base.
+4. Ao entrar na área permitida, o botão "Realizar Check-in" é ativado.
+5. Ao clicar, entra na fila e é redirecionado para a fila (ou permanece na tela).
+6. Na fila, visualiza sua posição e o horário previsto de chegada (calculado dinamicamente).
+7. Quando desejar, pode sair da fila (check-out), registrando o fim da viagem no histórico.
 
 ## ▶️ Como Rodar o Projeto
 
@@ -124,38 +138,18 @@ Cada feature possui:
 
 - Crie um arquivo .env na raiz do projeto com o seguinte conteúdo:
   ```env
-      SUPABASE_URL=sua_url_do_supabase
-      SUPABASE_ANON_KEY=sua_chave_anonima
+  SUPABASE_URL=sua_url_do_supabase
+  SUPABASE_ANON_KEY=sua_chave_anonima
 
 - Instale as dependências
-    ```bash
-      flutter pub get
+  ```bash
+  flutter pub get
 
 - Execute o aplicativo
-    ```bash
-      flutter run
+  ```bash
+  flutter run
   
 > ⚠️ **Administrador**: Você precisa criar manualmente um usuário administrador na tabela `admins` com o campo `must_change_password = true`. Use o UUID do usuário criado via Authentication → Users.
-
-## 🧪 Funcionalidades em Detalhe
-
-### Fluxo do Motorista
-
-1. Login com e-mail e senha fornecidos pelo admin.
-2. Se for primeiro acesso, altera a senha.
-3. Na tela principal, visualiza o mapa com o geofence da sua cidade base.
-4. Ao entrar na área permitida, o botão "Realizar Check-in" é ativado.
-5. Ao clicar, entra na fila e é redirecionado para a fila (ou permanece na tela).
-6. Na fila, visualiza sua posição e o horário previsto de chegada (calculado dinamicamente).
-7. Quando desejar, pode sair da fila (check-out), registrando o fim da viagem no histórico.
-
-### Fluxo do Administrador
-
-1. Login com credenciais de admin.
-2. Cadastra novos motoristas (cria usuário no Auth e registra na tabela drivers).
-3. Visualiza lista de motoristas, busca e exclui.
-4. Acompanha a fila em tempo real (atualização automática).
-5. Visualiza histórico de todas as viagens dos motoristas.
 
 ## 🎥 Apresentação do Aplicativo
 
