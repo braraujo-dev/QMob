@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icons/app_icon" alt="QMob" width="400">
+  <img src="assets/icons/app_icon.png" alt="QMob" width="400">
 </p>
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.22.0-blue?logo=flutter)
