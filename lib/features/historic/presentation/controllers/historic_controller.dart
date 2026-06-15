@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:alternative/core/utils/enum_class.dart';
+import 'package:qmob/core/utils/enum_class.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/historic_entity.dart';

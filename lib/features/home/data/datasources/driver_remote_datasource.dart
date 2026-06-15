@@ -1,5 +1,5 @@
-﻿import 'package:alternative/core/config/env.dart';
-import 'package:alternative/features/home/data/model/driver_model.dart';
+﻿import 'package:qmob/core/config/env.dart';
+import 'package:qmob/features/home/data/model/driver_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class DriverRemoteDataSource {
@@ -64,17 +64,18 @@ class DriverRemoteDataSourceImpl implements DriverRemoteDataSource {
     try {
       await supabase.from('queue').delete().eq('driver_id', driverId);
       await supabase.from('historic').delete().eq('user_id', driverId);
-      
+
       final List<dynamic> result = await supabase
           .from('drivers')
           .delete()
           .eq('id', driverId)
           .select();
-      
-      if (result.isEmpty) {
-        throw Exception("O banco de dados não permitiu a exclusão do registro. Verifique se as políticas de RLS (Políticas) no Supabase permitem que você delete motoristas.");
-      }
 
+      if (result.isEmpty) {
+        throw Exception(
+          "O banco de dados não permitiu a exclusão do registro. Verifique se as políticas de RLS (Políticas) no Supabase permitem que você delete motoristas.",
+        );
+      }
     } on PostgrestException catch (e) {
       throw Exception("Erro no Banco (Supabase): ${e.message}");
     } catch (e) {

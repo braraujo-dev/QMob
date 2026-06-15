@@ -1,10 +1,10 @@
 ﻿import 'dart:io';
-import 'package:alternative/features/home/data/model/admin_model.dart';
-import 'package:alternative/features/home/data/model/driver_model.dart';
-import 'package:alternative/features/home/domain/entities/admin_entity.dart';
-import 'package:alternative/features/home/domain/entities/driver_entity.dart';
-import 'package:alternative/features/home/domain/entities/profile_result.dart';
-import 'package:alternative/features/profile/domain/repositories/profile_repository.dart';
+import 'package:qmob/features/home/data/model/admin_model.dart';
+import 'package:qmob/features/home/data/model/driver_model.dart';
+import 'package:qmob/features/home/domain/entities/admin_entity.dart';
+import 'package:qmob/features/home/domain/entities/driver_entity.dart';
+import 'package:qmob/features/home/domain/entities/profile_result.dart';
+import 'package:qmob/features/profile/domain/repositories/profile_repository.dart';
 import 'package:dartz/dartz.dart';
 import '../datasources/profile_remote_datasource.dart';
 

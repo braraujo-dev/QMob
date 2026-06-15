@@ -1,4 +1,4 @@
-﻿import 'package:alternative/core/utils/enum_class.dart';
+﻿import 'package:qmob/core/utils/enum_class.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/injection_container.dart';

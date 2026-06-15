@@ -1,4 +1,4 @@
-import 'package:alternative/features/auth/domain/entities/user_entity.dart';
+import 'package:qmob/features/auth/domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
   UserModel({
@@ -9,7 +9,11 @@ class UserModel extends UserEntity {
     super.mustChangePassword,
   });
 
-  factory UserModel.fromSupabase(Map<String, dynamic> json, {String? baseCity, bool mustChange = false}) {
+  factory UserModel.fromSupabase(
+    Map<String, dynamic> json, {
+    String? baseCity,
+    bool mustChange = false,
+  }) {
     return UserModel(
       id: json['id'],
       email: json['email'] ?? '',

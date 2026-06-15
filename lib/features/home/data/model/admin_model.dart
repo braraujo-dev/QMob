@@ -1,4 +1,4 @@
-﻿import 'package:alternative/features/home/domain/entities/admin_entity.dart';
+﻿import 'package:qmob/features/home/domain/entities/admin_entity.dart';
 
 class AdminModel extends AdminEntity {
   AdminModel({

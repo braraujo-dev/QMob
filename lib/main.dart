@@ -1,6 +1,6 @@
-import 'package:alternative/core/theme/app_theme.dart';
-import 'package:alternative/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:alternative/routes/app_routes_manager.dart';
+import 'package:qmob/core/theme/app_theme.dart';
+import 'package:qmob/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:qmob/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

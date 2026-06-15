@@ -1,5 +1,5 @@
-﻿import 'package:alternative/features/home/domain/entities/driver_entity.dart';
-import 'package:alternative/features/home/domain/repositories/driver_repository.dart';
+﻿import 'package:qmob/features/home/domain/entities/driver_entity.dart';
+import 'package:qmob/features/home/domain/repositories/driver_repository.dart';
 import 'package:dartz/dartz.dart';
 
 class GetDriversUseCase {

@@ -1,6 +1,6 @@
-﻿import 'package:alternative/features/home/domain/usecases/delete_driver_usecase.dart';
-import 'package:alternative/features/home/domain/usecases/get_capitals_usecase.dart';
-import 'package:alternative/features/home/domain/usecases/get_driver_list_usecase.dart';
+﻿import 'package:qmob/features/home/domain/usecases/delete_driver_usecase.dart';
+import 'package:qmob/features/home/domain/usecases/get_capitals_usecase.dart';
+import 'package:qmob/features/home/domain/usecases/get_driver_list_usecase.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/driver_entity.dart';
@@ -89,15 +89,12 @@ class DriverRegisterController extends ValueNotifier<DriverState> {
   Future<void> deleteDriver(String driverId) async {
     value = DriverLoadingState();
     final result = await deleteDriverUseCase(driverId);
-    
-    result.fold(
-      (error) => value = DriverErrorState(error),
-      (_) {
-        _allDrivers.removeWhere((d) => d.id == driverId);
-        filteredDrivers.removeWhere((d) => d.id == driverId);
-        value = DriverSuccessState();
-        notifyListeners();
-      },
-    );
+
+    result.fold((error) => value = DriverErrorState(error), (_) {
+      _allDrivers.removeWhere((d) => d.id == driverId);
+      filteredDrivers.removeWhere((d) => d.id == driverId);
+      value = DriverSuccessState();
+      notifyListeners();
+    });
   }
 }

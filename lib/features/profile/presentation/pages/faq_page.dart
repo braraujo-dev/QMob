@@ -1,4 +1,4 @@
-﻿import 'package:alternative/core/theme/app_colors.dart';
+﻿import 'package:qmob/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class FAQPage extends StatelessWidget {
@@ -18,11 +18,11 @@ class FAQPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          _buildFAQTile("Como realizar o check-in", "Fique dentro do raio definido no mapa e o botão será habilitado."),
           _buildFAQTile(
-            "Como entro em contato com o suporte",
-            "",
+            "Como realizar o check-in",
+            "Fique dentro do raio definido no mapa e o botão será habilitado.",
           ),
+          _buildFAQTile("Como entro em contato com o suporte", ""),
         ],
       ),
     );

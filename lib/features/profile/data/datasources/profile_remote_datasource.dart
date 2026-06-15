@@ -1,8 +1,8 @@
 ﻿import 'dart:io';
 
-import 'package:alternative/features/home/data/model/admin_model.dart';
-import 'package:alternative/features/home/data/model/driver_model.dart';
-import 'package:alternative/features/home/domain/entities/profile_result.dart';
+import 'package:qmob/features/home/data/model/admin_model.dart';
+import 'package:qmob/features/home/data/model/driver_model.dart';
+import 'package:qmob/features/home/domain/entities/profile_result.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class ProfileRemoteDataSource {

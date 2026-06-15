@@ -1,11 +1,11 @@
-﻿import 'package:alternative/core/di/injection_container.dart';
-import 'package:alternative/features/historic/presentation/pages/historic_page.dart';
-import 'package:alternative/features/home/domain/entities/driver_entity.dart';
-import 'package:alternative/features/home/presentation/controllers/driver_register_controller.dart';
-import 'package:alternative/features/home/presentation/controllers/driver_state.dart';
-import 'package:alternative/features/profile/presentation/pages/profile_page.dart';
-import 'package:alternative/features/queue/presentation/pages/queue_page.dart';
-import 'package:alternative/routes/app_routes_manager.dart';
+﻿import 'package:qmob/core/di/injection_container.dart';
+import 'package:qmob/features/historic/presentation/pages/historic_page.dart';
+import 'package:qmob/features/home/domain/entities/driver_entity.dart';
+import 'package:qmob/features/home/presentation/controllers/driver_register_controller.dart';
+import 'package:qmob/features/home/presentation/controllers/driver_state.dart';
+import 'package:qmob/features/profile/presentation/pages/profile_page.dart';
+import 'package:qmob/features/queue/presentation/pages/queue_page.dart';
+import 'package:qmob/routes/app_routes_manager.dart';
 import 'package:flutter/material.dart';
 
 class AdminHomePage extends StatefulWidget {
@@ -118,7 +118,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         title = 'Ajustes';
         break;
       default:
-        title = 'Alternative';
+        title = 'QMob';
     }
 
     return AppBar(
