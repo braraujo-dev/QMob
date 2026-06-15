@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/app_banner.png" alt="QMob Logo" width="400">
+  <img src="assets/icons/app_icon" alt="QMob" width="400">
 </p>
 
 ![Flutter](https://img.shields.io/badge/Flutter-3.22.0-blue?logo=flutter)
@@ -118,7 +118,7 @@ A injeção de dependências é feita com **GetIt**, e o estado da UI é gerenci
 ### Pré-requisitos
 
 - Flutter 3.22+ (com Dart 3.4+)
-- Visual Studio Code (recomendado) ou Android Studio
+- Algum ambiente de desenvolvimento integrado como o Visual Studio Code
 - Conta no [Supabase](https://supabase.com/)
 - Dispositivo físico ou emulador (Android/iOS) com Google Play Services (para mapas)
 
@@ -147,8 +147,8 @@ A injeção de dependências é feita com **GetIt**, e o estado da UI é gerenci
   flutter pub get
 
 - Configure um emulador ou dispositivo
-  - Emulador: No Visual Sudio Code, clique em Run > Start Debugging (F5) e selecione um emulador Android ou iOS).[
-  - Dispositivo físico: Conecte via USB com Modo Desenvolvedor e Depuração USB habilitados ou use Depuração sem fio (em Opções do desenvolvedor no dispositivo).
+  - Emulador: Selecione um emulador para Android ou iOS em algum ambiente de desenvolvimento integrado.
+  - Dispositivo: Conecte via USB com Modo Desenvolvedor e Depuração USB habilitados ou use Depuração sem fio em Opções do desenvolvedor no dispositivo.
 
 4. Execute o aplicativo:
     ```bash
