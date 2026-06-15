@@ -122,6 +122,8 @@ A injeção de dependências é feita com **GetIt**, e o estado da UI é gerenci
 - Conta no [Supabase](https://supabase.com/)
 - Dispositivo físico ou emulador (Android/iOS) com Google Play Services (para mapas)
 
+### Etapas para Execução
+
 1. Clone o repositório:
    ```bash
    git clone https://github.com/seu-usuario/QMob.git
@@ -135,19 +137,22 @@ A injeção de dependências é feita com **GetIt**, e o estado da UI é gerenci
 - Obtenha a URL do projeto e a chave anônima (anon key).
 
 3. Configure o ambiente:
-
 - Crie um arquivo .env na raiz do projeto com o seguinte conteúdo:
   ```env
   SUPABASE_URL=sua_url_do_supabase
   SUPABASE_ANON_KEY=sua_chave_anonima
 
-- Instale as dependências
+- Instale as dependências:
   ```bash
   flutter pub get
 
-- Execute o aplicativo
-  ```bash
-  flutter run
+- Configure um emulador ou dispositivo
+  - Emulador: No Visual Sudio Code, clique em Run > Start Debugging (F5) e selecione um emulador Android ou iOS).[
+  - Dispositivo físico: Conecte via USB com Modo Desenvolvedor e Depuração USB habilitados ou use Depuração sem fio (em Opções do desenvolvedor no dispositivo).
+
+4. Execute o aplicativo:
+    ```bash
+    flutter run
   
 > ⚠️ **Administrador**: Você precisa criar manualmente um usuário administrador na tabela `admins` com o campo `must_change_password = true`. Use o UUID do usuário criado via Authentication → Users.
 
