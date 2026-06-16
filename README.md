@@ -10,7 +10,7 @@
 
 ## 📃 Descrição
 
-O **QMob** é um aplicativo Flutter desenvolvido em Dart para gestão de filas de motoristas, focado em sindicatos e administradores de transporte. A aplicação permite que motoristas realizem check-in em uma região geográfica (geofencing), entrem em uma fila virtual e acompanhem sua posição em tempo real. Administradores podem gerenciar motoristas, visualizar a fila e acessar histórico de viagens.
+O **QMob** é um aplicativo desenvolvido em Dart com Flutter para gestão de filas de motoristas, focado em sindicatos e administradores de transporte. A aplicação permite que motoristas realizem check-in em uma região geográfica (geofencing), entrem em uma fila virtual e acompanhem sua posição em tempo real. Administradores podem gerenciar motoristas, visualizar a fila e acessar histórico de viagens.
 
 ---
 
